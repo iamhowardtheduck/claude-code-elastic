@@ -1,0 +1,10 @@
+- version: 0.1.1
+  changes:
+  - description: Elastic License 2.0; Custom configurations option on both streams (e.g. filestream take_over for migrations); transcript exclude_files rendered correctly.
+    type: enhancement
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/pull/2
+- version: 0.1.0
+  changes:
+  - description: 'Initial release: transcripts, Desktop logs, gen_ai.* alignment, secret redaction, optional inference, dashboards.'
+    type: enhancement
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/pull/1

@@ -1,4 +1,4 @@
-# Claude Code Integration
+# Claude Code Transcripts Integration
 
 Collects **Claude Code session transcripts** and **Claude Desktop app/MCP logs** with Elastic Agent, maps them to ECS and the `gen_ai.*` fields, redacts secrets at ingest, and can optionally run ML inference (prompt embeddings + NLP classification) on every human prompt.
 

@@ -1,7 +1,7 @@
 format_version: 3.3.0
-name: claude_code
-title: Claude Code
-version: 0.1.0
+name: claude_code_transcripts
+title: Claude Code Transcripts
+version: 0.1.1
 description: Collect Claude Code session transcripts and Claude Desktop app/MCP logs, mapped to ECS and gen_ai.*, with secret redaction and optional ML inference.
 type: integration
 categories:
@@ -14,7 +14,7 @@ conditions:
     subscription: basic
 icons:
 - src: /img/icon.svg
-  title: Claude Code
+  title: Claude Code Transcripts
   size: 64x64
   type: image/svg+xml
 policy_templates:
@@ -28,3 +28,5 @@ policy_templates:
 owner:
   github: iamhowardtheduck
   type: community
+source:
+  license: Elastic-2.0

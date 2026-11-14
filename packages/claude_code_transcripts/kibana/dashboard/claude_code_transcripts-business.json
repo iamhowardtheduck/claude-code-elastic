@@ -12,7 +12,7 @@
     "title": "[Claude Code Transcripts] Business Analytics"
   },
   "coreMigrationVersion": "8.8.0",
-  "id": "claude_code-business",
+  "id": "claude_code_transcripts-business",
   "references": [],
   "type": "dashboard",
   "typeMigrationVersion": "10.3.0"

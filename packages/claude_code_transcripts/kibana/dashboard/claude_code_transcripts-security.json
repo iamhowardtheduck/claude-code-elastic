@@ -44,7 +44,7 @@
     "title": "[Claude Code Transcripts] Security"
   },
   "coreMigrationVersion": "8.8.0",
-  "id": "claude_code-security",
+  "id": "claude_code_transcripts-security",
   "references": [],
   "type": "dashboard",
   "typeMigrationVersion": "10.3.0"

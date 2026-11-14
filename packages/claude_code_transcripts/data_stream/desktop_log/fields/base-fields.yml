@@ -10,11 +10,11 @@
 - name: event.module
   type: constant_keyword
   description: Event module.
-  value: claude_code
+  value: claude_code_transcripts
 - name: event.dataset
   type: constant_keyword
   description: Event dataset.
-  value: claude_code.transcript
+  value: claude_desktop.log
 - name: '@timestamp'
   type: date
   description: Event timestamp.

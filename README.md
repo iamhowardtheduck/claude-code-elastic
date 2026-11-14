@@ -1,9 +1,11 @@
 # Claude Code → Elastic
 
-An Elastic Agent integration (`claude_code`) that ships **Claude Code session transcripts** and **Claude Desktop app/MCP logs** to Elasticsearch. It maps them to ECS and the `gen_ai.*` fields, redacts secrets at ingest, and can optionally run **ML inference** on every human prompt: semantic embeddings plus NLP classification for prompt injection, jailbreaks, toxicity, intent and PII. A toggle controls the inference. It ships with business and security dashboards. Detection rules, a model-pricing table and inference monitoring are available as optional extras.
+An Elastic Agent integration (`claude_code_transcripts`) that ships **Claude Code session transcripts** and **Claude Desktop app/MCP logs** to Elasticsearch. It maps them to ECS and the `gen_ai.*` fields, redacts secrets at ingest, and can optionally run **ML inference** on every human prompt: semantic embeddings plus NLP classification for prompt injection, jailbreaks, toxicity, intent and PII. A toggle controls the inference. It ships with business and security dashboards.
+
+> This package complements Elastic's official **Claude Code** integration (`claude_code`), which collects Claude Code's OpenTelemetry events and traces. This one reads the on-disk transcripts and the Desktop logs. Both can be installed side by side. Detection rules, a model-pricing table and inference monitoring are available as optional extras.
 
 ```
-packages/claude_code/        the integration (elastic-package source)
+packages/claude_code_transcripts/  the integration (elastic-package source)
   data_stream/transcript/      ~/.claude/projects/**/*.jsonl  -> logs-claude_code.transcript-*
   data_stream/desktop_log/     Claude Desktop main.log, mcp*.log -> logs-claude_desktop.log-*
   kibana/dashboard/            Business Analytics + Security dashboards
@@ -25,7 +27,7 @@ docs/inference-models.md     models for the optional inference, eland import, si
 
 Desktop "Chat" conversations are stored server-side, not on disk, so they can't be collected. `~/.claude/history.jsonl` (typed prompts only) is not collected either. Claude Code deletes transcripts after `cleanupPeriodDays` (default 30, in `~/.claude/settings.json`). Never set it to 0.
 
-See [`packages/claude_code/docs/README.md`](packages/claude_code/docs/README.md) for the field reference.
+See [`packages/claude_code_transcripts/docs/README.md`](packages/claude_code_transcripts/docs/README.md) for the field reference.
 
 ---
 
@@ -38,12 +40,12 @@ See [`packages/claude_code/docs/README.md`](packages/claude_code/docs/README.md)
 
 ### 1. Build the package
 
-Alternatively, download `claude_code-<version>.zip` from the GitHub release.
+Alternatively, download `claude_code_transcripts-<version>.zip` from the GitHub release.
 
 ```bash
 go install github.com/elastic/elastic-package@latest
-cd packages/claude_code
-elastic-package lint && elastic-package build      # -> build/packages/claude_code-0.1.0.zip
+cd packages/claude_code_transcripts
+elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.1.1.zip
 ```
 
 ### 2. Upload it to Kibana
@@ -52,7 +54,7 @@ elastic-package lint && elastic-package build      # -> build/packages/claude_co
 curl -X POST "$KIBANA_URL/api/fleet/epm/packages" \
   -H "Authorization: ApiKey $ES_API_KEY" -H 'kbn-xsrf: true' \
   -H 'Content-Type: application/zip' \
-  --data-binary @build/packages/claude_code-0.1.0.zip
+  --data-binary @build/packages/claude_code_transcripts-0.1.1.zip
 ```
 
 This installs the index templates, the three ingest pipelines (`logs-claude_code.transcript-<ver>`, `…-inference` and `…-classify`, plus `logs-claude_desktop.log-<ver>`) and the two dashboards. `elastic-package install --zip <file>` does the same against the stack configured for elastic-package.
@@ -61,7 +63,7 @@ This installs the index templates, the three ingest pipelines (`logs-claude_code
 
 ### 3. Add the integration to agent policies
 
-In Kibana, go to **Fleet → Integrations → Installed → Claude Code → Add Claude Code** and pick the agent policies for your workstations and servers. Then configure the two streams:
+In Kibana, go to **Fleet → Integrations → Installed → Claude Code Transcripts → Add Claude Code Transcripts** and pick the agent policies for your workstations and servers. Then configure the two streams:
 
 - **Claude Code session transcripts**
   - **Paths**: the defaults cover Windows, macOS, Linux (`/home/*` and `/root`) and Cowork sessions. Paths that don't exist on a host are ignored. If `CLAUDE_CONFIG_DIR` is set on a host, add that directory.
@@ -84,7 +86,7 @@ extras/setup.sh inference-monitoring # stats collector + [ML Inference] Admin da
 extras/setup.sh all
 ```
 
-`inference-monitoring` uses Kibana Workflows: a scheduled workflow samples `_ml/trained_models/_stats` and the ingest stats of the package pipelines every minute. If you install a package version other than 0.1.0, set `PKG_VERSION` so the collector watches the right pipeline names. The alert rules are created disabled, without actions. Add your connector (email, Slack and so on) in **Stack Management → Rules**, then enable them.
+`inference-monitoring` uses Kibana Workflows: a scheduled workflow samples `_ml/trained_models/_stats` and the ingest stats of the package pipelines every minute. If you install a package version other than 0.1.1, set `PKG_VERSION` so the collector watches the right pipeline names. The alert rules are created disabled, without actions. Add your connector (email, Slack and so on) in **Stack Management → Rules**, then enable them.
 
 ### 5. Enabling inference
 
@@ -128,7 +130,15 @@ If transcripts or Desktop logs already arrive through **Custom Logs (Filestream)
    ```
 5. The old hand-made pipelines (for example `claude-code-transcript`, `claude-prompt-classify`, `claude-desktop-log`) are no longer referenced, so you can delete them once you're happy with the new ones.
 
-Agents keep their file offsets only within the same input. The new integration policy is a new input, so it re-reads transcripts newer than `ignore_older`. That doesn't create duplicates, because `_id` is the transcript line `uuid` and the rewritten lines replace themselves within the current backing index.
+**Keep the file offsets.** Agents track their read position per input ID. A new integration policy is a new input, so without help it re-reads every file newer than `ignore_older` and duplicates the data in the current backing index. To avoid that, set **Custom configurations** on each stream of the new policy so it takes over the old inputs' state (Beta since 9.1). Find the old IDs under `inputs[].streams[].id` in `GET /api/fleet/agent_policies/<policy>/full`:
+
+```yaml
+take_over:
+  enabled: true
+  from_ids: ["filestream-filestream.filestream-<old package policy id>"]
+```
+
+Delete the old policy **before** adding the new one. Take-over only works when the source input is no longer running.
 
 ---
 
@@ -143,7 +153,7 @@ Agents keep their file offsets only within the same input. The new integration p
 ## Development
 
 ```bash
-cd packages/claude_code
+cd packages/claude_code_transcripts
 elastic-package lint
 elastic-package build
 elastic-package stack up -d && elastic-package install   # local test stack (Docker)
