@@ -1,0 +1,36 @@
+{
+  "description": "Flatten raw _ml/trained_models/_stats deployment objects and _nodes/stats/ingest pipeline objects posted by workflow ml-inference-stats-collector",
+  "processors": [
+    {
+      "set": {
+        "field": "@timestamp",
+        "value": "{{{_ingest.timestamp}}}"
+      }
+    },
+    {
+      "script": {
+        "tag": "flatten",
+        "source": "\nMap out = new HashMap();\nString kind = ctx.kind;\ndef r = ctx.raw;\nif (r instanceof String) { r = null; }\nif (kind == 'deployment' && r instanceof Map) {\n  Map d = new HashMap();\n  d.id = r.deployment_id; d.model_id = r.model_id; d.state = r.state; d.priority = r.priority;\n  d.allocations = r.number_of_allocations; d.threads_per_allocation = r.threads_per_allocation; d.queue_capacity = r.queue_capacity;\n  d.peak_throughput_per_minute = r.peak_throughput_per_minute;\n  if (r.allocation_status instanceof Map) { d.allocation_state = r.allocation_status.state; d.target_allocations = r.allocation_status.target_allocation_count; }\n  if (r.adaptive_allocations instanceof Map) { d.adaptive_enabled = r.adaptive_allocations.enabled; d.adaptive_min = r.adaptive_allocations.min_number_of_allocations; d.adaptive_max = r.adaptive_allocations.max_number_of_allocations; } else { d.adaptive_enabled = false; }\n  long pending = 0, tpm = 0, chlm = 0, cnt = 0, ch = 0, err = 0, rej = 0, tout = 0; double wsum = 0, wsumx = 0;\n  List nodes = new ArrayList(); List rs = new ArrayList();\n  if (r.nodes instanceof List) {\n    for (def n : r.nodes) {\n      if (n.node instanceof Map) { for (def v : n.node.values()) { nodes.add(v.name); } }\n      if (n.routing_state instanceof Map) { rs.add(n.routing_state.routing_state); }\n      long c = n.inference_count == null ? 0 : n.inference_count; long h = n.inference_cache_hit_count == null ? 0 : n.inference_cache_hit_count;\n      cnt += c; ch += h;\n      pending += n.number_of_pending_requests == null ? 0 : n.number_of_pending_requests;\n      tpm += n.throughput_last_minute == null ? 0 : n.throughput_last_minute;\n      chlm += n.inference_cache_hit_count_last_minute == null ? 0 : n.inference_cache_hit_count_last_minute;\n      err += n.error_count == null ? 0 : n.error_count; rej += n.rejected_execution_count == null ? 0 : n.rejected_execution_count; tout += n.timeout_count == null ? 0 : n.timeout_count;\n      if (n.average_inference_time_ms != null) { wsum += n.average_inference_time_ms * c; }\n      if (n.average_inference_time_ms_excluding_cache_hits != null) { wsumx += n.average_inference_time_ms_excluding_cache_hits * (c - h); }\n    }\n  }\n  d.nodes = nodes; d.routing_states = rs;\n  d.pending_requests = pending; d.throughput_last_minute = tpm; d.cache_hits_last_minute = chlm;\n  d.inference_count = cnt; d.cache_hit_count = ch; d.error_count = err; d.rejected_execution_count = rej; d.timeout_count = tout;\n  if (cnt > 0) { d.avg_inference_ms = wsum / cnt; }\n  if (cnt - ch > 0) { d.avg_inference_ms_excl_cache = wsumx / (cnt - ch); }\n  long alloc = r.number_of_allocations == null ? 0 : r.number_of_allocations;\n  if (alloc > 0) {\n    d.pending_per_allocation = pending / (double) alloc;\n    if (d.avg_inference_ms_excl_cache != null) { d.est_utilization = Math.min(5.0, (tpm - chlm) * d.avg_inference_ms_excl_cache / (60000.0 * alloc)); }\n  }\n  if (r.queue_capacity != null && r.queue_capacity > 0) { d.queue_fill = pending / (double) r.queue_capacity; }\n  out.deployment = d;\n} else if (kind == 'pipeline' && r instanceof Map) {\n  Map p = new HashMap(); p.name = ctx.pipeline_name;\n  long count = 0, failed = 0, current = 0, t = 0, active = 0;\n  if (r.nodes instanceof Map) {\n    for (def n : r.nodes.values()) {\n      if (n.ingest == null || n.ingest.pipelines == null) continue;\n      def s = n.ingest.pipelines[ctx.pipeline_name];\n      if (s == null) continue;\n      count += s.count; failed += s.failed; current += s.current; t += s.time_in_millis;\n      if (s.count > 0) { active++; }\n    }\n  }\n  p.count = count; p.failed = failed; p.current = current; p.time_in_millis = t; p.nodes_active = active;\n  out.pipeline = p;\n}\nout.kind = kind;\nif (ctx.execution_id != null) { out.collector = ['execution_id': ctx.execution_id]; }\nctx.ml_inference = out;\n"
+      }
+    },
+    {
+      "remove": {
+        "field": [
+          "raw",
+          "kind",
+          "pipeline_name",
+          "execution_id"
+        ],
+        "ignore_missing": true
+      }
+    }
+  ],
+  "on_failure": [
+    {
+      "set": {
+        "field": "error.message",
+        "value": "{{{_ingest.on_failure_message}}}"
+      }
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+- version: 0.1.0
+  changes:
+  - description: 'Initial release: transcripts, Desktop logs, gen_ai.* alignment, secret redaction, optional inference, dashboards.'
+    type: enhancement
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/pull/1

@@ -1,0 +1,150 @@
+{
+  "index_patterns": [
+    "ml-inference-stats*"
+  ],
+  "data_stream": {},
+  "priority": 500,
+  "_meta": {
+    "description": "Trained model deployment + ingest pipeline throughput stats for the Inference Admin dashboard"
+  },
+  "template": {
+    "settings": {
+      "index.lifecycle.name": "ml-inference-stats",
+      "number_of_shards": 1,
+      "number_of_replicas": 1,
+      "index.default_pipeline": "ml-inference-stats"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "ml_inference": {
+          "properties": {
+            "kind": {
+              "type": "keyword"
+            },
+            "deployment": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "model_id": {
+                  "type": "keyword"
+                },
+                "state": {
+                  "type": "keyword"
+                },
+                "allocation_state": {
+                  "type": "keyword"
+                },
+                "nodes": {
+                  "type": "keyword"
+                },
+                "routing_states": {
+                  "type": "keyword"
+                },
+                "priority": {
+                  "type": "keyword"
+                },
+                "allocations": {
+                  "type": "long"
+                },
+                "target_allocations": {
+                  "type": "long"
+                },
+                "threads_per_allocation": {
+                  "type": "long"
+                },
+                "queue_capacity": {
+                  "type": "long"
+                },
+                "pending_requests": {
+                  "type": "long"
+                },
+                "throughput_last_minute": {
+                  "type": "long"
+                },
+                "cache_hits_last_minute": {
+                  "type": "long"
+                },
+                "peak_throughput_per_minute": {
+                  "type": "long"
+                },
+                "inference_count": {
+                  "type": "long"
+                },
+                "cache_hit_count": {
+                  "type": "long"
+                },
+                "error_count": {
+                  "type": "long"
+                },
+                "rejected_execution_count": {
+                  "type": "long"
+                },
+                "timeout_count": {
+                  "type": "long"
+                },
+                "avg_inference_ms": {
+                  "type": "double"
+                },
+                "avg_inference_ms_excl_cache": {
+                  "type": "double"
+                },
+                "est_utilization": {
+                  "type": "double"
+                },
+                "pending_per_allocation": {
+                  "type": "double"
+                },
+                "queue_fill": {
+                  "type": "double"
+                },
+                "adaptive_enabled": {
+                  "type": "boolean"
+                },
+                "adaptive_min": {
+                  "type": "long"
+                },
+                "adaptive_max": {
+                  "type": "long"
+                }
+              }
+            },
+            "pipeline": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                },
+                "count": {
+                  "type": "long"
+                },
+                "failed": {
+                  "type": "long"
+                },
+                "current": {
+                  "type": "long"
+                },
+                "time_in_millis": {
+                  "type": "long"
+                },
+                "nodes_active": {
+                  "type": "long"
+                }
+              }
+            },
+            "collector": {
+              "properties": {
+                "execution_id": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

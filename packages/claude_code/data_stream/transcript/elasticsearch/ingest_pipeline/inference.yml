@@ -1,0 +1,85 @@
+---
+description: 'Claude Code transcripts: ML inference (prompt embedding via the inference API + NLP classification), with timing in claude_code.inference.*'
+processors:
+- script:
+    description: 'Embedding input: the (already redacted) human prompt, capped at 8000 chars'
+    tag: prompt-embedding-input
+    source: 'String m = ctx.message.trim(); ctx._embed_input = m.length() > 8000 ? m.substring(0, 8000) : m;'
+    lang: painless
+    if: (ctx.tags != null && ctx.tags.contains('claude_code_embed')) && (ctx.claude_code?.human_prompt == true && ctx.message instanceof String && ctx.message.trim().length() > 0)
+- script:
+    ignore_failure: true
+    description: Inference timer start (temporary field, removed before indexing)
+    tag: inference-timer-start-embedding
+    source: long n = System.nanoTime(); ctx._inf_mark = n; if (ctx._inf_t0 == null) { ctx._inf_t0 = n; }
+    if: ctx._embed_input != null
+- inference:
+    on_failure:
+    - set:
+        field: claude_code.prompt_embedding_error
+        value: '{{{_ingest.on_failure_message}}}'
+    input_output:
+    - input_field: _embed_input
+      output_field: claude_code.prompt_embedding
+    description: Jina v5 text nano via EIS; failures never block indexing
+    tag: prompt-embedding
+    model_id: .jina-embeddings-v5-text-nano
+    if: ctx._embed_input != null
+- script:
+    ignore_failure: true
+    description: Elapsed ms of the EIS embedding call
+    tag: inference-timer-embedding
+    params:
+      top: true
+      step: embedding_ms
+    if: ctx._embed_input != null
+    lang: painless
+    source: long n = System.nanoTime(); if (ctx._inf_mark != null) { Map cc = ctx.claude_code; if (cc == null) { cc = new HashMap(); ctx.claude_code = cc; } Map inf = cc.inference; if (inf == null) { inf = new HashMap(); cc.inference = inf; } double ms = Math.round((n - ((Number) ctx._inf_mark).longValue()) / 100000.0) / 10.0; if (params.containsKey('top') && params.top == true) { inf[params.step] = ms; } else { Map st = inf.steps; if (st == null) { st = new HashMap(); inf.steps = st; } st[params.step] = ms; } } ctx._inf_mark = n;
+- set:
+    tag: prompt-embedding-model
+    field: claude_code.prompt_embedding_model
+    if: ctx.claude_code?.prompt_embedding != null
+    value: .jina-embeddings-v5-text-nano
+- remove:
+    ignore_missing: true
+    description: drop the temp input and the model_id the inference processor writes beside its output
+    tag: prompt-embedding-cleanup
+    field:
+    - _embed_input
+    - claude_code.model_id
+- script:
+    ignore_failure: true
+    description: Inference timer start (temporary field, removed before indexing)
+    tag: inference-timer-start-classify
+    source: long n = System.nanoTime(); ctx._inf_mark = n; if (ctx._inf_t0 == null) { ctx._inf_t0 = n; }
+    if: (ctx.tags != null && ctx.tags.contains('claude_code_classify')) && (ctx.claude_code?.human_prompt == true && ctx.message instanceof String && ctx.message.length() > 0)
+- pipeline:
+    name: '{{ IngestPipeline "classify" }}'
+    ignore_failure: true
+    description: Run NLP classifiers on human prompts only
+    tag: prompt-classification
+    if: (ctx.tags != null && ctx.tags.contains('claude_code_classify')) && (ctx.claude_code?.human_prompt == true && ctx.message instanceof String && ctx.message.length() > 0)
+- script:
+    ignore_failure: true
+    description: Total inference duration = end - begin; begin/end are not stored
+    tag: inference-timer-finish
+    source: |2
+
+      long n = System.nanoTime();
+      Map cc = ctx.claude_code; if (cc == null) { cc = new HashMap(); ctx.claude_code = cc; }
+      Map inf = cc.inference; if (inf == null) { inf = new HashMap(); cc.inference = inf; }
+      double cls = 0.0;
+      Map st = inf.steps;
+      if (st != null) {
+        for (def e : st.entrySet()) { cls += ((Number) e.getValue()).doubleValue(); }
+        inf.classify_ms = Math.round(cls * 10.0) / 10.0;
+        inf.classify_calls = st.size();
+      }
+      inf.total_ms = Math.round((n - ((Number) ctx._inf_t0).longValue()) / 100000.0) / 10.0;
+    if: ctx._inf_t0 != null
+- remove:
+    ignore_missing: true
+    tag: inference-timer-cleanup
+    field:
+    - _inf_t0
+    - _inf_mark

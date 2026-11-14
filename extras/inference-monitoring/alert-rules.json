@@ -1,0 +1,299 @@
+[
+  {
+    "id": "ml-inference-queue-backlog",
+    "name": "ML Inference - Request queue backing up",
+    "rule_type_id": ".es-query",
+    "consumer": "alerts",
+    "schedule": {
+      "interval": "1m"
+    },
+    "tags": [
+      "ml-inference",
+      "inference-monitoring"
+    ],
+    "actions": [],
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM ml-inference-stats | WHERE ml_inference.kind == \"deployment\" AND ml_inference.deployment.allocations IS NOT NULL | STATS min_pending = MIN(ml_inference.deployment.pending_requests), max_pending = MAX(ml_inference.deployment.pending_requests), allocations = MAX(ml_inference.deployment.allocations), samples = COUNT(*) BY deployment = ml_inference.deployment.id | WHERE samples >= 3 AND min_pending >= GREATEST(TO_LONG(10), 2 * allocations) | EVAL min_pending = TO_STRING(min_pending), max_pending = TO_STRING(max_pending), allocations = TO_STRING(allocations) | KEEP deployment, min_pending, max_pending, allocations"
+      },
+      "timeField": "@timestamp",
+      "timeWindowSize": 5,
+      "timeWindowUnit": "m",
+      "threshold": [
+        0
+      ],
+      "thresholdComparator": ">",
+      "size": 100,
+      "groupBy": "row",
+      "aggType": "count",
+      "termSize": 5,
+      "sourceFields": [],
+      "excludeHitsFromPreviousRun": false
+    }
+  },
+  {
+    "id": "ml-inference-saturated",
+    "name": "ML Inference - Deployment saturated (est. utilisation >= 90%)",
+    "rule_type_id": ".es-query",
+    "consumer": "alerts",
+    "schedule": {
+      "interval": "1m"
+    },
+    "tags": [
+      "ml-inference",
+      "inference-monitoring"
+    ],
+    "actions": [],
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM ml-inference-stats | WHERE ml_inference.kind == \"deployment\" AND ml_inference.deployment.allocations IS NOT NULL | WHERE ml_inference.deployment.allocations > 0 | STATS utilisation = AVG(ml_inference.deployment.est_utilization), samples = COUNT(*) BY deployment = ml_inference.deployment.id | WHERE samples >= 5 AND utilisation >= 0.9 | EVAL utilisation = TO_STRING(ROUND(utilisation, 2)) | KEEP deployment, utilisation"
+      },
+      "timeField": "@timestamp",
+      "timeWindowSize": 10,
+      "timeWindowUnit": "m",
+      "threshold": [
+        0
+      ],
+      "thresholdComparator": ">",
+      "size": 100,
+      "groupBy": "row",
+      "aggType": "count",
+      "termSize": 5,
+      "sourceFields": [],
+      "excludeHitsFromPreviousRun": false
+    }
+  },
+  {
+    "id": "ml-inference-deployment-unhealthy",
+    "name": "ML Inference - Deployment not started or not fully allocated",
+    "rule_type_id": ".es-query",
+    "consumer": "alerts",
+    "schedule": {
+      "interval": "1m"
+    },
+    "tags": [
+      "ml-inference",
+      "inference-monitoring"
+    ],
+    "actions": [],
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM ml-inference-stats | WHERE ml_inference.kind == \"deployment\" AND ml_inference.deployment.allocations IS NOT NULL | STATS state = LAST(ml_inference.deployment.state, @timestamp), allocation = LAST(ml_inference.deployment.allocation_state, @timestamp), routing = LAST(ml_inference.deployment.routing_states, @timestamp) BY deployment = ml_inference.deployment.id | WHERE state != \"started\" OR allocation != \"fully_allocated\" | KEEP deployment, state, allocation"
+      },
+      "timeField": "@timestamp",
+      "timeWindowSize": 5,
+      "timeWindowUnit": "m",
+      "threshold": [
+        0
+      ],
+      "thresholdComparator": ">",
+      "size": 100,
+      "groupBy": "row",
+      "aggType": "count",
+      "termSize": 5,
+      "sourceFields": [],
+      "excludeHitsFromPreviousRun": false
+    }
+  },
+  {
+    "id": "ml-inference-errors",
+    "name": "ML Inference - Errors, rejections or timeouts increasing",
+    "rule_type_id": ".es-query",
+    "consumer": "alerts",
+    "schedule": {
+      "interval": "1m"
+    },
+    "tags": [
+      "ml-inference",
+      "inference-monitoring"
+    ],
+    "actions": [],
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM ml-inference-stats | WHERE ml_inference.kind == \"deployment\" AND ml_inference.deployment.allocations IS NOT NULL | STATS e = LAST(ml_inference.deployment.error_count, @timestamp) - FIRST(ml_inference.deployment.error_count, @timestamp), r = LAST(ml_inference.deployment.rejected_execution_count, @timestamp) - FIRST(ml_inference.deployment.rejected_execution_count, @timestamp), t = LAST(ml_inference.deployment.timeout_count, @timestamp) - FIRST(ml_inference.deployment.timeout_count, @timestamp) BY deployment = ml_inference.deployment.id | WHERE e > 0 OR r > 0 OR t > 0 | EVAL new_errors = TO_STRING(e), new_rejections = TO_STRING(r), new_timeouts = TO_STRING(t) | KEEP deployment, new_errors, new_rejections, new_timeouts"
+      },
+      "timeField": "@timestamp",
+      "timeWindowSize": 10,
+      "timeWindowUnit": "m",
+      "threshold": [
+        0
+      ],
+      "thresholdComparator": ">",
+      "size": 100,
+      "groupBy": "row",
+      "aggType": "count",
+      "termSize": 5,
+      "sourceFields": [],
+      "excludeHitsFromPreviousRun": false
+    }
+  },
+  {
+    "id": "ml-inference-pipeline-failures",
+    "name": "ML Inference - Claude ingest pipeline failures increasing",
+    "rule_type_id": ".es-query",
+    "consumer": "alerts",
+    "schedule": {
+      "interval": "1m"
+    },
+    "tags": [
+      "ml-inference",
+      "inference-monitoring"
+    ],
+    "actions": [],
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM ml-inference-stats | WHERE ml_inference.kind == \"pipeline\" | STATS f = LAST(ml_inference.pipeline.failed, @timestamp) - FIRST(ml_inference.pipeline.failed, @timestamp), in_flight = MAX(ml_inference.pipeline.current) BY pipeline = ml_inference.pipeline.name | WHERE f > 0 | EVAL new_failures = TO_STRING(f), in_flight = TO_STRING(in_flight) | KEEP pipeline, new_failures, in_flight"
+      },
+      "timeField": "@timestamp",
+      "timeWindowSize": 10,
+      "timeWindowUnit": "m",
+      "threshold": [
+        0
+      ],
+      "thresholdComparator": ">",
+      "size": 100,
+      "groupBy": "row",
+      "aggType": "count",
+      "termSize": 5,
+      "sourceFields": [],
+      "excludeHitsFromPreviousRun": false
+    }
+  },
+  {
+    "id": "ml-inference-collector-stale",
+    "name": "ML Inference - Stats collector stopped reporting",
+    "rule_type_id": ".es-query",
+    "consumer": "alerts",
+    "schedule": {
+      "interval": "5m"
+    },
+    "tags": [
+      "ml-inference",
+      "inference-monitoring"
+    ],
+    "actions": [],
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM ml-inference-stats | STATS docs = COUNT(*) | WHERE docs == 0 | EVAL docs = TO_STRING(docs)"
+      },
+      "timeField": "@timestamp",
+      "timeWindowSize": 5,
+      "timeWindowUnit": "m",
+      "threshold": [
+        0
+      ],
+      "thresholdComparator": ">",
+      "size": 100,
+      "groupBy": "row",
+      "aggType": "count",
+      "termSize": 5,
+      "sourceFields": [],
+      "excludeHitsFromPreviousRun": false
+    }
+  },
+  {
+    "id": "ml-inference-prompt-slow",
+    "name": "ML Inference - Claude prompt inference slow (p95 > 60 s)",
+    "rule_type_id": ".es-query",
+    "consumer": "alerts",
+    "schedule": {
+      "interval": "5m"
+    },
+    "tags": [
+      "ml-inference",
+      "inference-monitoring"
+    ],
+    "actions": [],
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM logs-claude_code.transcript-* | WHERE claude_code.inference.total_ms IS NOT NULL | STATS p95_s = PERCENTILE(claude_code.inference.total_ms, 95) / 1000.0, p50_s = PERCENTILE(claude_code.inference.total_ms, 50) / 1000.0, prompts = COUNT(*) | WHERE prompts >= 3 AND p95_s > 60 | EVAL p95_s = TO_STRING(ROUND(p95_s, 1)), p50_s = TO_STRING(ROUND(p50_s, 1)), prompts = TO_STRING(prompts)"
+      },
+      "timeField": "@timestamp",
+      "timeWindowSize": 15,
+      "timeWindowUnit": "m",
+      "threshold": [
+        0
+      ],
+      "thresholdComparator": ">",
+      "size": 100,
+      "groupBy": "row",
+      "aggType": "count",
+      "termSize": 5,
+      "sourceFields": [],
+      "excludeHitsFromPreviousRun": false
+    }
+  },
+  {
+    "id": "ml-inference-prompt-lag",
+    "name": "ML Inference - Claude prompts indexed late (p95 lag > 15 min)",
+    "rule_type_id": ".es-query",
+    "consumer": "alerts",
+    "schedule": {
+      "interval": "5m"
+    },
+    "tags": [
+      "ml-inference",
+      "inference-monitoring"
+    ],
+    "actions": [],
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM logs-claude_code.transcript-* | WHERE claude_code.inference.total_ms IS NOT NULL | EVAL lag_s = DATE_DIFF(\"seconds\", @timestamp, event.ingested) | STATS p95_lag_s = PERCENTILE(lag_s, 95), prompts = COUNT(*) | WHERE prompts >= 2 AND p95_lag_s > 900 | EVAL p95_lag_s = TO_STRING(p95_lag_s), prompts = TO_STRING(prompts)"
+      },
+      "timeField": "@timestamp",
+      "timeWindowSize": 30,
+      "timeWindowUnit": "m",
+      "threshold": [
+        0
+      ],
+      "thresholdComparator": ">",
+      "size": 100,
+      "groupBy": "row",
+      "aggType": "count",
+      "termSize": 5,
+      "sourceFields": [],
+      "excludeHitsFromPreviousRun": false
+    }
+  },
+  {
+    "id": "ml-inference-prompt-errors",
+    "name": "ML Inference - Claude prompt inference errors",
+    "rule_type_id": ".es-query",
+    "consumer": "alerts",
+    "schedule": {
+      "interval": "5m"
+    },
+    "tags": [
+      "ml-inference",
+      "inference-monitoring"
+    ],
+    "actions": [],
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM logs-claude_code.transcript-* | WHERE claude_code.human_prompt == true AND (claude_code.prompt_classification.errors IS NOT NULL OR claude_code.prompt_embedding_error IS NOT NULL) | EVAL error = SUBSTRING(MV_CONCAT(COALESCE(claude_code.prompt_classification.errors, claude_code.prompt_embedding_error), \"; \"), 0, 500) | STATS prompts = COUNT(*) BY error | EVAL prompts = TO_STRING(prompts)"
+      },
+      "timeField": "@timestamp",
+      "timeWindowSize": 15,
+      "timeWindowUnit": "m",
+      "threshold": [
+        0
+      ],
+      "thresholdComparator": ">",
+      "size": 100,
+      "groupBy": "row",
+      "aggType": "count",
+      "termSize": 5,
+      "sourceFields": [],
+      "excludeHitsFromPreviousRun": false
+    }
+  }
+]

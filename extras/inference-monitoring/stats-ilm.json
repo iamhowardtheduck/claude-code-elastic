@@ -1,0 +1,23 @@
+{
+  "policy": {
+    "_meta": {
+      "description": "ML inference throughput stats (collected every minute by workflow ml-inference-stats-collector)"
+    },
+    "phases": {
+      "hot": {
+        "actions": {
+          "rollover": {
+            "max_age": "7d",
+            "max_primary_shard_size": "5gb"
+          }
+        }
+      },
+      "delete": {
+        "min_age": "30d",
+        "actions": {
+          "delete": {}
+        }
+      }
+    }
+  }
+}

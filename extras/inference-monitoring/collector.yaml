@@ -1,0 +1,60 @@
+name: ML Inference - Stats Collector
+description: >-
+  Every minute, snapshots trained-model deployment stats (_ml/trained_models/_stats) and the
+  ingest-pipeline stats of the Claude Code transcript pipelines into the
+  ml-inference-stats data stream (default pipeline ml-inference-stats flattens them).
+  Feeds the "[ML Inference] Admin" dashboard and the inference throughput alerts.
+enabled: true
+tags: ["ml", "inference", "monitoring"]
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1m
+  - type: manual
+
+steps:
+  - name: models
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: "/_ml/trained_models/_stats?filter_path=trained_model_stats.model_id,trained_model_stats.deployment_stats"
+
+  - name: index_deployments
+    type: foreach
+    foreach: '${{ steps.models.output.trained_model_stats }}'
+    steps:
+      - name: index_deployment
+        type: elasticsearch.request
+        if: 'foreach.item.deployment_stats.state: *'
+        with:
+          method: POST
+          path: "/ml-inference-stats/_doc"
+          body:
+            kind: deployment
+            execution_id: "{{ execution.id }}"
+            raw: '${{ foreach.item.deployment_stats }}'
+        on-failure:
+          continue: true
+
+  - name: index_pipelines
+    type: foreach
+    foreach: '${{ "__PIPELINES__" | split: "," }}'
+    steps:
+      - name: pipeline_stats
+        type: elasticsearch.request
+        with:
+          method: GET
+          path: "/_nodes/stats/ingest?filter_path=nodes.*.name,nodes.*.ingest.pipelines.{{ foreach.item }}"
+      - name: index_pipeline
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: "/ml-inference-stats/_doc"
+          body:
+            kind: pipeline
+            pipeline_name: "{{ foreach.item }}"
+            execution_id: "{{ execution.id }}"
+            raw: '${{ steps.pipeline_stats.output }}'
+        on-failure:
+          continue: true
