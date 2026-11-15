@@ -2,6 +2,7 @@ module.exports = {
   style: 'elastic-web',
   name: 'claude-code-transcripts-load-test',
   title: 'Claude Code Transcripts: Load Test',
+  port: 30003,
 
   slides: [
     '01-cover.html',
