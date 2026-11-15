@@ -113,34 +113,41 @@ Then open **[Claude Code Transcripts] Business Analytics** and **[Claude Code Tr
 
 ## Migrating from a Custom Logs setup
 
-If transcripts or Desktop logs already arrive through **Custom Logs (Filestream)** with dataset `claude_code.transcript` or `claude_desktop.log`, Fleet has already created index templates with the same names as this package's. Switch over in this order:
+If transcripts or Desktop logs already arrive through **Custom Logs (Filestream)** with dataset `claude_code.transcript` or `claude_desktop.log`, Fleet refuses to install this package for two reasons:
 
-1. Delete the Custom Logs integration policies for those datasets: **Fleet → Agent policies → (policy) → Integrations → Delete**. Agents stop shipping until step 4.
-2. Delete the old index templates, so the package can create its own. The existing data stays.
+- Custom Logs owns the dataset: *"declares dataset … already owned by installed package filestream"*.
+- The existing data streams belong to another package: *"A matching live data stream … must be migrated or removed"*.
+
+This procedure has been run on a live cluster with no data loss and no duplicates. Collection pauses from step 3 until step 7.
+
+1. **Note the old stream IDs.** In `GET /api/fleet/agent_policies/<policy>/full`, the old IDs are under `inputs[].streams[].id`, for example `filestream-filestream.filestream-<package policy id>`. Also back up the old package policies.
+2. **Back up the data** into plain indices that index nothing, so mapping limits don't matter:
    ```
-   DELETE _index_template/logs-claude_code.transcript
-   DELETE _index_template/logs-claude_desktop.log
+   PUT claude-migration-backup-transcript   {"mappings": {"dynamic": false}}
+   POST _reindex {"source": {"index": "logs-claude_code.transcript-default"}, "dest": {"index": "claude-migration-backup-transcript"}}
    ```
-   Keep `logs-claude_code.transcript@custom`. The package template includes it too, and it holds the dense_vector mapping and any other customisations.
-3. Install the package (step 2 above) and add it to the same policies (step 3).
-4. Roll the data streams over, so the new template and pipeline apply right away:
+   Do the same for `logs-claude_desktop.log-default`. Because transcript `_id`s are line UUIDs, this also drops duplicates that earlier rollovers left behind.
+3. **Delete the old Custom Logs integration policies.** Agents stop the old inputs on their next check-in.
+4. **Release the dataset from Custom Logs.** Fleet's cleanup API needs a live policy, so create a temporary agent policy with no agents and add a Custom Logs integration for `claude_code.transcript` to it. Then:
    ```
-   POST logs-claude_code.transcript-default/_rollover
-   POST logs-claude_desktop.log-default/_rollover
+   DELETE kbn:/api/fleet/epm/packages/filestream/<version>/datastream_assets?packagePolicyId=<temporary package policy id>
    ```
-5. The old hand-made pipelines (for example `claude-code-transcript`, `claude-prompt-classify`, `claude-desktop-log`) are no longer referenced, so you can delete them once you're happy with the new ones.
+   Delete the temporary policies afterwards. Back up `logs-claude_code.transcript@custom` first: Custom Logs lists it as one of its assets. In our run it survived, but don't rely on that.
+5. **Top up the backups** (reindex again with `op_type: create` and `conflicts: proceed`). Then delete both data streams and any hand-made `logs-claude_desktop.log` index template, and **install the package**.
+6. **Restore the data** without running the pipeline a second time:
+   ```
+   POST _reindex {"source": {"index": "claude-migration-backup-transcript"},
+                  "dest": {"index": "logs-claude_code.transcript-default", "op_type": "create", "pipeline": "_none"}}
+   ```
+7. **Add the integration** to the same agent policies. Under each stream's **Custom configurations**, take over the old offsets so the files are not re-read (filestream take-over is Beta since 9.1):
+   ```yaml
+   take_over:
+     enabled: true
+     from_ids: ["filestream-filestream.filestream-<old package policy id>"]
+   ```
+8. **Verify.** The agent logs should show `Taking over state: … -> …`, new documents should arrive, and there should be no duplicate `_id`s. Then **remove the `take_over` block**: while it is set, events carry a `take_over` tag. Keep the backup indices until you are satisfied.
 
-**Keep the file offsets.** Agents track their read position per input ID. A new integration policy is a new input, so without help it re-reads every file newer than `ignore_older` and duplicates the data in the current backing index. To avoid that, set **Custom configurations** on each stream of the new policy so it takes over the old inputs' state (Beta since 9.1). Find the old IDs under `inputs[].streams[].id` in `GET /api/fleet/agent_policies/<policy>/full`:
-
-```yaml
-take_over:
-  enabled: true
-  from_ids: ["filestream-filestream.filestream-<old package policy id>"]
-```
-
-Delete the old policy **before** adding the new one. Take-over only works when the source input is no longer running.
-
----
+If agents ship through Logstash with the `elastic_integration` filter, nothing changes there: it resolves the package pipelines like any other integration.
 
 ## Design notes
 
