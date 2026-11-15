@@ -4,6 +4,8 @@ An Elastic Agent integration (`claude_code_transcripts`) that ships **Claude Cod
 
 > **Upstream:** this integration is proposed to Elastic in [elastic/integrations#22450](https://github.com/elastic/integrations/pull/22450). The upstream copy uses package-namespaced datasets (`claude_code_transcripts.transcript`, `claude_code_transcripts.desktop_log`). This repository keeps `claude_code.transcript` and `claude_desktop.log` so existing deployments keep working.
 
+> **Overview deck:** [watch the slides](https://iamhowardtheduck.github.io/claude-code-elastic/) or grab the [PDF](docs/claude-code-transcripts-deck.pdf) for what this integration contains, why it's built this way and what it solves. Source in [`deck/`](deck/).
+
 > This package complements Elastic's official **Claude Code** integration (`claude_code`), which collects Claude Code's OpenTelemetry events and traces. This one reads the on-disk transcripts and the Desktop logs. Both can be installed side by side. Detection rules, a model-pricing table and inference monitoring are available as optional extras.
 
 ```

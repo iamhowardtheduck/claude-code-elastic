@@ -2,3 +2,8 @@ build/
 __pycache__/
 *.pyc
 .env
+
+# fslides deck
+deck/node_modules/
+deck/_site/
+deck/.fslides/
