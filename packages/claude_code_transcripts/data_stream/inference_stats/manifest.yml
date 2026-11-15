@@ -38,7 +38,7 @@ streams:
     multi: false
     required: true
     show_user: false
-    default: logs-claude_code_transcripts.
+    default: logs-claude_code.transcript-
   - name: ssl
     type: yaml
     title: SSL configuration

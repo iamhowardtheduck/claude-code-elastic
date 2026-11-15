@@ -67,7 +67,7 @@ Alternatively, download `claude_code_transcripts-<version>.zip` from the GitHub 
 ```bash
 go install github.com/elastic/elastic-package@latest
 cd packages/claude_code_transcripts
-elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.2.1.zip
+elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.2.2.zip
 ```
 
 ### 2. Upload it to Kibana
@@ -76,7 +76,7 @@ elastic-package lint && elastic-package build      # -> build/packages/claude_co
 curl -X POST "$KIBANA_URL/api/fleet/epm/packages" \
   -H "Authorization: ApiKey $ES_API_KEY" -H 'kbn-xsrf: true' \
   -H 'Content-Type: application/zip' \
-  --data-binary @build/packages/claude_code_transcripts-0.2.1.zip
+  --data-binary @build/packages/claude_code_transcripts-0.2.2.zip
 ```
 
 This installs the index templates, the three ingest pipelines (`logs-claude_code.transcript-<ver>`, `…-inference` and `…-classify`, plus `logs-claude_desktop.log-<ver>`) and the two dashboards. `elastic-package install --zip <file>` does the same against the stack configured for elastic-package.
@@ -108,7 +108,7 @@ extras/setup.sh inference-monitoring # stats collector + [ML Inference] Admin da
 extras/setup.sh all
 ```
 
-**Inference monitoring** is built into the package from 0.2.0. Enable the **ML inference statistics** input (CEL) in the integration policy, with an Elasticsearch URL and an API key that has `monitor` and `monitor_ml`; it feeds the **[Claude Code Transcripts] ML Inference Admin** dashboard. `extras/setup.sh inference-monitoring` still installs the 9 alert rules (disabled, without actions) and the older Kibana Workflow collector, which writes to `ml-inference-stats`; use one collector, not both. If you install a package version other than 0.2.1, set `PKG_VERSION` so the workflow watches the right pipeline names.
+**Inference monitoring** is built into the package from 0.2.0. Enable the **ML inference statistics** input (CEL) in the integration policy, with an Elasticsearch URL and an API key that has `monitor` and `monitor_ml`; it feeds the **[Claude Code Transcripts] ML Inference Admin** dashboard. `extras/setup.sh inference-monitoring` still installs the 9 alert rules (disabled, without actions) and the older Kibana Workflow collector, which writes to `ml-inference-stats`; use one collector, not both. If you install a package version other than 0.2.2, set `PKG_VERSION` so the workflow watches the right pipeline names.
 
 ### 5. Enabling inference (optional)
 

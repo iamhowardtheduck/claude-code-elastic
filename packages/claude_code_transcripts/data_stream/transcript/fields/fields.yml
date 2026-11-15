@@ -129,7 +129,8 @@
     - name: id
       type: keyword
     - name: input_transformations
-      type: keyword
+      type: flattened
+      description: Context transformations Claude Code applied to the request (a list of objects such as type, reason and path in newer versions).
     - name: model
       type: keyword
     - name: role
