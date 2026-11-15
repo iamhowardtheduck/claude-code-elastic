@@ -34,6 +34,8 @@ The **Enable ML inference** switch on the transcript stream turns on, for human 
 1. **Prompt embedding** with the `.jina-embeddings-v5-text-nano` inference endpoint (Elastic Inference Service) into `claude_code.prompt_embedding` (768 dims, cosine). Used by the semantic panels on the Security dashboard and by the semantic detection rules.
 2. **Prompt classification** (switch **Prompt classification**, on by default once inference is enabled) into `claude_code.prompt_classification.*`: prompt injection, jailbreak, toxicity, offensive language, five zero-shot groups (security, agent action, task, interaction, moderation) and NER.
 
+3. **Semantic threat flags** (with embedding alone): cosine similarity to 29 threat phrases in 10 concepts goes into `claude_code.prompt_classification.semantic.*`; a score of 0.60 or more adds `security:semantic_<concept>` and `flagged: true`.
+
 Timing is recorded in `claude_code.inference.{total_ms,embedding_ms,classify_ms,steps.*}`. Inference failures never block indexing; they are recorded in `claude_code.prompt_embedding_error` and `claude_code.prompt_classification.errors`.
 
 Before enabling it:

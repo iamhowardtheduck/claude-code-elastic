@@ -401,6 +401,42 @@
       type: keyword
     - name: security_confidence
       type: float
+    - name: semantic
+      type: group
+      description: Ingest-time semantic threat match (prompt embedding vs tools/semantic-concepts.json)
+      fields:
+      - name: score
+        type: float
+        description: Best cosine similarity to any threat phrase
+      - name: concept
+        type: keyword
+        description: Concept of the best-matching phrase
+      - name: threshold
+        type: float
+        description: Threshold in effect when the prompt was indexed
+      - name: scores
+        type: group
+        fields:
+        - name: credential_theft
+          type: float
+        - name: data_exfiltration
+          type: float
+        - name: malware_development
+          type: float
+        - name: defense_evasion
+          type: float
+        - name: privilege_escalation
+          type: float
+        - name: unauthorized_access
+          type: float
+        - name: social_engineering
+          type: float
+        - name: reconnaissance
+          type: float
+        - name: persistence
+          type: float
+        - name: prompt_injection
+          type: float
     - name: task
       type: keyword
     - name: task_confidence

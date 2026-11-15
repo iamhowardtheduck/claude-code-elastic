@@ -18,7 +18,7 @@ Environment:
   ES_URL, KIBANA_URL           e.g. https://es.example:9200, https://kibana.example:5601
   ES_API_KEY                   base64 API key (preferred), or ES_USER + ES_PASSWORD
   CA_CERT                      optional path to a CA bundle; INSECURE=true skips TLS verification (testing only)
-  PKG_VERSION                  installed claude_code_transcripts package version (default 0.1.1; used for pipeline names)
+  PKG_VERSION                  installed claude_code_transcripts package version (default 0.1.2; used for pipeline names)
   MODELS_FILE                  your own copy of extras/models/models.json (sizing for your cluster)
   HF_TOKEN                     Hugging Face token, only for gated models
 """
@@ -26,7 +26,7 @@ import base64, json, os, ssl, sys, uuid, urllib.error, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ES, KB = os.environ.get("ES_URL", "").rstrip("/"), os.environ.get("KIBANA_URL", "").rstrip("/")
-PKG_VERSION = os.environ.get("PKG_VERSION", "0.1.1")
+PKG_VERSION = os.environ.get("PKG_VERSION", "0.1.2")
 
 def _auth():
     if os.environ.get("ES_API_KEY"):

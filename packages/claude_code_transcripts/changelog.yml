@@ -1,3 +1,8 @@
+- version: 0.1.2
+  changes:
+  - description: Ingest-time semantic threat flags. Every embedded prompt gets claude_code.prompt_classification.semantic (best cosine similarity to 29 threat phrases in 10 concepts); a score of 0.60 or more adds security:semantic_<concept> and sets flagged. Evaluated on held-out prompts (9/12 malicious, 2/12 benign) and 147 real prompts (1 flagged).
+    type: enhancement
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/issues/1
 - version: 0.1.1
   changes:
   - description: Elastic License 2.0; Custom configurations option on both streams (e.g. filestream take_over for migrations); transcript exclude_files rendered correctly.

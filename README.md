@@ -16,6 +16,7 @@ extras/                      things a package cannot install (run extras/setup.s
   inference-monitoring/        stats collector workflow, [ML Inference] Admin dashboard, 9 alert rules
   models/models.json           NLP models + deployment sizing used by `extras/setup.sh models`
 docs/inference-models.md     loading, sizing and changing the inference models and classifiers
+tools/                       semantic threat phrases, vector builder and evaluation (build_semantic.py, eval_semantic.py)
 ```
 
 ## What gets collected
@@ -46,7 +47,7 @@ Alternatively, download `claude_code_transcripts-<version>.zip` from the GitHub 
 ```bash
 go install github.com/elastic/elastic-package@latest
 cd packages/claude_code_transcripts
-elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.1.1.zip
+elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.1.2.zip
 ```
 
 ### 2. Upload it to Kibana
@@ -55,7 +56,7 @@ elastic-package lint && elastic-package build      # -> build/packages/claude_co
 curl -X POST "$KIBANA_URL/api/fleet/epm/packages" \
   -H "Authorization: ApiKey $ES_API_KEY" -H 'kbn-xsrf: true' \
   -H 'Content-Type: application/zip' \
-  --data-binary @build/packages/claude_code_transcripts-0.1.1.zip
+  --data-binary @build/packages/claude_code_transcripts-0.1.2.zip
 ```
 
 This installs the index templates, the three ingest pipelines (`logs-claude_code.transcript-<ver>`, `…-inference` and `…-classify`, plus `logs-claude_desktop.log-<ver>`) and the two dashboards. `elastic-package install --zip <file>` does the same against the stack configured for elastic-package.
@@ -87,7 +88,7 @@ extras/setup.sh inference-monitoring # stats collector + [ML Inference] Admin da
 extras/setup.sh all
 ```
 
-`inference-monitoring` uses Kibana Workflows: a scheduled workflow samples `_ml/trained_models/_stats` and the ingest stats of the package pipelines every minute. If you install a package version other than 0.1.1, set `PKG_VERSION` so the collector watches the right pipeline names. The alert rules are created disabled, without actions. Add your connector (email, Slack and so on) in **Stack Management → Rules**, then enable them.
+`inference-monitoring` uses Kibana Workflows: a scheduled workflow samples `_ml/trained_models/_stats` and the ingest stats of the package pipelines every minute. If you install a package version other than 0.1.2, set `PKG_VERSION` so the collector watches the right pipeline names. The alert rules are created disabled, without actions. Add your connector (email, Slack and so on) in **Stack Management → Rules**, then enable them.
 
 ### 5. Enabling inference
 

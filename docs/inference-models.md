@@ -56,6 +56,34 @@ GET _inference/text_embedding/.jina-embeddings-v5-text-nano
 
 The Security dashboard's semantic panels and the semantic detection rules call the same endpoint at query time. To use a different embedding model, follow [5f](#f-use-a-different-embedding-model).
 
+### Semantic threat flags (embedding only, no classification needed)
+
+Every embedded prompt is compared with 29 threat phrases in 10 concepts from `tools/semantic-concepts.json`:
+- credential theft, data exfiltration, malware development, defense evasion, privilege escalation
+- unauthorized access, social engineering, reconnaissance, persistence, prompt injection
+
+The result goes into `claude_code.prompt_classification.semantic`: `score` (best cosine similarity), `concept`, `scores.<concept>` and `threshold`. When the score is at least 0.60, the prompt also gets the category `security:semantic_<concept>` and `flagged: true`. The **Claude Code - Semantic Malicious Intent** rule and the Security dashboard read these stored fields, so no embeddings are computed at query time.
+
+How the phrases were evaluated: they were written as abstract intents, then tested on prompts that weren't used to write them.
+
+| Set | Malicious caught | Benign flagged |
+|---|---|---|
+| Development set | 12/12 | 2/10 |
+| **Held-out set** | **9/12** | **2/12** |
+| Real prompts | — | 1 of 147 |
+
+- **Misses:** a VBA macro dropper (0.33), source code leaked to a pastebin (0.58), turning off CloudTrail (0.58).
+- **False positives:** mostly defensive work that describes the attack it defends against, such as "our EDR flags our build tool as malware" or "create an alert when someone disables Defender".
+- **A phrase set that failed:** an earlier set, written in the same words as the test prompts, scored 10/12 on its own test set but only 3/12 on the held-out set. Always test phrases on prompts you didn't use to write them.
+
+**To change the phrases or the threshold:**
+1. Edit `tools/semantic-concepts.json`, then measure the effect with `python3 tools/eval_semantic.py --real --verbose`. It uses the labelled prompts in `tools/semantic-eval-prompts.json` and your real prompts.
+2. Run `python3 tools/build_semantic.py`, with the same environment as `extras/setup.sh`. It embeds the phrases and writes the unit vectors into `inference.yml`.
+3. Rebuild and upgrade the package (see g).
+4. To re-score existing prompts, run an `_update_by_query` with the same script and params, changing `ctx.` to `ctx._source.`.
+
+The vectors belong to the embedding model, so re-run the build script whenever the model changes.
+
 ## 3. Check it is working
 
 - `extras/setup.sh models-status`: every model `started`, errors 0, and `pending` near 0 under load.
