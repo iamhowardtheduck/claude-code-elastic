@@ -14,7 +14,8 @@ extras/                      things a package cannot install (run extras/setup.s
   inference/                   dense_vector mapping for the prompt embedding
   detection-rules/             10 Elastic Security ES|QL rules (imported disabled)
   inference-monitoring/        stats collector workflow, [ML Inference] Admin dashboard, 9 alert rules
-docs/inference-models.md     models for the optional inference, eland import, sizing
+  models/models.json           NLP models + deployment sizing used by `extras/setup.sh models`
+docs/inference-models.md     loading, sizing and changing the inference models and classifiers
 ```
 
 ## What gets collected
@@ -90,10 +91,19 @@ extras/setup.sh all
 
 ### 5. Enabling inference
 
-1. Deploy the models: [docs/inference-models.md](docs/inference-models.md).
-2. `extras/setup.sh inference-mapping`.
-3. Turn on **Enable ML inference** in the integration policy (and **Prompt classification** if you want it).
-4. Optional: `extras/setup.sh inference-monitoring`. Classification takes about 20-45 s of ML time per prompt on CPU, so check that the deployments keep up.
+```bash
+extras/setup.sh inference-mapping      # dense_vector mapping for the prompt embedding
+extras/setup.sh models --dry-run       # what would be imported/started (needs Docker for imports: eland)
+extras/setup.sh models                 # import the 6 NLP models and deploy them as configured in extras/models/models.json
+extras/setup.sh models-status
+extras/setup.sh classify "please wipe the production database"   # test the classifiers on one prompt
+```
+Then turn on **Enable ML inference** in the integration policy (and **Prompt classification** if you want it). Optionally add `extras/setup.sh inference-monitoring`. Classification takes about 15-45 s of ML time per prompt on CPU, so size the zero-shot model for your prompt rate.
+
+[docs/inference-models.md](docs/inference-models.md) covers:
+- requirements (ML nodes, a Platinum or trial licence, the Elastic Inference Service endpoint)
+- sizing
+- **changing the setup**: resizing deployments, re-importing a model with a different input length, tuning thresholds and zero-shot labels (testable before rebuilding with `CLASSIFY_PIPELINE_FILE`), adding or swapping models, using another embedding model, and rebuilding the package
 
 ### 6. Verify
 

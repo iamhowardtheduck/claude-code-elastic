@@ -8,11 +8,19 @@ Usage: extras/setup.sh <command> [<command> ...]
   inference-monitoring  stats collector (ILM, template, pipeline, workflow), admin dashboard, alert rules (disabled)
   all                   all of the above
 
+  models [--dry-run] [--restart]   import missing NLP models (eland in Docker) and start/update their deployments
+                                   to match extras/models/models.json (--restart: stop+start when threads change)
+  models-status                    deployment state, allocations, latency, queue and errors per model
+  classify "<prompt text>"         run one prompt through the installed classify pipeline (_simulate, nothing indexed);
+                                   CLASSIFY_PIPELINE_FILE=<edited classify.yml> tests your changes before rebuilding
+
 Environment:
   ES_URL, KIBANA_URL           e.g. https://es.example:9200, https://kibana.example:5601
   ES_API_KEY                   base64 API key (preferred), or ES_USER + ES_PASSWORD
   CA_CERT                      optional path to a CA bundle; INSECURE=true skips TLS verification (testing only)
   PKG_VERSION                  installed claude_code_transcripts package version (default 0.1.1; used for pipeline names)
+  MODELS_FILE                  your own copy of extras/models/models.json (sizing for your cluster)
+  HF_TOKEN                     Hugging Face token, only for gated models
 """
 import base64, json, os, ssl, sys, uuid, urllib.error, urllib.request
 
@@ -117,9 +125,149 @@ def inference_monitoring():
             code, res = kb("PUT", f"/api/alerting/rule/{rid}", upd)
         report(f"alert rule {rid} (disabled; add a connector action, then enable)", (code, res))
 
+# ---------------------------------------------------------------- models
+import shlex, shutil, subprocess
+
+def _eland_cmd(m, image):
+    """docker command for eland_import_hub_model; secrets are passed by environment name only (-e VAR), never on the command line."""
+    if not ES:
+        sys.exit("ES_URL not set")
+    args = ["eland_import_hub_model", "--url", "$ES_URL", "--hub-model-id", m["hub_model_id"], "--task-type", m["task_type"],
+            "--es-model-id", m["model_id"]]
+    if m.get("max_model_input_length"):
+        args += ["--max-model-input-length", str(m["max_model_input_length"])]
+    docker = ["docker", "run", "--rm", "--network", "host", "-e", "ES_URL"]
+    if os.environ.get("ES_API_KEY"):
+        docker += ["-e", "ES_API_KEY"]; args += ["--es-api-key", "$ES_API_KEY"]
+    else:
+        docker += ["-e", "ES_USER", "-e", "ES_PASSWORD"]; args += ["--es-username", "$ES_USER", "--es-password", "$ES_PASSWORD"]
+    if os.environ.get("HF_TOKEN"):          # gated Hugging Face models
+        docker += ["-e", "HF_TOKEN"]; args += ["--hub-access-token", "$HF_TOKEN"]
+    if os.environ.get("INSECURE") == "true":
+        args += ["--insecure"]
+    elif os.environ.get("CA_CERT"):
+        docker += ["-v", f"{os.path.abspath(os.environ['CA_CERT'])}:/ca.crt:ro"]; args += ["--ca-certs", "/ca.crt"]
+    # never pass --quantize: int8 models crashed pytorch_inference with SIGILL in testing
+    inner = " ".join(f'"{a}"' if a.startswith("$") else shlex.quote(a) for a in args)
+    return docker + [image, "sh", "-c", inner]
+
+def _deployment(model_id):
+    code, body = es("GET", f"/_ml/trained_models/{model_id}/_stats", ok=(200, 404))
+    if code != 200 or not body.get("trained_model_stats"):
+        return None
+    d = body["trained_model_stats"][0].get("deployment_stats")
+    return d[0] if isinstance(d, list) and d else d
+
+def _models_cfg():
+    f = os.environ.get("MODELS_FILE")
+    return json.load(open(f)) if f else load("models", "models.json")
+
+def models(dry=False, restart=False):
+    cfg = _models_cfg()
+    print("models" + (" (dry run)" if dry else ""))
+    for m in cfg["models"]:
+        mid, want = m["model_id"], m["deployment"]
+        code, _ = es("GET", f"/_ml/trained_models/{mid}", ok=(200, 404))
+        if code == 404:
+            cmd = _eland_cmd(m, cfg["eland_image"])
+            print(f"  import {mid} <- {m['hub_model_id']} ({m['task_type']})")
+            if dry or not shutil.which("docker"):
+                print("    " + ("run: " if not dry else "would run: ") + " ".join(shlex.quote(c) for c in cmd))
+                if not dry: print("    docker not found: run the command above on a host with Docker, then re-run 'models'")
+                continue
+            r = subprocess.run(cmd)
+            if r.returncode != 0:
+                print(f"  ERR import {mid} failed (exit {r.returncode})"); continue
+        dep = _deployment(mid)
+        threads = want.get("threads_per_allocation", 1)
+        adaptive = want.get("adaptive_allocations")
+        if dep and dep.get("state") in ("started", "starting") and restart and dep.get("threads_per_allocation") != threads:
+            print(f"  restart {mid}: threads {dep.get('threads_per_allocation')} -> {threads}")
+            if not dry:
+                report(f"stop {mid}", es("POST", f"/_ml/trained_models/{mid}/deployment/_stop?force=true"))
+            dep = None
+        if not dep or dep.get("state") not in ("started", "starting"):
+            q = f"threads_per_allocation={threads}&priority={want.get('priority', 'normal')}&wait_for=started&timeout=10m"
+            body = None
+            if adaptive: body = {"adaptive_allocations": adaptive}
+            else: q += f"&number_of_allocations={want.get('number_of_allocations', 1)}"
+            print(f"  start {mid}: {threads} thread(s) x " + (f"adaptive {adaptive['min_number_of_allocations']}-{adaptive['max_number_of_allocations']}" if adaptive else f"{want.get('number_of_allocations', 1)} allocation(s)"))
+            if not dry:
+                report(f"start {mid}", es("POST", f"/_ml/trained_models/{mid}/deployment/_start?{q}", body))
+            continue
+        # running: bring allocations in line
+        cur_ad = dep.get("adaptive_allocations") or {}
+        if adaptive:
+            same = cur_ad.get("enabled") and cur_ad.get("min_number_of_allocations") == adaptive["min_number_of_allocations"] and cur_ad.get("max_number_of_allocations") == adaptive["max_number_of_allocations"]
+            upd = None if same else {"adaptive_allocations": adaptive}
+        else:
+            n = want.get("number_of_allocations", 1)
+            same = not cur_ad.get("enabled") and dep.get("number_of_allocations") == n
+            upd = None if same else {"number_of_allocations": n, "adaptive_allocations": {"enabled": False}}
+        note = "" if dep.get("threads_per_allocation") == threads else f" (threads {dep.get('threads_per_allocation')} != {threads}: re-run with --restart)"
+        if upd is None:
+            print(f"  ok  {mid}: already as configured{note}")
+        else:
+            print(f"  update {mid}: {json.dumps(upd)}{note}")
+            if not dry:
+                report(f"update {mid}", es("POST", f"/_ml/trained_models/{dep.get('deployment_id', mid)}/deployment/_update", upd))
+
+def models_status():
+    cfg = _models_cfg()
+    print(f"{'model':48} {'state':9} {'alloc':>9} {'avg ms':>8} {'pending':>7} {'errors':>6}  nodes")
+    for m in cfg["models"]:
+        d = _deployment(m["model_id"])
+        if not d:
+            print(f"{m['model_id']:48} {'missing' if es('GET', '/_ml/trained_models/' + m['model_id'], ok=(200, 404))[0] == 404 else 'stopped':9}"); continue
+        nodes = [n for n in d.get("nodes", []) if (n.get("routing_state") or {}).get("routing_state") == "started"]
+        cnt = sum(n.get("inference_count", 0) for n in nodes)
+        avg = (sum(n.get("average_inference_time_ms", 0) * n.get("inference_count", 0) for n in nodes) / cnt) if cnt else 0
+        ad = d.get("adaptive_allocations") or {}
+        alloc = f"{d.get('number_of_allocations')}x{d.get('threads_per_allocation')}" + ("A" if ad.get("enabled") else "")
+        names = sorted({list(n["node"].values())[0].get("name", "?") for n in nodes})
+        print(f"{m['model_id']:48} {d.get('state', '?'):9} {alloc:>9} {avg:8.0f} {sum(n.get('number_of_pending_requests', 0) for n in nodes):7} "
+              f"{sum(n.get('error_count', 0) + n.get('rejected_execution_count', 0) + n.get('timeout_count', 0) for n in nodes):6}  {','.join(names)}")
+    print("alloc: allocations x threads, A = adaptive. avg ms is per request since the deployment started.")
+
+def classify(text):
+    pipe = f"logs-claude_code.transcript-{PKG_VERSION}-classify"
+    doc = {"message": text, "claude_code": {"human_prompt": True}}
+    import time; t = time.time()
+    f = os.environ.get("CLASSIFY_PIPELINE_FILE")       # test an edited classify.yml before rebuilding the package
+    if f:
+        try:
+            import yaml
+        except ImportError:
+            sys.exit("CLASSIFY_PIPELINE_FILE needs PyYAML (pip install pyyaml)")
+        pipe = f"{f} (not installed, simulated inline)"
+        code, body = es("POST", "/_ingest/pipeline/_simulate", {"pipeline": yaml.safe_load(open(f)), "docs": [{"_source": doc}]})
+    else:
+        code, body = es("POST", f"/_ingest/pipeline/{pipe}/_simulate", {"docs": [{"_source": doc}]})
+    if code >= 300:
+        sys.exit(f"ERR {code}: {json.dumps(body)[:400]}")
+    src = body["docs"][0].get("doc", {}).get("_source", {})
+    pc = src.get("claude_code", {}).get("prompt_classification", {})
+    print(f"pipeline {pipe}  ({time.time() - t:.1f} s)")
+    print("flagged:   ", pc.get("flagged"))
+    print("categories:", pc.get("categories"))
+    for k, v in sorted((pc.get("scores") or {}).items()):
+        if isinstance(v, dict):
+            top = sorted(((s, l) for l, s in v.items() if isinstance(s, (int, float))), reverse=True)[:3]
+            print(f"  {k:14} " + ", ".join(f"{l} {s:.2f}" for s, l in top))
+        else:
+            print(f"  {k:14} {v:.3f}" if isinstance(v, (int, float)) else f"  {k:14} {v}")
+    if pc.get("entities"): print("entities:  ", pc.get("entities"))
+    if pc.get("errors"): print("errors:    ", pc.get("errors"))
+
 CMDS = {"pricing": pricing, "inference-mapping": inference_mapping, "rules": rules, "inference-monitoring": inference_monitoring}
 if __name__ == "__main__":
     args = sys.argv[1:]
+    if args[:1] == ["models"]:
+        models(dry="--dry-run" in args, restart="--restart" in args); sys.exit()
+    if args[:1] == ["models-status"]:
+        models_status(); sys.exit()
+    if args[:1] == ["classify"] and len(args) == 2:
+        classify(args[1]); sys.exit()
     if not args or any(a not in CMDS and a != "all" for a in args):
         sys.exit(__doc__)
     for a in (list(CMDS) if "all" in args else args):
