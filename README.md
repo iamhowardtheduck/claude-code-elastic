@@ -108,9 +108,9 @@ Then turn on **Enable ML inference**, and optionally **Prompt classification**, 
 
 - **[docs/inference-models.md](docs/inference-models.md): loading.**
   - prerequisites per environment (licence, ML nodes, Elastic Inference Service / Cloud Connect, API key)
-  - the script
-  - step-by-step manual import with eland (including air-gapped)
-  - deploying in Kibana or with the API, smoke tests
+  - getting the setup script from GitHub, and running it on-prem or in the cloud
+  - **every model, one by one, with eland**: import, deploy and verify commands for on-prem and Elastic Cloud (Serverless notes included), plus air-gapped import
+  - deploying from Kibana instead of the API, and the end-to-end smoke test
 - **[docs/inference-tuning.md](docs/inference-tuning.md): tuning.**
   - capacity planning (roughly 290 prompts/hour per zero-shot allocation on CPU)
   - settings for self-managed, Cloud Hosted and Serverless, and a symptoms table
