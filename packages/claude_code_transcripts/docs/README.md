@@ -40,7 +40,7 @@ Timing is recorded in `claude_code.inference.{total_ms,embedding_ms,classify_ms,
 
 Before enabling it:
 - Run `extras/setup.sh inference-mapping` from the repository (adds the `dense_vector` mapping, which integration packages cannot declare).
-- Deploy the models (repository `docs/inference-models.md`). Classification is ML-heavy: the zero-shot model runs five passes per prompt.
+- Load the models: see `docs/inference-models.md` in the repository (script or manual; self-managed, Elastic Cloud Hosted and Serverless). Size and tune them with `docs/inference-tuning.md`. Classification is ML-heavy: the zero-shot model runs five passes per prompt.
 
 ## Dashboards
 - **[Claude Code Transcripts] Business Analytics**: activity, users, projects, models, tokens, estimated spend (needs the `claude-model-pricing` lookup index: `extras/setup.sh pricing`), topics.

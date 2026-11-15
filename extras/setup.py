@@ -16,6 +16,7 @@ Usage: extras/setup.sh <command> [<command> ...]
 
 Environment:
   ES_URL, KIBANA_URL           e.g. https://es.example:9200, https://kibana.example:5601
+  CLOUD_ID                     Elastic Cloud Hosted alternative to ES_URL/KIBANA_URL (from the deployment page)
   ES_API_KEY                   base64 API key (preferred), or ES_USER + ES_PASSWORD
   CA_CERT                      optional path to a CA bundle; INSECURE=true skips TLS verification (testing only)
   PKG_VERSION                  installed claude_code_transcripts package version (default 0.1.2; used for pipeline names)
@@ -25,7 +26,23 @@ Environment:
 import base64, json, os, ssl, sys, uuid, urllib.error, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+def _from_cloud_id(cid):
+    """Elastic Cloud ID -> (Elasticsearch URL, Kibana URL)."""
+    try:
+        b = cid.split(":", 1)[1]
+        host, es_id, kb_id = (base64.b64decode(b + "=" * (-len(b) % 4)).decode().split("$") + ["", ""])[:3]
+    except Exception:
+        sys.exit("CLOUD_ID is not a valid Elastic Cloud ID")
+    port = "443"
+    if ":" in host:
+        host, port = host.rsplit(":", 1)
+    return f"https://{es_id}.{host}:{port}", (f"https://{kb_id}.{host}:{port}" if kb_id else "")
+
 ES, KB = os.environ.get("ES_URL", "").rstrip("/"), os.environ.get("KIBANA_URL", "").rstrip("/")
+if os.environ.get("CLOUD_ID") and not (ES and KB):
+    _es, _kb = _from_cloud_id(os.environ["CLOUD_ID"])
+    ES, KB = ES or _es, KB or _kb
 PKG_VERSION = os.environ.get("PKG_VERSION", "0.1.2")
 
 def _auth():
@@ -131,7 +148,8 @@ import shlex, shutil, subprocess
 def _eland_cmd(m, image):
     """docker command for eland_import_hub_model; secrets are passed by environment name only (-e VAR), never on the command line."""
     if not ES:
-        sys.exit("ES_URL not set")
+        sys.exit("ES_URL (or CLOUD_ID) not set")
+    os.environ["ES_URL"] = ES          # eland gets the resolved URL, also when only CLOUD_ID was given
     args = ["eland_import_hub_model", "--url", "$ES_URL", "--hub-model-id", m["hub_model_id"], "--task-type", m["task_type"],
             "--es-model-id", m["model_id"]]
     if m.get("max_model_input_length"):

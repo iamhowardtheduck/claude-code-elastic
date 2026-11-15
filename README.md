@@ -14,8 +14,10 @@ extras/                      things a package cannot install (run extras/setup.s
   inference/                   dense_vector mapping for the prompt embedding
   detection-rules/             10 Elastic Security ES|QL rules (imported disabled)
   inference-monitoring/        stats collector workflow, [ML Inference] Admin dashboard, 9 alert rules
-  models/models.json           NLP models + deployment sizing used by `extras/setup.sh models`
-docs/inference-models.md     loading, sizing and changing the inference models and classifiers
+  models/models.json           NLP models + fixed sizing used by `extras/setup.sh models` (self-managed)
+  models/profiles/adaptive.json  adaptive sizing for Elastic Cloud Hosted / ECE / ECK / Serverless
+docs/inference-models.md     loading the inference models (script or manual; self-managed, Cloud, Serverless)
+docs/inference-tuning.md     performance sizing and accuracy tuning
 tools/                       semantic threat phrases, vector builder and evaluation (build_semantic.py, eval_semantic.py)
 ```
 
@@ -90,21 +92,29 @@ extras/setup.sh all
 
 `inference-monitoring` uses Kibana Workflows: a scheduled workflow samples `_ml/trained_models/_stats` and the ingest stats of the package pipelines every minute. If you install a package version other than 0.1.2, set `PKG_VERSION` so the collector watches the right pipeline names. The alert rules are created disabled, without actions. Add your connector (email, Slack and so on) in **Stack Management → Rules**, then enable them.
 
-### 5. Enabling inference
+### 5. Enabling inference (optional)
+
+Inference adds a prompt embedding (semantic search plus semantic threat flags) and, optionally, six NLP classifiers. Load the models with the script or by hand; both are documented for **self-managed**, **Elastic Cloud Hosted / ECE / ECK** and **Serverless**.
 
 ```bash
-extras/setup.sh inference-mapping      # dense_vector mapping for the prompt embedding
-extras/setup.sh models --dry-run       # what would be imported/started (needs Docker for imports: eland)
-extras/setup.sh models                 # import the 6 NLP models and deploy them as configured in extras/models/models.json
+extras/setup.sh inference-mapping      # vector mapping for the embedding
+extras/setup.sh models --dry-run       # plan: import missing models (eland in Docker), start/resize deployments
+extras/setup.sh models                 # self-managed: fixed sizing in extras/models/models.json
+# Cloud / Serverless: MODELS_FILE=extras/models/profiles/adaptive.json extras/setup.sh models  (CLOUD_ID works instead of ES_URL)
 extras/setup.sh models-status
-extras/setup.sh classify "please wipe the production database"   # test the classifiers on one prompt
+extras/setup.sh classify "please wipe the production database"
 ```
-Then turn on **Enable ML inference** in the integration policy (and **Prompt classification** if you want it). Optionally add `extras/setup.sh inference-monitoring`. Classification takes about 15-45 s of ML time per prompt on CPU, so size the zero-shot model for your prompt rate.
+Then turn on **Enable ML inference**, and optionally **Prompt classification**, in the integration policy.
 
-[docs/inference-models.md](docs/inference-models.md) covers:
-- requirements (ML nodes, a Platinum or trial licence, the Elastic Inference Service endpoint)
-- sizing
-- **changing the setup**: resizing deployments, re-importing a model with a different input length, tuning thresholds and zero-shot labels (testable before rebuilding with `CLASSIFY_PIPELINE_FILE`), adding or swapping models, using another embedding model, and rebuilding the package
+- **[docs/inference-models.md](docs/inference-models.md): loading.**
+  - prerequisites per environment (licence, ML nodes, Elastic Inference Service / Cloud Connect, API key)
+  - the script
+  - step-by-step manual import with eland (including air-gapped)
+  - deploying in Kibana or with the API, smoke tests
+- **[docs/inference-tuning.md](docs/inference-tuning.md): tuning.**
+  - capacity planning (roughly 290 prompts/hour per zero-shot allocation on CPU)
+  - settings for self-managed, Cloud Hosted and Serverless, and a symptoms table
+  - accuracy: thresholds, zero-shot labels, semantic phrases, swapping models, a different embedding model
 
 ### 6. Verify
 
