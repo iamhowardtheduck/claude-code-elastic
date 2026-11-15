@@ -199,6 +199,8 @@ elastic-package lint && elastic-package build
 curl -X POST "$KIBANA_URL/api/fleet/epm/packages" -H "Authorization: ApiKey $ES_API_KEY" -H 'kbn-xsrf: true' \
      -H 'Content-Type: application/zip' --data-binary @../../build/packages/claude_code_transcripts-0.1.3.zip
 ```
+> **Always bump the version before uploading.** Re-uploading a version that is already installed makes Fleet reinstall it, and that recreated the integration policy under a new ID. A new policy means new filestream input IDs, so agents re-read every file: transcripts deduplicate on `_id`, but Desktop log lines were indexed a second time.
+
 Fleet installs new versioned pipelines (`logs-claude_code.transcript-0.1.3*`) and points the data streams at them. Then:
 - Upgrade the integration policies: **Fleet → Integrations → Claude Code Transcripts → Policies → Upgrade**.
 - Run `PKG_VERSION=0.1.3 extras/setup.sh inference-monitoring` so the stats collector follows the new pipeline names, and use the same `PKG_VERSION` for `classify`.

@@ -49,7 +49,7 @@ Alternatively, download `claude_code_transcripts-<version>.zip` from the GitHub 
 ```bash
 go install github.com/elastic/elastic-package@latest
 cd packages/claude_code_transcripts
-elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.1.2.zip
+elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.1.3.zip
 ```
 
 ### 2. Upload it to Kibana
@@ -58,7 +58,7 @@ elastic-package lint && elastic-package build      # -> build/packages/claude_co
 curl -X POST "$KIBANA_URL/api/fleet/epm/packages" \
   -H "Authorization: ApiKey $ES_API_KEY" -H 'kbn-xsrf: true' \
   -H 'Content-Type: application/zip' \
-  --data-binary @build/packages/claude_code_transcripts-0.1.2.zip
+  --data-binary @build/packages/claude_code_transcripts-0.1.3.zip
 ```
 
 This installs the index templates, the three ingest pipelines (`logs-claude_code.transcript-<ver>`, `…-inference` and `…-classify`, plus `logs-claude_desktop.log-<ver>`) and the two dashboards. `elastic-package install --zip <file>` does the same against the stack configured for elastic-package.
@@ -90,7 +90,7 @@ extras/setup.sh inference-monitoring # stats collector + [ML Inference] Admin da
 extras/setup.sh all
 ```
 
-`inference-monitoring` uses Kibana Workflows: a scheduled workflow samples `_ml/trained_models/_stats` and the ingest stats of the package pipelines every minute. If you install a package version other than 0.1.2, set `PKG_VERSION` so the collector watches the right pipeline names. The alert rules are created disabled, without actions. Add your connector (email, Slack and so on) in **Stack Management → Rules**, then enable them.
+`inference-monitoring` uses Kibana Workflows: a scheduled workflow samples `_ml/trained_models/_stats` and the ingest stats of the package pipelines every minute. If you install a package version other than 0.1.3, set `PKG_VERSION` so the collector watches the right pipeline names. The alert rules are created disabled, without actions. Add your connector (email, Slack and so on) in **Stack Management → Rules**, then enable them.
 
 ### 5. Enabling inference (optional)
 
@@ -186,4 +186,4 @@ elastic-package lint
 elastic-package build
 elastic-package stack up -d && elastic-package install   # local test stack (Docker)
 ```
-Bump `version` in `manifest.yml` and add an entry to `changelog.yml` for every change.
+Bump `version` in `manifest.yml` and add an entry to `changelog.yml` for every change. **Never re-upload a version that is already installed:** Fleet reinstalls it, recreating the integration policy under a new ID, and agents then re-read all files (Desktop log lines get duplicated).
