@@ -26,6 +26,19 @@ docs/inference-tuning.md     performance sizing and accuracy tuning
 tools/                       semantic threat phrases, vector builder and evaluation (build_semantic.py, eval_semantic.py)
 ```
 
+## Screenshots
+
+These were rendered from fictional demo data (made-up users, hosts, projects and prompts) run through the integration's pipelines.
+
+**Business Analytics**: spend, tokens, models, projects, topics and task types
+![Business Analytics dashboard](packages/claude_code_transcripts/img/dashboard-business-analytics.png)
+
+**Security**: classifier and semantic threat flags, redacted secrets, risky commands, sensitive files and exfiltration sites, auto-mode blocks
+![Security dashboard](packages/claude_code_transcripts/img/dashboard-security.png)
+
+**ML Inference Admin**: deployment queue, throughput, utilisation, per-step and end-to-end inference time, ingest lag
+![ML Inference Admin dashboard](packages/claude_code_transcripts/img/dashboard-ml-inference-admin.png)
+
 ## What gets collected
 
 | Source | Where | Data stream |
@@ -54,7 +67,7 @@ Alternatively, download `claude_code_transcripts-<version>.zip` from the GitHub 
 ```bash
 go install github.com/elastic/elastic-package@latest
 cd packages/claude_code_transcripts
-elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.2.0.zip
+elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.2.1.zip
 ```
 
 ### 2. Upload it to Kibana
@@ -63,7 +76,7 @@ elastic-package lint && elastic-package build      # -> build/packages/claude_co
 curl -X POST "$KIBANA_URL/api/fleet/epm/packages" \
   -H "Authorization: ApiKey $ES_API_KEY" -H 'kbn-xsrf: true' \
   -H 'Content-Type: application/zip' \
-  --data-binary @build/packages/claude_code_transcripts-0.2.0.zip
+  --data-binary @build/packages/claude_code_transcripts-0.2.1.zip
 ```
 
 This installs the index templates, the three ingest pipelines (`logs-claude_code.transcript-<ver>`, `…-inference` and `…-classify`, plus `logs-claude_desktop.log-<ver>`) and the two dashboards. `elastic-package install --zip <file>` does the same against the stack configured for elastic-package.
@@ -95,7 +108,7 @@ extras/setup.sh inference-monitoring # stats collector + [ML Inference] Admin da
 extras/setup.sh all
 ```
 
-**Inference monitoring** is built into the package from 0.2.0. Enable the **ML inference statistics** input (CEL) in the integration policy, with an Elasticsearch URL and an API key that has `monitor` and `monitor_ml`; it feeds the **[Claude Code Transcripts] ML Inference Admin** dashboard. `extras/setup.sh inference-monitoring` still installs the 9 alert rules (disabled, without actions) and the older Kibana Workflow collector, which writes to `ml-inference-stats`; use one collector, not both. If you install a package version other than 0.2.0, set `PKG_VERSION` so the workflow watches the right pipeline names.
+**Inference monitoring** is built into the package from 0.2.0. Enable the **ML inference statistics** input (CEL) in the integration policy, with an Elasticsearch URL and an API key that has `monitor` and `monitor_ml`; it feeds the **[Claude Code Transcripts] ML Inference Admin** dashboard. `extras/setup.sh inference-monitoring` still installs the 9 alert rules (disabled, without actions) and the older Kibana Workflow collector, which writes to `ml-inference-stats`; use one collector, not both. If you install a package version other than 0.2.1, set `PKG_VERSION` so the workflow watches the right pipeline names.
 
 ### 5. Enabling inference (optional)
 

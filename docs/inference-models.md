@@ -85,7 +85,7 @@ The setup script and its sizing files are in the repository **[iamhowardtheduck/
 Use a release tag, so the script matches the integration version you installed:
 
 ```bash
-git clone --branch v0.2.0 https://github.com/iamhowardtheduck/claude-code-elastic.git
+git clone --branch v0.2.1 https://github.com/iamhowardtheduck/claude-code-elastic.git
 cd claude-code-elastic
 extras/setup.sh            # prints the commands and the environment variables it uses
 ```
@@ -93,8 +93,8 @@ extras/setup.sh            # prints the commands and the environment variables i
 Without git, download the tagged source:
 
 ```bash
-curl -fsSL https://github.com/iamhowardtheduck/claude-code-elastic/archive/refs/tags/v0.2.0.tar.gz | tar xz
-cd claude-code-elastic-0.2.0
+curl -fsSL https://github.com/iamhowardtheduck/claude-code-elastic/archive/refs/tags/v0.2.1.tar.gz | tar xz
+cd claude-code-elastic-0.2.1
 ```
 
 Requirements on the machine running it:

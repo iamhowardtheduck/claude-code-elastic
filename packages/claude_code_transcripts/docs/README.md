@@ -242,7 +242,7 @@ The repository [iamhowardtheduck/claude-code-elastic](https://github.com/iamhowa
 - it adds the mapping
 
 ```
-git clone --branch v0.2.0 https://github.com/iamhowardtheduck/claude-code-elastic.git && cd claude-code-elastic
+git clone --branch v0.2.1 https://github.com/iamhowardtheduck/claude-code-elastic.git && cd claude-code-elastic
 extras/setup.sh inference-mapping
 extras/setup.sh models                                                       # on-premises sizing
 MODELS_FILE=extras/models/profiles/adaptive.json extras/setup.sh models     # Elastic Cloud sizing
