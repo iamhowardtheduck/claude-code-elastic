@@ -5,7 +5,9 @@ on:
     branches: [main]
     paths:
       - "deck/**"
+      - "deck-performance/**"
       - "docs/claude-code-transcripts-deck.pdf"
+      - "docs/claude-code-transcripts-load-test.pdf"
       - ".github/workflows/deck-pages.yml"
   workflow_dispatch:
 
@@ -35,7 +37,13 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: "true"
       - run: npx fslides build ../_site
         working-directory: deck
-      - run: cp docs/claude-code-transcripts-deck.pdf _site/
+      - run: npm install --no-audit --no-fund
+        working-directory: deck-performance
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+      - run: npx fslides build ../_site/load-test
+        working-directory: deck-performance
+      - run: cp docs/claude-code-transcripts-deck.pdf docs/claude-code-transcripts-load-test.pdf _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
