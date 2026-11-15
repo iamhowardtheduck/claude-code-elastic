@@ -1,4 +1,5 @@
 module.exports = {
+  style: 'elastic-web',
   name: 'claude-code-transcripts',
   title: 'Claude Code Transcripts for Elastic',
   slidesDir: 'slides',

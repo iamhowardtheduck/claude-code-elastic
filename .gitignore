@@ -7,3 +7,4 @@ __pycache__/
 deck/node_modules/
 deck/_site/
 deck/.fslides/
+deck/.claude/

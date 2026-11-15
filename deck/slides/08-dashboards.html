@@ -2,35 +2,43 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Claude Code Transcripts — Dashboards</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="brand.css">
+<title>Claude Code Transcripts: Dashboards</title>
+<link rel="stylesheet" href="style/eweb.css">
 <style>
-.dash{padding:24px 24px 22px;display:flex;flex-direction:column}
-.top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px}
-.n{font-family:var(--mono);font-size:3.4rem;font-weight:700;color:var(--elastic-blue);line-height:1;letter-spacing:-.05em}
-.pl{font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);margin:8px 0 18px}
-.spark{display:flex;align-items:flex-end;gap:5px;height:56px}
-.spark i{display:block;width:9px;border-radius:2px 2px 0 0;background:var(--elastic-blue)}
-.sec .n{color:var(--pink)}.sec .spark i{background:var(--pink)}
-.ml .spark i{background:var(--light-teal)}
-.dash p{margin-bottom:16px;flex:1}
+.cols{display:grid;z-index:2;position:relative}
+.col{padding:0 28px;border-left:1px solid var(--ink);display:flex;flex-direction:column}
+.col:first-child{padding-left:0;border-left:0}
+.col:last-child{padding-right:0}
+.col .tag{margin-bottom:12px}
+
+h1{font-size:46px}
+.cols{position:absolute;left:72px;right:72px;top:236px;bottom:80px;grid-template-columns:repeat(3,1fr)}
+.big{display:flex;align-items:flex-end;gap:12px;height:90px}
+.big .stat{font-size:88px}
+.big .post{font-size:14px;color:var(--char);padding-bottom:12px}
+.sec .stat,.col:nth-child(2) .stat{color:var(--blue)}
+.blocks{display:flex;gap:4px;flex-wrap:wrap;margin:18px 0 18px;padding-top:14px;border-top:1px dashed var(--line);max-width:300px}
+.blocks i{width:14px;height:14px;background:var(--blue);animation:pop .3s ease both}
+.blocks.sec i{background:var(--orange)}
+.blocks.ml i{background:var(--teal)}
+@keyframes pop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
+.col .cap{font-size:14px}
+.aud{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
 </style>
 </head>
-<body>
-<div class="eyebrow a-rise" style="--d:0s">Out of the box</div>
-<span class="rule" style="--d:0.2s"></span>
-<h2 class="a-rise" style="--d:0.1s">Three dashboards for three audiences.</h2>
-<div class="grid" style="grid-template-columns:repeat(3,1fr)">
-<div class="card dash a-rise" style="--d:.45s"><div class="top"><div class="n" data-target="16">16</div><div class="spark"><i class="a-up" style="height:30%;--d:.9s"></i><i class="a-up" style="height:45%;--d:.95s"></i><i class="a-up" style="height:40%;--d:1s"></i><i class="a-up" style="height:62%;--d:1.05s"></i><i class="a-up" style="height:58%;--d:1.1s"></i><i class="a-up" style="height:80%;--d:1.15s"></i><i class="a-up" style="height:100%;--d:1.2s"></i></div></div><div class="pl">panels</div><h3>Business Analytics</h3><p>Activity, users, projects, models, token volume, estimated spend from a model-pricing lookup, and topics.</p><div><span class="tag">eng leaders · FinOps</span></div></div>
-<div class="card dash sec a-rise" style="--d:.6s"><div class="top"><div class="n" data-target="17">17</div><div class="spark"><i class="a-up" style="height:20%;--d:1.05s"></i><i class="a-up" style="height:25%;--d:1.1s"></i><i class="a-up" style="height:18%;--d:1.15s"></i><i class="a-up" style="height:95%;--d:1.2s"></i><i class="a-up" style="height:35%;--d:1.25s"></i><i class="a-up" style="height:22%;--d:1.3s"></i><i class="a-up" style="height:28%;--d:1.35s"></i></div></div><div class="pl">panels</div><h3>Security</h3><p>Risky commands, secrets exposed, file and network access, auto-mode blocks, classification results and semantic threat search.</p><div><span class="tag p">SOC · AppSec</span></div></div>
-<div class="card dash ml a-rise" style="--d:.75s"><div class="top"><div class="n" data-target="16">16</div><div class="spark"><i class="a-up" style="height:60%;--d:1.2s"></i><i class="a-up" style="height:64%;--d:1.25s"></i><i class="a-up" style="height:58%;--d:1.3s"></i><i class="a-up" style="height:66%;--d:1.35s"></i><i class="a-up" style="height:62%;--d:1.4s"></i><i class="a-up" style="height:65%;--d:1.45s"></i><i class="a-up" style="height:61%;--d:1.5s"></i></div></div><div class="pl">panels</div><h3>ML Inference Admin</h3><p>Is inference keeping up? Shows queue depth, throughput, utilization, errors, per-prompt inference time and ingest lag.</p><div><span class="tag t">platform team</span></div></div>
+<body data-foot="Claude Code Transcripts · Dashboards">
+<div class="z">
+  <div class="eyebrow in1">Out of the box · <b>ES|QL dashboards</b></div>
+  <h1 class="in2">Three dashboards. <span class="b">Three audiences.</span></h1>
 </div>
-<div class="wm a-fade" style="--d:.6s"><img src="elastic-logo.svg" alt="">elastic</div>
-
+<div class="cols"><div class="col in3"><div class="tag">01 · Business Analytics</div><div class="big"><span class="stat" data-n="16">16</span><span class="post">panels</span></div><div class="blocks " data-n="16" data-d="0.6"></div><p class="cap">Activity, users, projects, models, token volume, estimated spend from a pricing lookup, and topics.</p><div class="aud"><span class="chip on">eng leaders · FinOps</span></div></div><div class="col in4"><div class="tag">02 · Security</div><div class="big"><span class="stat" data-n="17">17</span><span class="post">panels</span></div><div class="blocks sec" data-n="17" data-d="0.75"></div><p class="cap">Risky commands, secrets exposed, file and network access, auto-mode blocks, classifier results and semantic threat search.</p><div class="aud"><span class="chip">SOC · AppSec</span></div></div><div class="col in5"><div class="tag">03 · ML Inference Admin</div><div class="big"><span class="stat" data-n="16">16</span><span class="post">panels</span></div><div class="blocks ml" data-n="16" data-d="0.8999999999999999"></div><p class="cap">Queue depth, throughput, utilization, errors, per-prompt inference time and ingest lag.</p><div class="aud"><span class="chip">platform team</span></div></div></div>
+<script src="style/eweb.js"></script>
 <script src="/js/fuckslides.js"></script>
 <script>
-(function(){if(window!==window.top)return;const W=1280,H=720;function f(){var s=Math.min(innerWidth/W,innerHeight/H);document.body.style.transform='scale('+s+')';document.body.style.transformOrigin='0 0';document.body.style.left=((innerWidth-W*s)/2)+'px';document.body.style.top=((innerHeight-H*s)/2)+'px'}f();addEventListener('resize',f)})();
+(function(){
+document.querySelectorAll('.blocks').forEach(e => { for (let i = 0; i < +e.dataset.n; i++){ const b = document.createElement('i'); b.style.animationDelay = (+e.dataset.d + i * .03) + 's'; e.appendChild(b); } });
+document.querySelectorAll('.stat[data-n]').forEach(s => EW.count(s, +s.dataset.n, {delay: .4, dur: 1.1}));
+})();
 </script>
 </body>
 </html>
