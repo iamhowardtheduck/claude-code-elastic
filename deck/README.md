@@ -14,4 +14,4 @@ npm run serve        # full player with live reload
 npm run pdf          # re-export, then copy the PDF to docs/claude-code-transcripts-deck.pdf
 ```
 
-Every slide is an HTML file in `slides/`; order and labels live in `fslides.config.js`. Pushes to `main` that touch `deck/` or the PDF redeploy GitHub Pages.
+Every slide is an HTML file in `slides/`, styled with the Elastic brand system in `slides/brand.css` (colors, Inter/Space Mono type, card and teal-rule patterns, and the entrance-animation classes `a-rise`, `a-l`, `a-r`, `a-pop`, `a-fade`, `a-grow`, timed with a `--d` delay). The PDF export finishes every animation, so slides always print in their final state; order and labels live in `fslides.config.js`. Pushes to `main` that touch `deck/` or the PDF redeploy GitHub Pages.

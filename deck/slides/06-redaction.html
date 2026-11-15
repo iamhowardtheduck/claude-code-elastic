@@ -3,53 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <title>Claude Code Transcripts — Secret Redaction</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;800;900&family=JetBrains+Mono:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="brand.css">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{width:100%;height:100%;overflow:hidden;background:#1C1E25}
-body{width:1280px;height:720px;overflow:hidden;position:absolute;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;background:#1C1E25;color:#fff;display:flex;flex-direction:column;justify-content:center;padding:0 90px}
-body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(255,255,255,0.04) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
-.bar{position:fixed;top:0;left:0;width:5px;height:100%;background:linear-gradient(#00BFB3,#D97757)}
-@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.f1,.f2,.f3,.f4{opacity:0;animation:up .55s ease forwards}.f1{animation-delay:.1s}.f2{animation-delay:.3s}.f3{animation-delay:.5s}.f4{animation-delay:.7s}
-.eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#00BFB3;margin-bottom:18px}
-h1{font-size:4.2rem;font-weight:900;letter-spacing:-.035em;line-height:1.05;margin-bottom:22px}
-h2{font-size:2.6rem;font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-bottom:30px}
-.sub{font-size:1.2rem;font-weight:300;color:rgba(255,255,255,.6);line-height:1.6;max-width:820px}
-.acc{color:#00BFB3}.org{color:#D97757}
-code,.mono{font-family:'JetBrains Mono',monospace}
-.muted{color:rgba(255,255,255,.5)}
-.grid{display:grid;gap:18px}
-.card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:22px 24px}
-.card h3{font-size:1.1rem;font-weight:800;margin-bottom:8px;letter-spacing:-.01em}
-.card p{font-size:.92rem;font-weight:300;color:rgba(255,255,255,.65);line-height:1.5}
-.tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;padding:4px 9px;border-radius:6px;background:rgba(0,191,179,.12);color:#00BFB3;margin:0 6px 6px 0}
-.tag.o{background:rgba(217,119,87,.14);color:#E8916F}
-.k{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#00BFB3;margin-bottom:10px;display:block}
-
-.ba{display:flex;gap:14px;align-items:stretch}
-.pane{flex:1;border-radius:14px;padding:18px 20px;background:#14161B;border:1px solid rgba(255,255,255,.08)}
-.pane code{font-size:.74rem;line-height:1.9;color:rgba(255,255,255,.8);display:block;word-break:break-all}
-.pane.bad{border-color:rgba(217,119,87,.4)}.pane.good{border-color:rgba(0,191,179,.45)}
-.arr{display:flex;align-items:center;color:#00BFB3;font-weight:900;font-size:1.4rem}
-
+.ba{display:flex;gap:0;align-items:stretch}
+.pane{flex:1;border-radius:14px;padding:18px 20px;background:var(--light-grey);border:1.5px solid var(--developer-blue)}
+.pane code{font-size:.72rem;line-height:2;color:var(--dark-ink);display:block;word-break:break-all}
+.pane .k.bad{color:var(--pink)}
+.arr{width:56px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.arr svg{width:30px;height:16px;stroke:var(--elastic-blue);stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:44;--len:44;animation:draw .5s ease 1.5s both}
+.sec{background:linear-gradient(var(--light-poppy),var(--light-poppy)) no-repeat left/0 100%;border-radius:3px;padding:1px 0;animation:mark .5s ease both}
+@keyframes mark{to{background-size:100% 100%}}
+.sec:nth-of-type(1){animation-delay:.9s}.sec:nth-of-type(2){animation-delay:1.05s}.sec:nth-of-type(3){animation-delay:1.2s}
+.red{background:var(--light-teal);color:var(--dark-ink);font-weight:700;border-radius:3px;padding:1px 4px;display:inline-block;line-height:1.5}
+.card{padding:20px 22px}
 </style>
 </head>
 <body>
-<div class="bar"></div>
-
-<div class="eyebrow f1">Safe by default</div>
-<h2 class="f1">Secrets are removed <span class="acc">before</span> they're indexed.</h2>
-<div class="ba f2">
-<div class="pane bad"><span class="k" style="color:#E8916F">what the developer pasted</span><code>export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCY…<br>curl https://admin:hunter2@db.internal/…<br>ghp_8sK2…Xq  →  "why is this token failing?"</code></div>
-<div class="arr">→</div>
-<div class="pane good"><span class="k">what lands in Elasticsearch</span><code>export AWS_SECRET_ACCESS_KEY=[REDACTED:aws_secret_key]<br>curl https://[REDACTED:url_credentials]@db.internal/…<br>[REDACTED:github_token]  →  "why is this token failing?"</code></div>
+<div class="eyebrow a-rise" style="--d:0s">Safe by default</div>
+<span class="rule" style="--d:0.2s"></span>
+<h2 class="a-rise" style="--d:0.1s">Secrets are removed <span class="b">before</span> they're indexed.</h2>
+<div class="ba">
+<div class="pane a-rise" style="--d:.45s"><span class="k bad">what the developer pasted</span><code>export AWS_SECRET_ACCESS_KEY=<span class="sec">wJalrXUtnFEMI/K7MDENG/bPxRfiCY…</span><br>curl https://<span class="sec">admin:hunter2</span>@db.internal/…<br><span class="sec">ghp_8sK2…Xq</span>  →  "why is this token failing?"</code></div>
+<div class="arr"><svg viewBox="0 0 30 16"><path d="M1 8h26M20 1l7 7-7 7"/></svg></div>
+<div class="pane a-r" style="--d:1.6s"><span class="k">what lands in Elasticsearch</span><code>export AWS_SECRET_ACCESS_KEY=<span class="red a-pop" style="--d:2s">[REDACTED:aws_secret_key]</span><br>curl https://<span class="red a-pop" style="--d:2.15s">[REDACTED:url_credentials]</span>@db.internal/…<br><span class="red a-pop" style="--d:2.3s">[REDACTED:github_token]</span>  →  "why is this token failing?"</code></div>
 </div>
-<div class="grid f3" style="grid-template-columns:repeat(3,1fr);margin-top:26px">
-<div class="card"><h3>Broad coverage</h3><p>Cloud keys, GitHub, GitLab, Slack and Stripe tokens, Anthropic and OpenAI keys, private keys, passwords, and credentials in URLs.</p></div>
-<div class="card"><h3>Everywhere it hides</h3><p>Applied to <code>message</code>, message content, tool inputs and MCP payloads.</p></div>
-<div class="card"><h3>Still detectable</h3><p><code>claude_code.secrets.*</code> keeps the type and length of each secret, never the value, so the exposure itself becomes an alert.</p></div>
+<div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:24px">
+<div class="card a-rise" style="--d:2.5s"><h3>Broad coverage</h3><p>Cloud keys, GitHub, GitLab, Slack and Stripe tokens, Anthropic and OpenAI keys, private keys, passwords, and credentials in URLs.</p></div>
+<div class="card a-rise" style="--d:2.62s"><h3>Everywhere it hides</h3><p>Applied to <code>message</code>, message content, tool inputs and MCP payloads.</p></div>
+<div class="card a-rise" style="--d:2.74s"><h3>Still detectable</h3><p><code>claude_code.secrets.*</code> keeps the type and length of each secret, never the value, so the exposure itself becomes an alert.</p></div>
 </div>
+<div class="wm a-fade" style="--d:.6s"><img src="elastic-logo.svg" alt="">elastic</div>
 
 <script src="/js/fuckslides.js"></script>
 <script>
