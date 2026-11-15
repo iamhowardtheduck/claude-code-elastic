@@ -4,23 +4,29 @@ processors:
 - set:
     field: event.kind
     value: event
+    tag: set_event_kind
 - set:
     field: service.name
     value: claude-desktop
+    tag: set_service_name
 - set:
     field: ecs.version
     value: 9.3.0
+    tag: set_ecs_version
 - set:
     field: event.action
     value: log
+    tag: set_event_action
 - set:
     field: claude_desktop
     value: {}
     override: false
+    tag: set_claude_desktop
 - rename:
     field: message
     target_field: _tmp.line
     ignore_missing: true
+    tag: rename_message
 - grok:
     description: chrome-native-host style, electron-log main.log style and MCP '[server] [level]' style; ISO with or without T/Z/brackets
     field: _tmp.line
@@ -34,14 +40,17 @@ processors:
     - ^\[?%{TS:_tmp.ts}\]? \[%{DATA:claude_desktop.mcp.server}\] \[%{LVL:log.level}\] %{ANY:_tmp.msg}
     - ^%{ANY:_tmp.msg}
     ignore_missing: true
+    tag: grok_tmp_line
 - set:
     field: _tmp.tz
     copy_from: event.timezone
     ignore_empty_value: true
+    tag: set_tmp_tz
 - set:
     field: _tmp.tz
     value: UTC
     override: false
+    tag: set_tmp_tz_2
 - date:
     if: ctx._tmp?.ts != null
     field: _tmp.ts
@@ -54,10 +63,13 @@ processors:
     - append:
         field: error.message
         value: unparsed timestamp {{{_tmp.ts}}}
+        tag: date_tmp_ts_on_failure_append_error_message
+    tag: date_tmp_ts
 - append:
     if: ctx._tmp?.ts == null
     field: tags
     value: claude_desktop_unparsed_line
+    tag: append_tags
 - grok:
     description: User from the log path (Windows %APPDATA% / %LOCALAPPDATA%, macOS ~/Library/Logs)
     field: log.file.path
@@ -68,11 +80,13 @@ processors:
     - (?i)%{SEP}(?:Users|home)%{SEP}%{SEG:user.name}%{SEP}
     ignore_missing: true
     ignore_failure: true
+    tag: grok_log_file_path
 - append:
     if: ctx.user?.name != null
     field: related.user
     value: '{{{user.name}}}'
     allow_duplicates: false
+    tag: append_related_user
 - script:
     lang: painless
     description: log file name, MCP server from file name, level normalisation
@@ -93,6 +107,7 @@ processors:
         if (l == 'warning') { l = 'warn'; }
         ctx.log.level = l;
       }
+    tag: script_log_file_name_mcp_server_from_file_name_
 - script:
     lang: painless
     description: message text, truncation, detect MCP JSON-RPC traffic
@@ -151,6 +166,7 @@ processors:
         ctx.gen_ai = ['operation': ['name': 'execute_tool']];
         if (id != null) { ctx.gen_ai.tool = ['call': ['id': id]]; }
       }
+    tag: script_message_text_truncation_detect_mcp_json_
 - json:
     if: ctx._tmp?.rpc_raw != null
     field: _tmp.rpc_raw
@@ -159,6 +175,8 @@ processors:
     - append:
         field: tags
         value: claude_desktop_rpc_unparsed
+        tag: json_tmp_rpc_raw_on_failure_append_tags
+    tag: json_tmp_rpc_raw
 - script:
     if: ctx._tmp?.rpc instanceof Map
     lang: painless
@@ -187,6 +205,7 @@ processors:
         ctx.event.outcome = (r.result instanceof Map && r.result.isError == true) ? 'failure' : 'success';
       }
       mcp.payload = r;   // stored, not indexed (enabled: false); redacted below
+    tag: script_json_rpc_event_action_mcp_method_id_gen_
 - script:
     tag: redact-secrets
     lang: painless
@@ -443,19 +462,24 @@ processors:
     - append:
         field: claude_desktop.secrets.errors
         value: redaction script failed
+        tag: redact-secrets_on_failure_append_claude_desktop_secrets_errors
 - remove:
     description: _tmp holds the unredacted line; message keeps the redacted text
     field:
     - _tmp
     ignore_missing: true
+    tag: remove_tmp
 on_failure:
+- append:
+    tag: append_error_message_on_failure
+    field: error.message
+    value: Processor '{{{ _ingest.on_failure_processor_type }}}' {{{#_ingest.on_failure_processor_tag}}}with tag '{{{ _ingest.on_failure_processor_tag }}}' {{{/_ingest.on_failure_processor_tag}}}in pipeline '{{{ _ingest.pipeline }}}' failed with message '{{{ _ingest.on_failure_message }}}'
 - set:
+    tag: set_event_kind_pipeline_error
     field: event.kind
     value: pipeline_error
-- append:
-    field: error.message
-    value: '{{{_ingest.on_failure_processor_type}}}: {{{_ingest.on_failure_message}}}'
 - remove:
     field:
     - _tmp
     ignore_missing: true
+    tag: remove_temp_fields_on_failure

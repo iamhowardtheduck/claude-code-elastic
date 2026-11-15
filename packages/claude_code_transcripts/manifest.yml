@@ -1,8 +1,8 @@
-format_version: 3.3.0
+format_version: 3.6.0
 name: claude_code_transcripts
 title: Claude Code Transcripts
-version: 0.1.4
-description: Collect Claude Code session transcripts and Claude Desktop app/MCP logs, mapped to ECS and gen_ai.*, with secret redaction and optional ML inference.
+version: 0.2.0
+description: Collect Claude Code session transcripts and Claude Desktop app/MCP logs from disk with Elastic Agent, mapped to ECS and gen_ai.*, with secret redaction and optional ML inference on prompts.
 type: integration
 categories:
 - security
@@ -25,6 +25,9 @@ policy_templates:
   - type: filestream
     title: Collect Claude Code transcripts and Claude Desktop logs
     description: Tail the JSONL transcripts and the Desktop app/MCP log files
+  - type: cel
+    title: Collect ML inference statistics
+    description: Poll Elasticsearch trained-model and ingest-pipeline statistics for the [ML Inference] Admin dashboard (optional)
 owner:
   github: iamhowardtheduck
   type: community

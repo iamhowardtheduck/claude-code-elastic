@@ -2,18 +2,21 @@
 
 An Elastic Agent integration (`claude_code_transcripts`) that ships **Claude Code session transcripts** and **Claude Desktop app/MCP logs** to Elasticsearch. It maps them to ECS and the `gen_ai.*` fields, redacts secrets at ingest, and can optionally run **ML inference** on every human prompt: semantic embeddings plus NLP classification for prompt injection, jailbreaks, toxicity, intent and PII. A toggle controls the inference. It ships with business and security dashboards.
 
+> **Upstream:** this integration is proposed to Elastic in [elastic/integrations#22450](https://github.com/elastic/integrations/pull/22450). The upstream copy uses package-namespaced datasets (`claude_code_transcripts.transcript`, `claude_code_transcripts.desktop_log`). This repository keeps `claude_code.transcript` and `claude_desktop.log` so existing deployments keep working.
+
 > This package complements Elastic's official **Claude Code** integration (`claude_code`), which collects Claude Code's OpenTelemetry events and traces. This one reads the on-disk transcripts and the Desktop logs. Both can be installed side by side. Detection rules, a model-pricing table and inference monitoring are available as optional extras.
 
 ```
 packages/claude_code_transcripts/  the integration (elastic-package source)
   data_stream/transcript/      ~/.claude/projects/**/*.jsonl  -> logs-claude_code.transcript-*
   data_stream/desktop_log/     Claude Desktop main.log, mcp*.log -> logs-claude_desktop.log-*
-  kibana/dashboard/            Business Analytics + Security dashboards
+  data_stream/inference_stats/ optional CEL input: ML deployment + ingest pipeline stats -> metrics-claude_code_transcripts.inference_stats-*
+  kibana/dashboard/            Business Analytics, Security and ML Inference Admin dashboards
 extras/                      things a package cannot install (run extras/setup.sh)
   pricing/                     claude-model-pricing lookup index (spend panels)
   inference/                   dense_vector mapping for the prompt embedding
   detection-rules/             10 Elastic Security ES|QL rules (imported disabled)
-  inference-monitoring/        stats collector workflow, [ML Inference] Admin dashboard, 9 alert rules
+  inference-monitoring/        alternative stats collector (Kibana Workflow) and 9 alert rules
   models/models.json           NLP models + fixed sizing used by `extras/setup.sh models` (self-managed)
   models/profiles/adaptive.json  adaptive sizing for Elastic Cloud Hosted / ECE / ECK / Serverless
 docs/inference-models.md     loading the inference models (script or manual; self-managed, Cloud, Serverless)
@@ -49,7 +52,7 @@ Alternatively, download `claude_code_transcripts-<version>.zip` from the GitHub 
 ```bash
 go install github.com/elastic/elastic-package@latest
 cd packages/claude_code_transcripts
-elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.1.4.zip
+elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.2.0.zip
 ```
 
 ### 2. Upload it to Kibana
@@ -58,7 +61,7 @@ elastic-package lint && elastic-package build      # -> build/packages/claude_co
 curl -X POST "$KIBANA_URL/api/fleet/epm/packages" \
   -H "Authorization: ApiKey $ES_API_KEY" -H 'kbn-xsrf: true' \
   -H 'Content-Type: application/zip' \
-  --data-binary @build/packages/claude_code_transcripts-0.1.4.zip
+  --data-binary @build/packages/claude_code_transcripts-0.2.0.zip
 ```
 
 This installs the index templates, the three ingest pipelines (`logs-claude_code.transcript-<ver>`, `…-inference` and `…-classify`, plus `logs-claude_desktop.log-<ver>`) and the two dashboards. `elastic-package install --zip <file>` does the same against the stack configured for elastic-package.
@@ -90,7 +93,7 @@ extras/setup.sh inference-monitoring # stats collector + [ML Inference] Admin da
 extras/setup.sh all
 ```
 
-`inference-monitoring` uses Kibana Workflows: a scheduled workflow samples `_ml/trained_models/_stats` and the ingest stats of the package pipelines every minute. If you install a package version other than 0.1.4, set `PKG_VERSION` so the collector watches the right pipeline names. The alert rules are created disabled, without actions. Add your connector (email, Slack and so on) in **Stack Management → Rules**, then enable them.
+**Inference monitoring** is built into the package from 0.2.0. Enable the **ML inference statistics** input (CEL) in the integration policy, with an Elasticsearch URL and an API key that has `monitor` and `monitor_ml`; it feeds the **[Claude Code Transcripts] ML Inference Admin** dashboard. `extras/setup.sh inference-monitoring` still installs the 9 alert rules (disabled, without actions) and the older Kibana Workflow collector, which writes to `ml-inference-stats`; use one collector, not both. If you install a package version other than 0.2.0, set `PKG_VERSION` so the workflow watches the right pipeline names.
 
 ### 5. Enabling inference (optional)
 
@@ -186,4 +189,4 @@ elastic-package lint
 elastic-package build
 elastic-package stack up -d && elastic-package install   # local test stack (Docker)
 ```
-Bump `version` in `manifest.yml` and add an entry to `changelog.yml` for every change. **Never re-upload a version that is already installed:** Fleet reinstalls it, recreating the integration policy under a new ID, and agents then re-read all files (Desktop log lines get duplicated).
+The docs are generated from `_dev/build/docs/README.md` (`elastic-package build` renders `docs/README.md` with the field tables). Pipeline tests are in `data_stream/*/_dev/test/pipeline`; run them with `elastic-package test pipeline` against a stack (or `ELASTIC_PACKAGE_ELASTICSEARCH_HOST` / `_API_KEY` / `ELASTIC_PACKAGE_CA_CERT`). Bump `version` in `manifest.yml` and add an entry to `changelog.yml` for every change. **Never re-upload a version that is already installed:** Fleet reinstalls it, recreating the integration policy under a new ID, and agents then re-read all files (Desktop log lines get duplicated).

@@ -85,7 +85,7 @@ The setup script and its sizing files are in the repository **[iamhowardtheduck/
 Use a release tag, so the script matches the integration version you installed:
 
 ```bash
-git clone --branch v0.1.4 https://github.com/iamhowardtheduck/claude-code-elastic.git
+git clone --branch v0.2.0 https://github.com/iamhowardtheduck/claude-code-elastic.git
 cd claude-code-elastic
 extras/setup.sh            # prints the commands and the environment variables it uses
 ```
@@ -93,8 +93,8 @@ extras/setup.sh            # prints the commands and the environment variables i
 Without git, download the tagged source:
 
 ```bash
-curl -fsSL https://github.com/iamhowardtheduck/claude-code-elastic/archive/refs/tags/v0.1.4.tar.gz | tar xz
-cd claude-code-elastic-0.1.4
+curl -fsSL https://github.com/iamhowardtheduck/claude-code-elastic/archive/refs/tags/v0.2.0.tar.gz | tar xz
+cd claude-code-elastic-0.2.0
 ```
 
 Requirements on the machine running it:
@@ -443,7 +443,7 @@ Go to **Fleet → Agent policies → (policy) → Claude Code Transcripts → Ed
 - **Enable ML inference:** on (embedding plus semantic threat flags).
 - **Prompt classification:** on (the six models), or off for embedding-only.
 
-Inference is configured per agent policy, so you can enable it for a pilot group first. New human prompts then carry `claude_code.prompt_embedding`, `claude_code.prompt_classification.*` and `claude_code.inference.total_ms`. To also monitor throughput, run `extras/setup.sh inference-monitoring`, which installs the **[ML Inference] Admin** dashboard and alerts.
+Inference is configured per agent policy, so you can enable it for a pilot group first. New human prompts then carry `claude_code.prompt_embedding`, `claude_code.prompt_classification.*` and `claude_code.inference.total_ms`. To also monitor throughput, enable the integration's **ML inference statistics** input (an Elasticsearch URL and an API key with `monitor` and `monitor_ml`). It feeds the **[Claude Code Transcripts] ML Inference Admin** dashboard. `extras/setup.sh inference-monitoring` adds the alert rules.
 
 ## Turning it off or removing it
 

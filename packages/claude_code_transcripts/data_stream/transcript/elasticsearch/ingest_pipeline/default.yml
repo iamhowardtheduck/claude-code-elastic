@@ -4,57 +4,71 @@ processors:
 - drop:
     description: Keep only conversation lines (JSON parse failures are kept for troubleshooting)
     if: ctx.claude_code != null && ctx.claude_code.type != 'user' && ctx.claude_code.type != 'assistant'
+    tag: drop_keep_only_conversation_lines_json_parse_
 - date:
     ignore_failure: true
     formats:
     - ISO8601
     field: claude_code.timestamp
+    tag: date_claude_code_timestamp
 - set:
     field: event.kind
     value: event
+    tag: set_event_kind
 - set:
     field: service.name
     value: claude-code
+    tag: set_service_name
 - set:
     field: gen_ai.system
     value: anthropic
+    tag: set_gen_ai_system
 - set:
     ignore_empty_value: true
     field: event.id
     copy_from: claude_code.uuid
+    tag: set_event_id
 - set:
     description: Resumed sessions re-write earlier lines into a new file; same uuid -> same _id
     field: _id
     if: ctx.claude_code?.uuid != null
     value: '{{{claude_code.uuid}}}'
+    tag: set_id
 - set:
     ignore_empty_value: true
     field: service.version
     copy_from: claude_code.version
+    tag: set_service_version
 - set:
     ignore_empty_value: true
     field: process.working_directory
     copy_from: claude_code.cwd
+    tag: set_process_working_directory
 - set:
     ignore_empty_value: true
     field: gen_ai.conversation.id
     copy_from: claude_code.sessionId
+    tag: set_gen_ai_conversation_id
 - set:
     ignore_empty_value: true
     field: gen_ai.response.model
     copy_from: claude_code.message.model
+    tag: set_gen_ai_response_model
 - set:
     ignore_empty_value: true
     field: gen_ai.response.id
     copy_from: claude_code.message.id
+    tag: set_gen_ai_response_id
 - set:
     ignore_empty_value: true
     field: gen_ai.usage.output_tokens
     copy_from: claude_code.message.usage.output_tokens
+    tag: set_gen_ai_usage_output_tokens
 - append:
     field: gen_ai.response.finish_reasons
     if: ctx.claude_code?.message?.stop_reason != null
     value: '{{{claude_code.message.stop_reason}}}'
+    tag: append_gen_ai_response_finish_reasons
 - grok:
     ignore_failure: true
     field: log.file.path
@@ -67,18 +81,20 @@ processors:
       SEG: '[^\\/]+'
       ROOTUSER: root
       SEP: '[\\/]'
+    tag: grok_log_file_path
 - append:
     field: related.user
     allow_duplicates: false
     if: ctx.user?.name != null
     value: '{{{user.name}}}'
+    tag: append_related_user
 - remove:
     field: message
     ignore_missing: true
+    tag: remove_message
 - script:
     description: Flatten message.content into ECS message and classify the line
-    source: |2+
-
+    source: |2
                 def cc = ctx.claude_code;
                 def msg = cc.message;
                 def content = (msg instanceof Map) ? msg.content : null;
@@ -140,25 +156,29 @@ processors:
                 if (ctx.event == null) { ctx.event = new HashMap(); }
                 ctx.event.action = action;
                 cc.human_prompt = (action == 'user-prompt');
-
     lang: painless
     if: ctx.claude_code != null
+    tag: script_flatten_message_content_into_ecs_message
 - set:
     description: OTel name; gen_ai.system (ECS name, deprecated in OTel) is kept for ECS consumers
     field: gen_ai.provider.name
     value: anthropic
+    tag: set_gen_ai_provider_name
 - set:
     ignore_empty_value: true
     field: gen_ai.request.model
     copy_from: claude_code.requestedModel
+    tag: set_gen_ai_request_model
 - set:
     field: ecs.version
     value: 9.3.0
+    tag: set_ecs_version
 - script:
     on_failure:
     - append:
         field: error.message
         value: gen_ai alignment failed
+        tag: gen-ai-align_on_failure_append_error_message
     description: gen_ai.operation.name, gen_ai.tool.*, OTel token totals incl. cache
     tag: gen-ai-align
     source: |
@@ -207,6 +227,7 @@ processors:
     field:
     - claude_code.toolUseResult
     - claude_code.timestamp
+    tag: remove_claude_code_tooluseresult
 - script:
     description: 'tool_result content: plain string -> [{type:text,text:...}] so content.content has one shape'
     tag: normalize-tool-result
@@ -227,6 +248,7 @@ processors:
     - append:
         field: claude_code.secrets.errors
         value: redaction script failed
+        tag: redact-secrets_on_failure_append_claude_code_secrets_errors
     description: Detect and redact secrets in message, message.content and wireToolInputs (type + length only)
     tag: redact-secrets
     source: |
@@ -532,9 +554,11 @@ processors:
     if: ctx.tags instanceof List
     source: ctx.tags.removeIf(t -> t == 'claude_code_embed' || t == 'claude_code_classify'); if (ctx.tags.isEmpty()) { ctx.remove('tags'); }
 on_failure:
+- append:
+    tag: append_error_message_on_failure
+    field: error.message
+    value: Processor '{{{ _ingest.on_failure_processor_type }}}' {{{#_ingest.on_failure_processor_tag}}}with tag '{{{ _ingest.on_failure_processor_tag }}}' {{{/_ingest.on_failure_processor_tag}}}in pipeline '{{{ _ingest.pipeline }}}' failed with message '{{{ _ingest.on_failure_message }}}'
 - set:
+    tag: set_event_kind_pipeline_error
     field: event.kind
     value: pipeline_error
-- append:
-    field: error.message
-    value: '{{{_ingest.on_failure_processor_type}}}: {{{_ingest.on_failure_message}}}'

@@ -1,3 +1,8 @@
+- version: 0.2.0
+  changes:
+  - description: New optional inference_stats data stream (CEL input polling trained-model and ingest-pipeline statistics) and the [Claude Code Transcripts] ML Inference Admin dashboard. Every processor tagged and standard pipeline on_failure; pipeline tests; generated field reference in the README; documentation style fixes. Same pipelines and dataset names as 0.1.4 otherwise.
+    type: enhancement
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/issues/4
 - version: 0.1.4
   changes:
   - description: Integration README lists every command to load the inference models (Eland import, start, verify) for on-premises and Elastic Cloud, the vector mapping and the embedding check, with an IMPORTANT note to run them before enabling Prompt classification. No pipeline or mapping changes.

@@ -6,6 +6,7 @@ processors:
     - append:
         field: claude_code.prompt_classification.errors
         value: 'injection: {{{_ingest.on_failure_message}}}'
+        tag: classify-injection_on_failure_append_claude_code_prompt_classification_errors
     target_field: _ml.injection
     inference_config:
       text_classification:
@@ -27,6 +28,7 @@ processors:
     - append:
         field: claude_code.prompt_classification.errors
         value: 'jailbreak: {{{_ingest.on_failure_message}}}'
+        tag: classify-jailbreak_on_failure_append_claude_code_prompt_classification_errors
     target_field: _ml.jailbreak
     inference_config:
       text_classification:
@@ -48,6 +50,7 @@ processors:
     - append:
         field: claude_code.prompt_classification.errors
         value: 'toxicity: {{{_ingest.on_failure_message}}}'
+        tag: classify-toxicity_on_failure_append_claude_code_prompt_classification_errors
     target_field: _ml.toxicity
     inference_config:
       text_classification:
@@ -69,6 +72,7 @@ processors:
     - append:
         field: claude_code.prompt_classification.errors
         value: 'offensive: {{{_ingest.on_failure_message}}}'
+        tag: classify-offensive_on_failure_append_claude_code_prompt_classification_errors
     target_field: _ml.offensive
     inference_config:
       text_classification:
@@ -90,6 +94,7 @@ processors:
     - append:
         field: claude_code.prompt_classification.errors
         value: 'security: {{{_ingest.on_failure_message}}}'
+        tag: classify-security_on_failure_append_claude_code_prompt_classification_errors
     target_field: _ml.security
     inference_config:
       zero_shot_classification:
@@ -125,6 +130,7 @@ processors:
     - append:
         field: claude_code.prompt_classification.errors
         value: 'agent_action: {{{_ingest.on_failure_message}}}'
+        tag: classify-agent_action_on_failure_append_claude_code_prompt_classification_errors
     target_field: _ml.agent_action
     inference_config:
       zero_shot_classification:
@@ -157,6 +163,7 @@ processors:
     - append:
         field: claude_code.prompt_classification.errors
         value: 'task: {{{_ingest.on_failure_message}}}'
+        tag: classify-task_on_failure_append_claude_code_prompt_classification_errors
     target_field: _ml.task
     inference_config:
       zero_shot_classification:
@@ -192,6 +199,7 @@ processors:
     - append:
         field: claude_code.prompt_classification.errors
         value: 'interaction: {{{_ingest.on_failure_message}}}'
+        tag: classify-interaction_on_failure_append_claude_code_prompt_classification_errors
     target_field: _ml.interaction
     inference_config:
       zero_shot_classification:
@@ -218,6 +226,7 @@ processors:
     - append:
         field: claude_code.prompt_classification.errors
         value: 'moderation: {{{_ingest.on_failure_message}}}'
+        tag: classify-moderation_on_failure_append_claude_code_prompt_classification_errors
     target_field: _ml.moderation
     inference_config:
       zero_shot_classification:
@@ -249,6 +258,7 @@ processors:
     - append:
         field: claude_code.prompt_classification.errors
         value: 'ner: {{{_ingest.on_failure_message}}}'
+        tag: classify-ner_on_failure_append_claude_code_prompt_classification_errors
     target_field: _ml.ner
     inference_config:
       ner: {}
@@ -515,10 +525,17 @@ processors:
 - remove:
     field: _ml
     ignore_missing: true
+    tag: remove_ml
 on_failure:
 - append:
-    field: claude_code.prompt_classification.errors
-    value: '{{{_ingest.on_failure_processor_type}}}: {{{_ingest.on_failure_message}}}'
+    tag: append_error_message_on_failure
+    field: error.message
+    value: Processor '{{{ _ingest.on_failure_processor_type }}}' {{{#_ingest.on_failure_processor_tag}}}with tag '{{{ _ingest.on_failure_processor_tag }}}' {{{/_ingest.on_failure_processor_tag}}}in pipeline '{{{ _ingest.pipeline }}}' failed with message '{{{ _ingest.on_failure_message }}}'
+- set:
+    tag: set_event_kind_pipeline_error
+    field: event.kind
+    value: pipeline_error
 - remove:
     field: _ml
     ignore_missing: true
+    tag: remove_temp_fields_on_failure

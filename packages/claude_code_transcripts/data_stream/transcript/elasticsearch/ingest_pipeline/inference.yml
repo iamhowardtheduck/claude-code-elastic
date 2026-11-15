@@ -18,6 +18,7 @@ processors:
     - set:
         field: claude_code.prompt_embedding_error
         value: '{{{_ingest.on_failure_message}}}'
+        tag: prompt-embedding_on_failure_set_claude_code_prompt_embedding_error
     input_output:
     - input_field: _embed_input
       output_field: claude_code.prompt_embedding
@@ -158,6 +159,7 @@ processors:
     - append:
         field: claude_code.prompt_classification.errors
         value: 'semantic: {{{_ingest.on_failure_message}}}'
+        tag: semantic-threats_on_failure_append_claude_code_prompt_classification_errors
 - script:
     ignore_failure: true
     description: Total inference duration = end - begin; begin/end are not stored
@@ -181,3 +183,12 @@ processors:
     field:
     - _inf_t0
     - _inf_mark
+on_failure:
+- append:
+    tag: append_error_message_on_failure
+    field: error.message
+    value: Processor '{{{ _ingest.on_failure_processor_type }}}' {{{#_ingest.on_failure_processor_tag}}}with tag '{{{ _ingest.on_failure_processor_tag }}}' {{{/_ingest.on_failure_processor_tag}}}in pipeline '{{{ _ingest.pipeline }}}' failed with message '{{{ _ingest.on_failure_message }}}'
+- set:
+    tag: set_event_kind_pipeline_error
+    field: event.kind
+    value: pipeline_error

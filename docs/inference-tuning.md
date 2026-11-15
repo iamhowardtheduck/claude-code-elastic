@@ -38,7 +38,7 @@ FROM logs-claude_code.transcript-* | WHERE claude_code.inference.total_ms IS NOT
 | STATS p50_s = ROUND(PERCENTILE(claude_code.inference.total_ms, 50) / 1000, 1),
         p95_s = ROUND(PERCENTILE(claude_code.inference.total_ms, 95) / 1000, 1)
 ```
-The **[ML Inference] Admin** dashboard (`extras/setup.sh inference-monitoring`) charts the same figures over time, plus utilisation and ingest lag, and alerts when the queue backs up. The raw numbers are in `GET _ml/trained_models/_stats`: `number_of_pending_requests`, `average_inference_time_ms`, `throughput_last_minute`, `rejected_execution_count` and `timeout_count`.
+The **[Claude Code Transcripts] ML Inference Admin** dashboard (fed by the integration's **ML inference statistics** input) charts the same figures over time, plus utilisation and ingest lag, and alerts when the queue backs up. The raw numbers are in `GET _ml/trained_models/_stats`: `number_of_pending_requests`, `average_inference_time_ms`, `throughput_last_minute`, `rejected_execution_count` and `timeout_count`.
 
 ### How much capacity
 Measured on CPU-only ML nodes:
@@ -203,4 +203,4 @@ curl -X POST "$KIBANA_URL/api/fleet/epm/packages" -H "Authorization: ApiKey $ES_
 
 Fleet installs new versioned pipelines (`logs-claude_code.transcript-0.1.3*`) and points the data streams at them. Then:
 - Upgrade the integration policies: **Fleet → Integrations → Claude Code Transcripts → Policies → Upgrade**.
-- Run `PKG_VERSION=0.1.3 extras/setup.sh inference-monitoring` so the stats collector follows the new pipeline names, and use the same `PKG_VERSION` for `classify`.
+- The integration's **ML inference statistics** input follows the new pipeline names by itself. If you use the older Workflow collector instead, run `PKG_VERSION=<new version> extras/setup.sh inference-monitoring`. Use the same `PKG_VERSION` for `classify`.
