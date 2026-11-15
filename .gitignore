@@ -7,3 +7,10 @@ __pycache__/
 deck/node_modules/
 deck/_site/
 deck/.fslides/
+
+# load-test deck
+deck-performance/node_modules/
+deck-performance/_site/
+deck-performance/.fslides/
+deck-performance/*.pdf
+deck-performance/.claude/

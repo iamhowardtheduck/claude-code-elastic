@@ -90,13 +90,15 @@ def _adversarial():
 
 ADVERSARIAL = _adversarial()
 
-def prompt_text(rng, first, adversarial_rate, secret_rate):
+def prompt_text(rng, first, adversarial_rate, secret_rate, unique=True):
     r = rng.random()
     if r < adversarial_rate:
         return rng.choice(ADVERSARIAL)
     if not first and r < 0.45:
-        return rng.choice(FOLLOWUPS)
+        return rng.choice(FOLLOWUPS)     # short follow-ups repeat in real sessions too
     t = f"{rng.choice(VERBS)} {rng.choice(OBJECTS)}{rng.choice(CONTEXT)}"
+    if unique:   # real task prompts rarely repeat; without this ~70% of model calls hit the inference cache
+        t += f" (see {rng.choice(['src', 'lib', 'app', 'pkg'])}/{rng.choice(PROJECTS).replace('-', '_')}_{rng.randint(1, 99999)}.py)"
     if rng.random() < secret_rate:
         t += "; " + rng.choice(SECRETS).format(n=rng.randint(10, 99), h=uuid.uuid4().hex[:36], H=uuid.uuid4().hex[:16].upper())
     return t
@@ -125,9 +127,9 @@ class Session:
         return {"log": {"file": {"path": self.path}}, "host": {"name": self.host, "hostname": self.host},
                 "input": {"type": "filestream"}, "tags": tags + [self.ns_tag], "claude_code": cc}
 
-    def turn(self, extra_lines, adversarial_rate, secret_rate, tags):
+    def turn(self, extra_lines, adversarial_rate, secret_rate, tags, unique=True):
         rng = self.rng
-        text = prompt_text(rng, self.turns == 0, adversarial_rate, secret_rate)
+        text = prompt_text(rng, self.turns == 0, adversarial_rate, secret_rate, unique)
         self.turns += 1
         out = [self._line({"type": "user", "message": {"role": "user", "content": text}}, tags)]
         model = rng.choice(["claude-sonnet-5-5", "claude-opus-5-5", "claude-haiku-5-5"])
@@ -242,7 +244,7 @@ def cmd_run(a):
                 s = rng.choice(sessions)
                 if s.turns >= rng.randint(8, 40):          # start a fresh session now and then
                     sessions[sessions.index(s)] = s = Session(rng, "loadgen")
-                lines = s.turn(a.lines_per_prompt, a.adversarial_rate, a.secret_rate, tags)
+                lines = s.turn(a.lines_per_prompt, a.adversarial_rate, a.secret_rate, tags, not a.repeatable_prompts)
                 buf += lines; buf_prompts += 1
                 with lock:
                     st["prompts"] += 1; st["lines"] += len(lines)
@@ -322,6 +324,7 @@ def main():
         p.add_argument("--adversarial-rate", type=float, default=0.03)
         p.add_argument("--secret-rate", type=float, default=0.02)
         p.add_argument("--seed", type=int, default=None)
+        p.add_argument("--repeatable-prompts", action="store_true", help="draw task prompts from a small fixed set (high inference-cache hit rate; the 2026-11-15 test ran like this)")
     r = sub.add_parser("run"); common(r)
     r.add_argument("--rate", type=float, default=1.0, help="human prompts per second")
     r.add_argument("--duration", type=int, default=300, help="seconds")
