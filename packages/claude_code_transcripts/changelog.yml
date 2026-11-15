@@ -1,3 +1,8 @@
+- version: 0.1.4
+  changes:
+  - description: Integration README lists every command to load the inference models (Eland import, start, verify) for on-premises and Elastic Cloud, the vector mapping and the embedding check, with an IMPORTANT note to run them before enabling Prompt classification. No pipeline or mapping changes.
+    type: enhancement
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/issues/3
 - version: 0.1.3
   changes:
   - description: Documentation - integration README points to the model loading guide (script or manual; self-managed, Elastic Cloud Hosted and Serverless) and the new tuning guide. No pipeline or mapping changes.
