@@ -105,7 +105,7 @@ processors:
       if (m.length() > max) { m = m.substring(0, max); ctx.claude_desktop.truncated = true; }
       ctx.message = m;
       if (ctx.log == null) { ctx.log = new HashMap(); }
-      // component prefix: "[RemotePluginManager] ...", "[sourcerer] ..." (mcp.log: the MCP server name)
+      // component prefix: "[RemotePluginManager] ...", "[my-mcp-server] ..." (mcp.log: the MCP server name)
       String comp = ctx._tmp.component;
       String rest = m;
       if (comp == null && m.startsWith('[')) {

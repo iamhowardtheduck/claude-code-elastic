@@ -90,13 +90,11 @@ cd claude-code-elastic
 extras/setup.sh            # prints the commands and the environment variables it uses
 ```
 
-The repository is **private**, so you need read access to it. Without git, download the tagged source with the GitHub CLI or a token:
+Without git, download the tagged source:
 
 ```bash
-gh repo clone iamhowardtheduck/claude-code-elastic -- --branch v0.1.4
-# or
-curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" \
-  https://api.github.com/repos/iamhowardtheduck/claude-code-elastic/tarball/v0.1.4 | tar xz
+curl -fsSL https://github.com/iamhowardtheduck/claude-code-elastic/archive/refs/tags/v0.1.4.tar.gz | tar xz
+cd claude-code-elastic-0.1.4
 ```
 
 Requirements on the machine running it:
