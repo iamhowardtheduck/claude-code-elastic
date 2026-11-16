@@ -1,3 +1,11 @@
+- version: 0.2.2
+  changes:
+  - description: Map claude_code.message.input_transformations as flattened. Newer Claude Code versions write it as a list of objects, which the keyword mapping rejected (document_parsing_exception, lines lost to the failure store).
+    type: bugfix
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/issues/6
+  - description: ML inference statistics input - default pipeline name prefix is now logs-claude_code.transcript-, matching this package's pipeline names (the old default matched none, so no pipeline statistics were collected).
+    type: bugfix
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/issues/6
 - version: 0.2.1
   changes:
   - description: Dashboard screenshots (Business Analytics, Security, ML Inference Admin) rendered from fictional demo data.

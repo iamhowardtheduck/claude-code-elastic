@@ -7,4 +7,34 @@ __pycache__/
 deck/node_modules/
 deck/_site/
 deck/.fslides/
+
+# load-test deck
+deck-performance/node_modules/
+deck-performance/_site/
+deck-performance/.fslides/
+deck-performance/*.pdf
+deck-performance/.claude/
+
+# deck-inference
+deck-inference/node_modules/
+deck-inference/_site/
+deck-inference/.fslides/
+deck-inference/*.pdf
+deck-inference/.claude/
+
+# deck-full
+deck-full/node_modules/
+deck-full/_site/
+deck-full/.fslides/
+deck-full/*.pdf
+deck-full/.claude/
+
+# fslides kit skill copied into the original deck
 deck/.claude/
+
+# deck-models
+deck-models/node_modules/
+deck-models/_site/
+deck-models/.fslides/
+deck-models/*.pdf
+deck-models/.claude/

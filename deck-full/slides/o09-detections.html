@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Detection rules</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:44px;max-width:520px}
+  .sub{font-size:16px;max-width:480px}
+  .big{display:flex;align-items:flex-end;gap:14px;margin-top:34px}
+  .big .stat{font-size:110px;letter-spacing:-4px}
+  .big .post{font-size:14px;line-height:1.4;color:var(--char);padding-bottom:16px}
+  .sev{margin-top:20px;max-width:440px}
+  .sev .blocks{display:flex;gap:4px}
+  .sev .blocks i{flex:1;height:22px;animation:pop .3s ease both}
+  .sev .key{display:flex;gap:18px;margin-top:10px;font:500 11px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--char)}
+  .sev .key .sw{margin-right:6px}
+  @keyframes pop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
+  .h{background:#E0352B}.m{background:var(--orange)}.l{background:var(--slate)}
+  .rules{position:absolute;left:660px;right:72px;top:92px;display:flex;flex-direction:column;gap:7px;z-index:2;list-style:none}
+  .rules li{display:flex;align-items:center;gap:14px;border:1px solid var(--line);background:#fff;padding:9px 14px;font-size:14px;color:var(--ink);animation:ew-in .45s cubic-bezier(.2,.7,.2,1) both}
+  .rules li b{font:600 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;width:44px;text-align:center;padding:3px 0;color:#fff;flex-shrink:0}
+  .rules li b.l{color:var(--ink)}
+  .rules .head{border:0;padding:0 0 4px;background:none;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--grey)}
+</style>
+</head>
+<body data-foot="Overview · Detection rules">
+<div class="z">
+  <div class="eyebrow in1">Detections · <b>companion repo</b></div>
+  <h1 class="in2">ES|QL rules for Elastic Security. <span class="b">Imported disabled.</span></h1>
+  <p class="sub in3">You tune them to your environment, then turn them on.</p>
+  <div class="big in3"><span class="stat" id="n">10</span><span class="post">detection rules<br>for Claude Code activity</span></div>
+  <div class="sev in4"><div class="blocks" id="blocks"></div>
+    <div class="key"><span><i class="sw h"></i>high · 4</span><span><i class="sw m"></i>medium · 5</span><span><i class="sw l"></i>low · 1</span></div></div>
+</div>
+<ul class="rules">
+  <li class="head" style="animation-delay:.3s">Severity · rule</li>
+  <li style="animation-delay:.4s"><b class="h">high</b>Prompt injection or jailbreak attempt</li>
+  <li style="animation-delay:.47s"><b class="h">high</b>Prompt semantically similar to malicious intent</li>
+  <li style="animation-delay:.54s"><b class="h">high</b>Destructive, evasion or remote-shell command run by the agent</li>
+  <li style="animation-delay:.61s"><b class="h">high</b>Repeated auto-mode blocks in one session</li>
+  <li style="animation-delay:.68s"><b class="m">med</b>Secret exposed to the model</li>
+  <li style="animation-delay:.75s"><b class="m">med</b>Agent accessed a sensitive credential file</li>
+  <li style="animation-delay:.82s"><b class="m">med</b>Credential access or persistence command run by the agent</li>
+  <li style="animation-delay:.89s"><b class="m">med</b>Agent contacted a paste, webhook or tunnel service</li>
+  <li style="animation-delay:.96s"><b class="m">med</b>Prompt requests disabling security or changing access</li>
+  <li style="animation-delay:1.03s"><b class="l">low</b>Action blocked by the auto-mode safety classifier</li>
+</ul>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+<script>
+(function(){
+  const b = document.getElementById('blocks');
+  ['h','h','h','h','m','m','m','m','m','l'].forEach((c, i) => { const e = document.createElement('i'); e.className = c; e.style.animationDelay = (.7 + i * .05) + 's'; b.appendChild(e); });
+  EW.count(document.getElementById('n'), 10, {delay: .35, dur: 1.1});
+})();
+</script>
+</body>
+</html>

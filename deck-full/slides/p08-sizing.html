@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sizing</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:40px;max-width:1100px}
+  .sub{font-size:15px;max-width:1000px}
+  .grid{position:absolute;left:72px;right:72px;top:250px;display:grid;grid-template-columns:1.35fr 1fr;gap:44px;z-index:2}
+  table{width:100%;border-collapse:collapse;font:400 12.5px var(--mono);color:var(--char)}
+  th{font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--grey);text-align:left;padding:0 8px 9px 0;border-bottom:1px solid var(--ink)}
+  th.n,td.n{text-align:right}
+  td{padding:6px 8px 6px 0;border-bottom:1px solid var(--line)}
+  tr.zs td{color:var(--ink);font-weight:600}
+  tr.zs td.n:last-child{color:var(--blue)}
+  tr.tot td{border-top:1px solid var(--ink);border-bottom:0;font-weight:600;color:var(--ink);padding-top:10px}
+  tr.tot td.n:last-child{color:var(--blue);font-size:15px}
+  .foot{margin-top:12px;font-size:12px;color:var(--grey);line-height:1.5}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opts .card{padding:12px 16px}
+  .card .tag{color:var(--blue);margin-bottom:6px}
+  .card h3{font:600 16px var(--sans);letter-spacing:-.3px;margin-bottom:2px}
+  .card p{font-size:12.5px;line-height:1.45;color:var(--char)}
+  .card .nodes{margin-top:6px;display:flex;gap:6px;align-items:center;font:500 11px var(--mono);color:var(--grey);text-transform:uppercase;letter-spacing:.04em}
+  .card .nodes i{width:18px;height:18px;background:var(--blue);display:inline-block}
+  .card .nodes i.half{background:var(--blue-l)}
+  .card.rec{border-color:var(--ink);box-shadow:8px 8px 0 var(--blue)}
+</style>
+</head>
+<body data-foot="Load test · Sizing">
+<div class="z">
+  <div class="eyebrow in1">Sizing · <b>25,000 prompts an hour, uncached</b></div>
+  <h1 class="in2">The customer peak needs about 62 vCPUs of ML. <span class="b">Fewer passes halve it.</span></h1>
+  <p class="sub in3">Allocations = prompts/hour × allocation-seconds per prompt ÷ 3,600, plus 50% headroom. One thread per allocation, measured costs from phase 3, Elastic Cloud c5d ML nodes (64 GB = 36 vCPU).</p>
+</div>
+<div class="grid">
+  <div class="in3">
+    <table>
+      <tr><th>Model</th><th class="n">s / prompt</th><th class="n">busy</th><th class="n">allocations</th></tr>
+      <tr class="zs"><td>zero-shot, 5 passes</td><td class="n">5.0</td><td class="n">34.7</td><td class="n">52</td></tr>
+      <tr><td>prompt injection</td><td class="n">0.16</td><td class="n">1.1</td><td class="n">2</td></tr>
+      <tr><td>jailbreak</td><td class="n">0.13</td><td class="n">0.9</td><td class="n">2</td></tr>
+      <tr><td>toxicity</td><td class="n">0.13</td><td class="n">0.9</td><td class="n">2</td></tr>
+      <tr><td>offensive</td><td class="n">0.14</td><td class="n">0.9</td><td class="n">2</td></tr>
+      <tr><td>NER (PII entities)</td><td class="n">0.13</td><td class="n">0.9</td><td class="n">2</td></tr>
+      <tr><td>embedding (EIS)</td><td class="n">0.08</td><td class="n">n/a</td><td class="n">0</td></tr>
+      <tr class="tot"><td>Total, 1 thread each</td><td class="n"></td><td class="n">39.4</td><td class="n">62 vCPU</td></tr>
+    </table>
+    <p class="foot">Memory at 62 allocations: about 48 GB, mostly the extra zero-shot allocations (≈0.7 GB each). Validate against your own prompt lengths: prompts under 20 characters run 2 passes, not 5.</p>
+  </div>
+  <div class="opts">
+    <div class="card rec in4"><div class="tag">Full classification</div><h3>2 × 64 GB ML nodes</h3><p>72 vCPU for 62 allocations, one node per zone. Fixed allocations, ML minimum set to this size.</p><div class="nodes"><i></i><i></i><span>2 nodes</span></div></div>
+    <div class="card in5"><div class="tag">Security + agent action only</div><h3>1 × 64 GB ML node</h3><p>2 zero-shot passes: 21 allocations, 31 vCPU in total. Drops task, interaction and moderation labels.</p><div class="nodes"><i></i><span>1 node</span></div></div>
+    <div class="card in6"><div class="tag">Embedding + semantic flags</div><h3>No ML nodes</h3><p>Phase 1 measured 10 prompts/s on EIS alone. Threat flags still work from the embedding.</p><div class="nodes"><i class="half"></i><span>0 nodes</span></div></div>
+  </div>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+</body>
+</html>

@@ -19,7 +19,7 @@ Environment:
   CLOUD_ID                     Elastic Cloud Hosted alternative to ES_URL/KIBANA_URL (from the deployment page)
   ES_API_KEY                   base64 API key (preferred), or ES_USER + ES_PASSWORD
   CA_CERT                      optional path to a CA bundle; INSECURE=true skips TLS verification (testing only)
-  PKG_VERSION                  installed claude_code_transcripts package version (default 0.2.1; used for pipeline names)
+  PKG_VERSION                  installed claude_code_transcripts package version (default 0.2.2; used for pipeline names)
   MODELS_FILE                  your own copy of extras/models/models.json (sizing for your cluster)
   HF_TOKEN                     Hugging Face token, only for gated models
 """
@@ -43,7 +43,7 @@ ES, KB = os.environ.get("ES_URL", "").rstrip("/"), os.environ.get("KIBANA_URL", 
 if os.environ.get("CLOUD_ID") and not (ES and KB):
     _es, _kb = _from_cloud_id(os.environ["CLOUD_ID"])
     ES, KB = ES or _es, KB or _kb
-PKG_VERSION = os.environ.get("PKG_VERSION", "0.2.1")
+PKG_VERSION = os.environ.get("PKG_VERSION", "0.2.2")
 
 def _auth():
     if os.environ.get("ES_API_KEY"):
@@ -75,8 +75,11 @@ def call(base, method, path, body=None, ctype="application/json", ok=(200, 201))
 def es(m, p, b=None, **k): return call(ES, m, p, b, **k)
 def kb(m, p, b=None, **k): return call(KB, m, p, b, **k)
 def load(*p): return json.load(open(os.path.join(HERE, *p)))
+FAILURES = 0
 def report(what, res):
+    global FAILURES
     code, body = res
+    FAILURES += code >= 300
     print(f"  {'ok ' if code < 300 else 'ERR'} {what} ({code})" + ("" if code < 300 else f": {json.dumps(body)[:300]}"))
 
 def merge(a, b):
@@ -166,8 +169,11 @@ def _eland_cmd(m, image):
     elif os.environ.get("CA_CERT"):
         docker += ["-v", f"{os.path.abspath(os.environ['CA_CERT'])}:/ca.crt:ro"]; args += ["--ca-certs", "/ca.crt"]
     # never pass --quantize: int8 models crashed pytorch_inference with SIGILL in testing
-    inner = " ".join(f'"{a}"' if a.startswith("$") else shlex.quote(a) for a in args)
-    return docker + [image, "sh", "-c", inner]
+    # "$VAR" arguments are expanded inside the container by a python launcher (not sh -c: the shell in
+    # eland:latest 9.2.0 fails with a missing libcrypt.so.1), so secret values never reach the host command line
+    launcher = ("import os,sys; from eland.cli.eland_import_hub_model import main; "
+                "sys.argv = [os.path.expandvars(a) if a.startswith('$') else a for a in sys.argv[1:]]; sys.exit(main())")
+    return docker + ["--entrypoint", "", image, "python3", "-c", launcher] + args
 
 def _deployment(model_id):
     code, body = es("GET", f"/_ml/trained_models/{model_id}/_stats", ok=(200, 404))
@@ -181,6 +187,7 @@ def _models_cfg():
     return json.load(open(f)) if f else load("models", "models.json")
 
 def models(dry=False, restart=False):
+    global FAILURES
     cfg = _models_cfg()
     print("models" + (" (dry run)" if dry else ""))
     for m in cfg["models"]:
@@ -195,6 +202,7 @@ def models(dry=False, restart=False):
                 continue
             r = subprocess.run(cmd)
             if r.returncode != 0:
+                FAILURES += 1
                 print(f"  ERR import {mid} failed (exit {r.returncode})"); continue
         dep = _deployment(mid)
         threads = want.get("threads_per_allocation", 1)
@@ -281,7 +289,9 @@ CMDS = {"pricing": pricing, "inference-mapping": inference_mapping, "rules": rul
 if __name__ == "__main__":
     args = sys.argv[1:]
     if args[:1] == ["models"]:
-        models(dry="--dry-run" in args, restart="--restart" in args); sys.exit()
+        models(dry="--dry-run" in args, restart="--restart" in args)
+        if FAILURES: print(f"{FAILURES} step(s) failed"); sys.exit(1)
+        sys.exit()
     if args[:1] == ["models-status"]:
         models_status(); sys.exit()
     if args[:1] == ["classify"] and len(args) == 2:

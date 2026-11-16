@@ -85,7 +85,7 @@ The setup script and its sizing files are in the repository **[iamhowardtheduck/
 Use a release tag, so the script matches the integration version you installed:
 
 ```bash
-git clone --branch v0.2.1 https://github.com/iamhowardtheduck/claude-code-elastic.git
+git clone --branch v0.2.2 https://github.com/iamhowardtheduck/claude-code-elastic.git
 cd claude-code-elastic
 extras/setup.sh            # prints the commands and the environment variables it uses
 ```
@@ -93,8 +93,8 @@ extras/setup.sh            # prints the commands and the environment variables i
 Without git, download the tagged source:
 
 ```bash
-curl -fsSL https://github.com/iamhowardtheduck/claude-code-elastic/archive/refs/tags/v0.2.1.tar.gz | tar xz
-cd claude-code-elastic-0.2.1
+curl -fsSL https://github.com/iamhowardtheduck/claude-code-elastic/archive/refs/tags/v0.2.2.tar.gz | tar xz
+cd claude-code-elastic-0.2.2
 ```
 
 Requirements on the machine running it:
@@ -310,7 +310,7 @@ Expected: `"predicted_value": "offensive"`, probability about 0.94.
 ---
 
 ### Model 5: zero-shot classifier (size this one)
-`cross-encoder__nli-deberta-v3-base-128` runs five passes per prompt: security, agent action, task, interaction and moderation. It is imported at **128 tokens**, which is much faster than the default 512; real prompts are short. It does most of the inference work, so give it most of the capacity. See [sizing](inference-tuning.md#how-much-capacity) (roughly one allocation per 290 prompts/hour).
+`cross-encoder__nli-deberta-v3-base-128` runs five passes per prompt: security, agent action, task, interaction and moderation. It is imported at **128 tokens**, which is much faster than the default 512; real prompts are short. It does most of the inference work, so give it most of the capacity. See [sizing](inference-tuning.md#how-much-capacity) (roughly one allocation per 290 prompts/hour on self-managed CPU nodes, or per 720 on Elastic Cloud).
 
 **On-prem**
 ```bash

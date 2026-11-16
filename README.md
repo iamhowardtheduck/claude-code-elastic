@@ -6,6 +6,14 @@ An Elastic Agent integration (`claude_code_transcripts`) that ships **Claude Cod
 
 > **Overview deck:** [watch the slides](https://iamhowardtheduck.github.io/claude-code-elastic/) or grab the [PDF](docs/claude-code-transcripts-deck.pdf) for what this integration contains, why it's built this way and what it solves. Source in [`deck/`](deck/).
 
+> **Load-test deck:** [watch the slides](https://iamhowardtheduck.github.io/claude-code-elastic/load-test/) or grab the [PDF](docs/claude-code-transcripts-load-test.pdf) for measured throughput toward 100,000 prompts a day on Elastic Cloud, and how to size ML for it. Source in [`deck-performance/`](deck-performance/); generator in [`tools/loadgen.py`](tools/loadgen.py).
+
+> **Inference and redaction deck:** [watch the slides](https://iamhowardtheduck.github.io/claude-code-elastic/inference/) or grab the [PDF](docs/claude-code-transcripts-inference.pdf) for everything the ingest pipelines do to a prompt: 19 secret detectors, the EIS embedding, semantic threat flags, the single-pass and zero-shot classifiers, and where the inference time goes. Source in [`deck-inference/`](deck-inference/).
+
+> **Full deck:** [watch the slides](https://iamhowardtheduck.github.io/claude-code-elastic/full/) or grab the [PDF](docs/claude-code-transcripts-full.pdf): the overview, inference and load-test decks in one, in the elastic-web style. Source in [`deck-full/`](deck-full/).
+
+> **Models deck:** [watch the slides](https://iamhowardtheduck.github.io/claude-code-elastic/models/) or grab the [PDF](docs/claude-code-transcripts-models.pdf): the seven ML models, one slide each, with what each is used for, its labels, threshold and memory. Source in [`deck-models/`](deck-models/).
+
 > This package complements Elastic's official **Claude Code** integration (`claude_code`), which collects Claude Code's OpenTelemetry events and traces. This one reads the on-disk transcripts and the Desktop logs. Both can be installed side by side. Detection rules, a model-pricing table and inference monitoring are available as optional extras.
 
 ```
@@ -67,7 +75,7 @@ Alternatively, download `claude_code_transcripts-<version>.zip` from the GitHub 
 ```bash
 go install github.com/elastic/elastic-package@latest
 cd packages/claude_code_transcripts
-elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.2.1.zip
+elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.2.2.zip
 ```
 
 ### 2. Upload it to Kibana
@@ -76,7 +84,7 @@ elastic-package lint && elastic-package build      # -> build/packages/claude_co
 curl -X POST "$KIBANA_URL/api/fleet/epm/packages" \
   -H "Authorization: ApiKey $ES_API_KEY" -H 'kbn-xsrf: true' \
   -H 'Content-Type: application/zip' \
-  --data-binary @build/packages/claude_code_transcripts-0.2.1.zip
+  --data-binary @build/packages/claude_code_transcripts-0.2.2.zip
 ```
 
 This installs the index templates, the three ingest pipelines (`logs-claude_code.transcript-<ver>`, `…-inference` and `…-classify`, plus `logs-claude_desktop.log-<ver>`) and the two dashboards. `elastic-package install --zip <file>` does the same against the stack configured for elastic-package.
@@ -108,7 +116,7 @@ extras/setup.sh inference-monitoring # stats collector + [ML Inference] Admin da
 extras/setup.sh all
 ```
 
-**Inference monitoring** is built into the package from 0.2.0. Enable the **ML inference statistics** input (CEL) in the integration policy, with an Elasticsearch URL and an API key that has `monitor` and `monitor_ml`; it feeds the **[Claude Code Transcripts] ML Inference Admin** dashboard. `extras/setup.sh inference-monitoring` still installs the 9 alert rules (disabled, without actions) and the older Kibana Workflow collector, which writes to `ml-inference-stats`; use one collector, not both. If you install a package version other than 0.2.1, set `PKG_VERSION` so the workflow watches the right pipeline names.
+**Inference monitoring** is built into the package from 0.2.0. Enable the **ML inference statistics** input (CEL) in the integration policy, with an Elasticsearch URL and an API key that has `monitor` and `monitor_ml`; it feeds the **[Claude Code Transcripts] ML Inference Admin** dashboard. `extras/setup.sh inference-monitoring` still installs the 9 alert rules (disabled, without actions) and the older Kibana Workflow collector, which writes to `ml-inference-stats`; use one collector, not both. If you install a package version other than 0.2.2, set `PKG_VERSION` so the workflow watches the right pipeline names.
 
 ### 5. Enabling inference (optional)
 
@@ -130,7 +138,7 @@ Then turn on **Enable ML inference**, and optionally **Prompt classification**, 
   - **every model, one by one, with eland**: import, deploy and verify commands for on-prem and Elastic Cloud (Serverless notes included), plus air-gapped import
   - deploying from Kibana instead of the API, and the end-to-end smoke test
 - **[docs/inference-tuning.md](docs/inference-tuning.md): tuning.**
-  - capacity planning (roughly 290 prompts/hour per zero-shot allocation on CPU)
+  - capacity planning (roughly 290 prompts/hour per zero-shot allocation on self-managed CPU nodes, about 720 on Elastic Cloud)
   - settings for self-managed, Cloud Hosted and Serverless, and a symptoms table
   - accuracy: thresholds, zero-shot labels, semantic phrases, swapping models, a different embedding model
 

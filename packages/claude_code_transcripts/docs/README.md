@@ -242,7 +242,7 @@ The repository [iamhowardtheduck/claude-code-elastic](https://github.com/iamhowa
 - it adds the mapping
 
 ```
-git clone --branch v0.2.1 https://github.com/iamhowardtheduck/claude-code-elastic.git && cd claude-code-elastic
+git clone --branch v0.2.2 https://github.com/iamhowardtheduck/claude-code-elastic.git && cd claude-code-elastic
 extras/setup.sh inference-mapping
 extras/setup.sh models                                                       # on-premises sizing
 MODELS_FILE=extras/models/profiles/adaptive.json extras/setup.sh models     # Elastic Cloud sizing
@@ -328,7 +328,7 @@ POST _security/api_key
 | claude_code.message.content.type |  | keyword |
 | claude_code.message.diagnostics.cache_miss_reason.type |  | keyword |
 | claude_code.message.id |  | keyword |
-| claude_code.message.input_transformations |  | keyword |
+| claude_code.message.input_transformations | Context transformations Claude Code applied to the request (a list of objects such as type, reason and path in newer versions). | flattened |
 | claude_code.message.model |  | keyword |
 | claude_code.message.role |  | keyword |
 | claude_code.message.stop_reason |  | keyword |

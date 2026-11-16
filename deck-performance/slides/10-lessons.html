@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lessons</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:44px;max-width:1100px}
+  .sub{font-size:16px;max-width:900px}
+  .list{position:absolute;left:72px;right:72px;top:262px;z-index:2;border-top:1px solid var(--ink)}
+  .it{display:grid;grid-template-columns:200px 1fr 230px;gap:24px;align-items:baseline;padding:13px 0;border-bottom:1px solid var(--line)}
+  .it .tag{color:var(--grey);font-weight:500}
+  .it .tag b{color:var(--ink);font-weight:600;display:block;margin-bottom:2px}
+  .it p{font-size:13.5px;line-height:1.5;color:var(--char)}
+  .it .fix{font:500 11px var(--mono);text-transform:uppercase;letter-spacing:.04em;color:var(--teal-d)}
+  .it .fix.red{color:#E0352B}
+  code{font-family:var(--mono);font-size:.92em}
+</style>
+</head>
+<body data-foot="Load test · Field notes">
+<div class="z">
+  <div class="eyebrow in1">Field notes · <b>deploying to a fresh deployment</b></div>
+  <h1 class="in2">Getting to the test found five real issues. <span class="b">All fixed or documented.</span></h1>
+  <p class="sub in3">These came up installing the integration and a second Elastic Agent on a fresh Elastic Cloud deployment, before any synthetic load ran.</p>
+</div>
+<div class="list">
+  <div class="it in3"><span class="tag"><b>Mapping</b>input_transformations</span><p>Newer Claude Code writes this field as a list of objects. The <code>keyword</code> mapping sent those lines to the failure store.</p><span class="fix">fixed in 0.2.2: flattened</span></div>
+  <div class="it in4"><span class="tag"><b>Agent output</b>dropped batches</span><p>During a classified backfill, 1,600-event bulks hit Cloud proxy 502s and the agent's exporter dropped them, acknowledging the lines. 90 lines were recovered by hand.</p><span class="fix">bulk_max_size 200, backfill unclassified</span></div>
+  <div class="it in4"><span class="tag"><b>Stats input</b>pipeline prefix</span><p>The default prefix matched no pipeline in this package, so no pipeline statistics were collected.</p><span class="fix">fixed in 0.2.2</span></div>
+  <div class="it in5"><span class="tag"><b>Second agent</b>same host</span><p>Elastic Defend blocked an installer run from <code>/tmp</code>, and both agents claimed monitoring port 6791. On Windows a second agent hits an open named-pipe bug (elastic-agent #5306).</p><span class="fix">install from home, port 6792</span></div>
+  <div class="it in6"><span class="tag"><b>Autoscaling</b>ML tier</span><p>Extra allocations never triggered a memory scale-up, even with a 64 GB maximum.</p><span class="fix red">provision ML minimum up front</span></div>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+</body>
+</html>

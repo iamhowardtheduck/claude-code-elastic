@@ -5,7 +5,15 @@ on:
     branches: [main]
     paths:
       - "deck/**"
+      - "deck-performance/**"
+      - "deck-inference/**"
+      - "deck-full/**"
+      - "deck-models/**"
       - "docs/claude-code-transcripts-deck.pdf"
+      - "docs/claude-code-transcripts-load-test.pdf"
+      - "docs/claude-code-transcripts-inference.pdf"
+      - "docs/claude-code-transcripts-full.pdf"
+      - "docs/claude-code-transcripts-models.pdf"
       - ".github/workflows/deck-pages.yml"
   workflow_dispatch:
 
@@ -35,7 +43,31 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: "true"
       - run: npx fslides build ../_site
         working-directory: deck
-      - run: cp docs/claude-code-transcripts-deck.pdf _site/
+      - run: npm install --no-audit --no-fund
+        working-directory: deck-performance
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+      - run: npx fslides build ../_site/load-test
+        working-directory: deck-performance
+      - run: npm install --no-audit --no-fund
+        working-directory: deck-inference
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+      - run: npx fslides build ../_site/inference
+        working-directory: deck-inference
+      - run: npm install --no-audit --no-fund
+        working-directory: deck-full
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+      - run: npx fslides build ../_site/full
+        working-directory: deck-full
+      - run: npm install --no-audit --no-fund
+        working-directory: deck-models
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+      - run: npx fslides build ../_site/models
+        working-directory: deck-models
+      - run: cp docs/claude-code-transcripts-*.pdf _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
