@@ -14,13 +14,13 @@ Loading the models is covered in [inference-models.md](inference-models.md).
 ## 1. Performance and sizing
 
 ### Where the time goes
-Each human prompt with classification on makes **10 ML requests**:
+Each human prompt with classification on makes **11 ML requests**, one embedding and ten classifier calls:
 - 1 embedding (EIS, about 0.1 s)
 - 4 single-pass classifiers (each 0.1–0.3 s)
 - **5 zero-shot passes** on one model
 - 1 NER pass
 
-On the reference cluster the zero-shot passes took **82% of inference time**. Size the zero-shot model; the others almost never need more than 1–2 allocations.
+The zero-shot passes take **82–89% of inference time**: 82% on the self-managed reference cluster, and 89% (5.7 s of 6.4 s) on a prompt sampled during the 2026-11-15 Elastic Cloud load test. Size the zero-shot model; the others almost never need more than 1–2 allocations.
 
 ### Measure first
 ```bash
@@ -42,7 +42,9 @@ The **[Claude Code Transcripts] ML Inference Admin** dashboard (fed by the integ
 
 ### How much capacity
 Measured on CPU-only ML nodes:
-- **One 1-thread allocation of the zero-shot model handles about 290 prompts per hour.** That's 0.08 prompts/s; 16 allocations handled about 1.3 prompts/s.
+- **One 1-thread allocation of the zero-shot model handles about 290 prompts per hour on the self-managed reference cluster.** That's 0.08 prompts/s; 16 allocations handled about 1.3 prompts/s.
+- **On Elastic Cloud c5d ML nodes it handled about 720 prompts per hour, uncached** (2026-11-15 load test: 1.0 s per zero-shot call × 5 passes = 5 s of allocation time per prompt). Faster CPUs explain most of the gap.
+- The sizing rule below uses 290 because it is the conservative figure. On Elastic Cloud you can divide by 720 instead.
 - The median prompt is about 120 characters, and only about 2.6% of prompts exceed 150 tokens. That's why the 128-token zero-shot model loses almost nothing and is much faster than the 512-token original.
 
 > **zero-shot allocations ≈ peak prompts per hour ÷ 290, plus 50% headroom.** Use at least 1.

@@ -310,7 +310,7 @@ Expected: `"predicted_value": "offensive"`, probability about 0.94.
 ---
 
 ### Model 5: zero-shot classifier (size this one)
-`cross-encoder__nli-deberta-v3-base-128` runs five passes per prompt: security, agent action, task, interaction and moderation. It is imported at **128 tokens**, which is much faster than the default 512; real prompts are short. It does most of the inference work, so give it most of the capacity. See [sizing](inference-tuning.md#how-much-capacity) (roughly one allocation per 290 prompts/hour).
+`cross-encoder__nli-deberta-v3-base-128` runs five passes per prompt: security, agent action, task, interaction and moderation. It is imported at **128 tokens**, which is much faster than the default 512; real prompts are short. It does most of the inference work, so give it most of the capacity. See [sizing](inference-tuning.md#how-much-capacity) (roughly one allocation per 290 prompts/hour on self-managed CPU nodes, or per 720 on Elastic Cloud).
 
 **On-prem**
 ```bash

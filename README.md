@@ -136,7 +136,7 @@ Then turn on **Enable ML inference**, and optionally **Prompt classification**, 
   - **every model, one by one, with eland**: import, deploy and verify commands for on-prem and Elastic Cloud (Serverless notes included), plus air-gapped import
   - deploying from Kibana instead of the API, and the end-to-end smoke test
 - **[docs/inference-tuning.md](docs/inference-tuning.md): tuning.**
-  - capacity planning (roughly 290 prompts/hour per zero-shot allocation on CPU)
+  - capacity planning (roughly 290 prompts/hour per zero-shot allocation on self-managed CPU nodes, about 720 on Elastic Cloud)
   - settings for self-managed, Cloud Hosted and Serverless, and a symptoms table
   - accuracy: thresholds, zero-shot labels, semantic phrases, swapping models, a different embedding model
 
