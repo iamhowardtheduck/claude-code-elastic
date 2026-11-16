@@ -2,37 +2,53 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Claude Code Transcripts — Get Started</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="brand.css">
+<title>Claude Code Transcripts: Get started</title>
+<link rel="stylesheet" href="style/eweb.css">
 <style>
-body{align-items:center;text-align:center;padding:0 110px}
-.eyebrow{margin-bottom:18px}
-h1{font-size:3.5rem}
-h1 .t{color:var(--light-teal)}
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:10px 0 30px;text-align:left;width:100%}
-.step{background:var(--white);color:var(--dark-ink);border-radius:14px;padding:20px 22px;font-size:.98rem;line-height:1.5;color:var(--ink)}
-.step b{color:var(--dark-ink)}
-.step .n{width:34px;height:34px;border-radius:50%;background:var(--elastic-blue);color:var(--white);font-family:var(--mono);font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
-.step .n::after{content:'';}
-.links .tag{font-size:.8rem;padding:8px 13px}
-.foot{position:absolute;left:0;right:0;bottom:44px;display:flex;justify-content:center}
+h1{font-size:76px;line-height:.96;letter-spacing:-3px;margin-top:80px}
+.steps{margin-top:30px;max-width:500px;list-style:none}
+.steps li{display:grid;grid-template-columns:34px 1fr;gap:10px;padding:11px 0;border-top:1px solid var(--line);font-size:15px;line-height:1.45;color:var(--char)}
+.steps li:last-child{border-bottom:1px solid var(--line)}
+.steps b{color:var(--ink);font-weight:600}
+.steps .n{font:600 12px var(--mono);color:var(--blue);padding-top:2px}
+.cta{margin-top:28px;display:flex;gap:12px;align-items:center}
+.cta a{text-decoration:none;pointer-events:auto;cursor:pointer;position:relative;z-index:6;font-size:14px;padding:10px 18px}
+#hero{left:600px;top:0;width:680px;height:720px}
 </style>
 </head>
-<body class="blue">
-<div class="eyebrow a-rise">Get started</div>
-<h1 class="a-rise" style="--d:.15s">Install it. Assign a policy.<br><span class="t">See everything.</span></h1>
-<div class="steps">
-<div class="step a-rise" style="--d:.45s"><div class="n a-pop" style="--d:.6s">1</div>Install <b>Claude Code Transcripts</b> from Fleet (Stack 9.4+, Basic license).</div>
-<div class="step a-rise" style="--d:.65s"><div class="n a-pop" style="--d:.8s">2</div>Add it to the agent policy for your developer workstations.</div>
-<div class="step a-rise" style="--d:.85s"><div class="n a-pop" style="--d:1s">3</div>Optional: run <code>extras/setup.sh</code> to load models, pricing and rules, then flip <b>Enable ML inference</b>.</div>
+<body data-foot="Claude Code Transcripts · Get started">
+<div class="z">
+  <div class="eyebrow in1">Get started</div>
+  <h1 class="in2">Install it.<br><span class="b">See everything.</span></h1>
+  <ol class="steps in3">
+    <li><span class="n">01</span><span>Install <b>Claude Code Transcripts</b> from Fleet (Stack 9.4+, Basic license).</span></li>
+    <li><span class="n">02</span><span>Add it to the agent policy for your developer workstations.</span></li>
+    <li><span class="n">03</span><span>Optional: run <span class="mono">extras/setup.sh</span> to load models, pricing and rules, then enable ML inference.</span></li>
+  </ol>
+  <div class="cta in4"><a class="btn fill" href="https://github.com/elastic/integrations/pull/22450" target="_blank" rel="noopener">Integration PR&nbsp;&nbsp;↗</a><a class="btn" href="https://github.com/iamhowardtheduck/claude-code-elastic" target="_blank" rel="noopener">Companion repo&nbsp;&nbsp;↗</a></div>
 </div>
-<div class="links a-rise" style="--d:1.15s"><span class="tag t">github.com/elastic/integrations/pull/22450</span><span class="tag">github.com/iamhowardtheduck/claude-code-elastic</span></div>
-<div class="foot"><div class="lockup a-fade" style="--d:1.3s"><img src="elastic-logo.svg" alt=""><span class="word">elastic</span><span class="tagline">The Search AI Company</span></div></div>
-
+<svg id="hero" class="iso" viewBox="0 0 680 720"></svg>
+<script src="style/eweb.js"></script>
 <script src="/js/fuckslides.js"></script>
 <script>
-(function(){if(window!==window.top)return;const W=1280,H=720;function f(){var s=Math.min(innerWidth/W,innerHeight/H);document.body.style.transform='scale('+s+')';document.body.style.transformOrigin='0 0';document.body.style.left=((innerWidth-W*s)/2)+'px';document.body.style.top=((innerHeight-H*s)/2)+'px'}f();addEventListener('resize',f)})();
+(function(){
+EW.dots({x: 700, y: 30, w: 580, h: 620, seed: 4, blobs: 6, thr: .5});
+const sc = EW.iso(document.getElementById('hero'), {ox: 280, oy: 300, s: .8});
+sc.rect({x: -30, y: -30, w: 330, d: 330, z: 0, delay: .05, dash: '2 4'});
+sc.box({x: 0, y: 0, w: 270, d: 270, h: 46, c: 'blue', delay: .1, drop: 60, snap: false, order: -1000});
+[118, 88, 58].forEach((h, i) => sc.box({x: 22 + i * 56, y: 150, w: 44, d: 100, h, z: 46, c: 'slate', stroke: false, delay: .3 + i * .06, drop: 50, order: 100}));
+sc.box({x: 190, y: 26, w: 60, d: 60, h: 76, z: 46, c: 'teal', delay: .5, drop: 50, order: 70});
+sc.box({x: 72, y: 34, w: 80, d: 80, h: 80, z: 46, c: 'pink', delay: .7, drop: 150, order: 50});
+sc.box({x: 60, y: 22, w: 104, d: 104, h: 104, z: 46, c: 'glass', wire: true, inner: true, stroke: '#343741', delay: .95, drop: 0, snap: false, order: 60});
+sc.label({at: [164, 22, 46 + 90], side: 'r', len: 50, title: 'Claude Code', sub: 'Observed', raw: true, delay: 1.2});
+sc.label({at: [250, 26, 46 + 38], side: 'r', len: 30, title: 'Ingest pipeline', sub: 'Parse + redact', delay: 1.25});
+sc.label({at: [270, 170, 16], side: 'r', len: 110, title: 'Elastic', sub: ['3 dashboards', '10 detections'], raw: true, delay: 1.35});
+const [cx, cy] = sc.P(112, 74, 46);
+const ring = EW.el('ellipse', {cx, cy, rx: 10, ry: 5.8, fill: 'none', stroke: '#F04E98', 'stroke-width': 1.2, opacity: 0}, sc.floor);
+sc.run();
+EW.loop(t => { if (t < 1.6) return; const k = ((t - 1.6) % 2.6) / 2.6;
+  ring.setAttribute('rx', 60 + k * 120); ring.setAttribute('ry', (60 + k * 120) * .58); ring.setAttribute('opacity', (1 - k) * .6); });
+})();
 </script>
 </body>
 </html>
