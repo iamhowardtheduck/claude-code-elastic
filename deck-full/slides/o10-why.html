@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Why it is different</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:46px;max-width:1100px}
+  .grid{position:absolute;left:72px;right:72px;top:196px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px 18px;z-index:2}
+  .card{display:grid;grid-template-columns:76px 1fr;gap:4px 16px;padding:16px 18px;min-height:190px;align-content:start}
+  .card svg{grid-row:span 3;width:76px;height:76px;overflow:visible}
+  .card .tag{color:var(--blue);align-self:end}
+  .card h3{font:600 17px var(--sans);letter-spacing:-.3px}
+  .card p{font-size:13px;line-height:1.5;color:var(--char);grid-column:1 / -1;margin-top:8px}
+  .card.hot{border-color:var(--ink);box-shadow:8px 8px 0 var(--blue)}
+  code{font-family:var(--mono);font-size:.92em}
+</style>
+</head>
+<body data-foot="Overview · Why it's different">
+<div class="z">
+  <div class="eyebrow in1">Why it's awesome</div>
+  <h1 class="in2">Built like a real Elastic integration. <span class="b">Not a log dump.</span></h1>
+</div>
+<div class="grid">
+  <div class="card hot in3"><svg id="i1" viewBox="0 0 76 76"></svg><span class="tag">01 · collection</span><h3>Zero-touch collection</h3><p>No changes to Claude Code, no proxy, no API key interception. If Elastic Agent is on the machine, you have coverage.</p></div>
+  <div class="card in3"><svg id="i2" viewBox="0 0 76 76"></svg><span class="tag">02 · standards</span><h3>Open standards</h3><p>ECS plus OpenTelemetry <code>gen_ai.*</code>, so it correlates with EDR, network and OTel data you already collect.</p></div>
+  <div class="card in4"><svg id="i3" viewBox="0 0 76 76"></svg><span class="tag">03 · cost</span><h3>Costs you can trust</h3><p>Keeps Anthropic's raw split of uncached input, cache reads and cache writes, so spend is priced correctly. Deduplicates on <code>gen_ai.response.id</code>.</p></div>
+  <div class="card in4"><svg id="i4" viewBox="0 0 76 76"></svg><span class="tag">04 · identity</span><h3>No duplicates</h3><p><code>event.id</code> becomes the document <code>_id</code>, so resumed sessions never double-count.</p></div>
+  <div class="card in5"><svg id="i5" viewBox="0 0 76 76"></svg><span class="tag">05 · ML</span><h3>Fail-open ML</h3><p>Inference is off by default, enabled with a single toggle, and never blocks ingest. You can watch its health on its own dashboard.</p></div>
+  <div class="card in5"><svg id="i6" viewBox="0 0 76 76"></svg><span class="tag">06 · OTel</span><h3>Complements OTel</h3><p>Runs alongside Elastic's official <code>claude_code</code> OTel integration. That one gives you telemetry; this one gives you what was actually said and done.</p></div>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+<script>
+(function(){
+  const S = id => EW.iso(document.getElementById(id), {ox: 38, oy: 42, s: .5});
+  let sc;
+  // 01 an agent on the machine: teal agent resting on a slate laptop
+  sc = S('i1');
+  sc.box({x: -40, y: -40, w: 80, d: 80, h: 10, c: 'slate', stroke: false, delay: .4, drop: 40});
+  sc.box({x: -14, y: -14, w: 28, d: 28, h: 28, z: 10, c: 'teal', delay: .6, drop: 40});
+  sc.run();
+  // 02 two standards, one shape: two equal slabs, blue and teal
+  sc = S('i2');
+  sc.box({x: -40, y: -40, w: 80, d: 80, h: 16, c: 'blue', delay: .45, drop: 40});
+  sc.box({x: -40, y: -40, w: 80, d: 80, h: 16, z: 16, c: 'teal', delay: .6, drop: 40});
+  sc.run();
+  // 03 three token buckets: uncached, cache read, cache write
+  sc = S('i3');
+  [[-46, 30, 'blue'], [-10, 54, 'slate'], [26, 18, 'ink']].forEach(([x, h, c], i) => sc.box({x, y: -14, w: 22, d: 28, h, c, stroke: c === 'slate' ? false : '#1D1E24', delay: .65 + i * .07, drop: 40}));
+  sc.run();
+  // 04 one id, one document: a solid cube where its duplicate would land
+  sc = S('i4');
+  sc.box({x: -22, y: -22, w: 44, d: 44, h: 40, c: 'blue', delay: .7, drop: 40});
+  sc.box({x: -22, y: -22, w: 44, d: 44, h: 40, z: 40, c: 'glass', wire: true, dash: '3 3', stroke: '#343741', shadow: false, delay: .85, drop: 20, snap: false});
+  sc.run();
+  // 05 optional ML: a pink model inside a dashed frame
+  sc = S('i5');
+  sc.box({x: -18, y: -18, w: 36, d: 36, h: 36, c: 'pink', delay: .9, drop: 40});
+  sc.box({x: -30, y: -30, w: 60, d: 60, h: 56, c: 'glass', wire: true, dash: '3 3', stroke: '#343741', shadow: false, delay: 1.0, drop: 0, snap: false, order: 50});
+  sc.run();
+  // 06 side by side: telemetry and transcripts
+  sc = S('i6');
+  sc.box({x: -46, y: -20, w: 36, d: 40, h: 30, c: 'slate', stroke: false, delay: .95, drop: 40});
+  sc.box({x: 6, y: -20, w: 36, d: 40, h: 50, c: 'blue', delay: 1.05, drop: 40});
+  sc.run();
+})();
+</script>
+</body>
+</html>

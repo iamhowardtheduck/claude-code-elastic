@@ -6,8 +6,12 @@ on:
     paths:
       - "deck/**"
       - "deck-performance/**"
+      - "deck-inference/**"
+      - "deck-full/**"
       - "docs/claude-code-transcripts-deck.pdf"
       - "docs/claude-code-transcripts-load-test.pdf"
+      - "docs/claude-code-transcripts-inference.pdf"
+      - "docs/claude-code-transcripts-full.pdf"
       - ".github/workflows/deck-pages.yml"
   workflow_dispatch:
 
@@ -43,7 +47,19 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: "true"
       - run: npx fslides build ../_site/load-test
         working-directory: deck-performance
-      - run: cp docs/claude-code-transcripts-deck.pdf docs/claude-code-transcripts-load-test.pdf _site/
+      - run: npm install --no-audit --no-fund
+        working-directory: deck-inference
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+      - run: npx fslides build ../_site/inference
+        working-directory: deck-inference
+      - run: npm install --no-audit --no-fund
+        working-directory: deck-full
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+      - run: npx fslides build ../_site/full
+        working-directory: deck-full
+      - run: cp docs/claude-code-transcripts-*.pdf _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

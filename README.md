@@ -8,6 +8,10 @@ An Elastic Agent integration (`claude_code_transcripts`) that ships **Claude Cod
 
 > **Load-test deck:** [watch the slides](https://iamhowardtheduck.github.io/claude-code-elastic/load-test/) or grab the [PDF](docs/claude-code-transcripts-load-test.pdf) for measured throughput toward 100,000 prompts a day on Elastic Cloud, and how to size ML for it. Source in [`deck-performance/`](deck-performance/); generator in [`tools/loadgen.py`](tools/loadgen.py).
 
+> **Inference and redaction deck:** [watch the slides](https://iamhowardtheduck.github.io/claude-code-elastic/inference/) or grab the [PDF](docs/claude-code-transcripts-inference.pdf) for everything the ingest pipelines do to a prompt: 19 secret detectors, the EIS embedding, semantic threat flags, the single-pass and zero-shot classifiers, and where the inference time goes. Source in [`deck-inference/`](deck-inference/).
+
+> **Full deck:** [watch the slides](https://iamhowardtheduck.github.io/claude-code-elastic/full/) or grab the [PDF](docs/claude-code-transcripts-full.pdf): the overview, inference and load-test decks in one, in the elastic-web style. Source in [`deck-full/`](deck-full/).
+
 > This package complements Elastic's official **Claude Code** integration (`claude_code`), which collects Claude Code's OpenTelemetry events and traces. This one reads the on-disk transcripts and the Desktop logs. Both can be installed side by side. Detection rules, a model-pricing table and inference monitoring are available as optional extras.
 
 ```

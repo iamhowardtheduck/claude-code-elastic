@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ML inference</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:44px;max-width:1100px}
+  .grid{position:absolute;left:72px;right:72px;top:228px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;z-index:2}
+  .card{display:flex;flex-direction:column;gap:6px;padding:16px 18px}
+  .card .tag{color:var(--pink)}
+  .card h3{font:600 17px var(--sans);letter-spacing:-.3px}
+  .card p{font-size:13px;line-height:1.5;color:var(--char)}
+  .card p i{font-style:normal;font-weight:600;color:var(--ink)}
+  code{font-family:var(--mono);font-size:.92em}
+  .meter{position:absolute;left:72px;right:72px;top:430px;display:grid;grid-template-columns:1fr 470px;gap:48px;align-items:center;border-top:1px solid var(--ink);padding-top:22px;z-index:2}
+  .meter .tag{color:var(--blue);margin-bottom:8px;display:block}
+  .meter p{font-size:14.5px;line-height:1.55;color:var(--char)}
+  .meter p b{color:var(--ink);font-weight:600}
+  .meter p .muted{color:var(--grey);display:block;margin-top:8px;font-size:13px}
+  .gauge{position:relative;padding-top:26px}
+  .track{position:relative;height:14px;background:var(--bg);border:1px solid var(--line)}
+  .fill{position:absolute;left:0;top:0;bottom:0;width:78%;background:var(--blue);transform-origin:left;animation:grow .8s cubic-bezier(.2,.7,.2,1) .6s both}
+  @keyframes grow{from{transform:scaleX(0)}to{transform:none}}
+  .thr{position:absolute;left:60%;top:-26px;bottom:-8px;width:0;border-left:1.5px dashed var(--ink)}
+  .thr span{position:absolute;top:0;left:6px;font:600 10.5px var(--mono);letter-spacing:.06em;white-space:nowrap}
+  .scale{display:flex;justify-content:space-between;font:400 10.5px var(--mono);color:var(--grey);margin-top:8px}
+  .res{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+  .res .v{font:500 44px/1 var(--sans);letter-spacing:-1.5px;color:var(--blue)}
+  .res .v small{font:500 11px var(--mono);letter-spacing:.06em;color:var(--grey);text-transform:uppercase;margin-left:10px}
+  .flag{font:600 12px var(--mono);color:#fff;background:var(--pink);padding:6px 10px;animation:pop .35s cubic-bezier(.2,.7,.2,1) 1.35s both}
+  @keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body data-foot="Overview · ML inference">
+<div class="z">
+  <div class="eyebrow in1">Optional ML inference · <b>on human prompts</b></div>
+  <h1 class="in2">Elastic reads every prompt. <span class="b">And tells you what it's actually asking for.</span></h1>
+</div>
+<div class="grid">
+  <div class="card in3"><span class="tag">embedding</span><h3>Semantic vectors</h3><p><code>jina-embeddings-v5</code>, 768 dimensions, stored with BBQ HNSW. Search prompts by meaning, not keywords.</p></div>
+  <div class="card in3"><span class="tag">classifiers</span><h3>Threat models</h3><p>Prompt injection, jailbreak, toxicity and offensive language, each scored on every prompt.</p></div>
+  <div class="card in4"><span class="tag">zero-shot ×5</span><h3>Intent</h3><p>Security, agent action, task, interaction and moderation, e.g. <i>destructive</i>, <i>credential theft</i>, <i>fix bug</i>, <i>deploy</i>.</p></div>
+  <div class="card in4"><span class="tag">NER</span><h3>PII entities</h3><p>People, organizations and locations mentioned in prompts.</p></div>
+</div>
+<div class="meter in5">
+  <div><span class="tag">Semantic threat flags</span><p>Cosine similarity against <b>29 threat phrases</b> across <b>10 concepts</b>. A score of 0.60 or higher sets <code>flagged: true</code>.<span class="muted">An inference failure never blocks indexing; the error is recorded on the document.</span></p></div>
+  <div class="gauge">
+    <div class="track"><div class="fill"></div><div class="thr"><span>THRESHOLD 0.60</span></div></div>
+    <div class="scale"><span>0.0</span><span>similarity</span><span>1.0</span></div>
+    <div class="res"><span class="v" id="v">0.78<small>example prompt</small></span><span class="flag">flagged: true</span></div>
+  </div>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+<script>
+(function(){
+  const v = document.getElementById('v'), sm = v.querySelector('small').outerHTML, t0 = performance.now();
+  const f = now => { const k = EW.ease(((now - t0) / 1000 - .6) / .8); v.innerHTML = (.78 * k).toFixed(2) + sm; if (k < 1) requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+})();
+</script>
+</body>
+</html>

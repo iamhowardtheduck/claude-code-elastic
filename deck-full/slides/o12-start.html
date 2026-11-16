@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Get started</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:64px;line-height:.98;letter-spacing:-2.6px;margin-top:56px}
+  .steps{margin-top:30px;display:flex;flex-direction:column;max-width:520px;border-top:1px solid var(--ink)}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.5;color:var(--char)}
+  .step .n{font:600 13px var(--mono);color:var(--blue)}
+  .step b{color:var(--ink);font-weight:600}
+  code{font-family:var(--mono);font-size:.92em;color:var(--ink)}
+  .cta{margin-top:28px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .cta a{text-decoration:none;pointer-events:auto;cursor:pointer;position:relative;z-index:6;font-size:14px;padding:10px 18px}
+  #hero{left:640px;top:0;width:640px;height:720px}
+</style>
+</head>
+<body data-foot="Overview · Get started">
+<div class="z">
+  <div class="eyebrow in1">Get started</div>
+  <h1 class="in2">Install it.<br>Assign a policy.<br><span class="b">See everything.</span></h1>
+  <div class="steps">
+    <div class="step in3"><span class="n">01</span><span>Install <b>Claude Code Transcripts</b> from Fleet (Stack 9.4+, Basic license).</span></div>
+    <div class="step in4"><span class="n">02</span><span>Add it to the agent policy for your developer workstations.</span></div>
+    <div class="step in5"><span class="n">03</span><span>Optional: run <code>extras/setup.sh</code> to load models, pricing and rules, then flip <b>Enable ML inference</b>.</span></div>
+  </div>
+  <div class="cta in6">
+    <a class="btn fill" href="https://github.com/elastic/integrations/pull/22450" target="_blank" rel="noopener">elastic/integrations#22450&nbsp;&nbsp;↗</a>
+    <a class="btn" href="https://github.com/iamhowardtheduck/claude-code-elastic" target="_blank" rel="noopener">iamhowardtheduck/claude-code-elastic&nbsp;&nbsp;↗</a>
+  </div>
+</div>
+<svg id="hero" class="iso" viewBox="0 0 640 720"></svg>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+<script>
+(function(){
+  EW.dots({x: 640, y: 30, w: 640, h: 660, seed: 5, blobs: 6, thr: .5});
+  const sc = EW.iso(document.getElementById('hero'), {ox: 320, oy: 330, s: .72});
+  sc.rect({x: -30, y: -30, w: 330, d: 330, z: 0, delay: .05, dash: '2 4'});
+  // Elastic: the platform everything lands on
+  sc.box({x: 0, y: 0, w: 270, d: 270, h: 46, c: 'blue', delay: .1, drop: 60, snap: false, order: -1000});
+  // developer workstations, each running Elastic Agent
+  [[24, 150], [96, 150], [168, 150]].forEach(([x, y], i) => {
+    sc.box({x, y, w: 60, d: 90, h: 14, z: 46, c: 'slate', stroke: false, delay: .3 + i * .08, drop: 60, order: 10});
+    sc.box({x: x + 16, y: y + 30, w: 28, d: 28, h: 28, z: 60, c: 'teal', delay: .5 + i * .08, drop: 50, order: 20});
+  });
+  // optional ML: pink model in its dashed frame
+  sc.box({x: 172, y: 36, w: 44, d: 44, h: 44, z: 46, c: 'pink', delay: .75, drop: 60, order: 30});
+  sc.box({x: 160, y: 24, w: 68, d: 68, h: 66, z: 46, c: 'glass', wire: true, dash: '3 3', stroke: '#343741', shadow: false, delay: .9, drop: 0, snap: false, order: 40});
+  // a Kibana panel at the back
+  sc.box({x: 24, y: 24, w: 100, d: 70, h: 10, z: 46, c: 'white', delay: .6, drop: 50, order: 5});
+  [22, 34, 50, 40].forEach((h, j) => sc.box({x: 34 + j * 22, y: 54, w: 14, d: 24, h, z: 56, c: j === 2 ? 'blue' : 'slate', stroke: j === 2 ? '#1D1E24' : false, delay: .8 + j * .04, drop: 40, order: 6}));
+  sc.label({at: [24, 240, 46 + 7], side: 'l', len: 30, title: '02 · Agent policy', sub: 'workstations', delay: 1.0});
+  sc.label({at: [228, 40, 46 + 44], side: 'r', len: 24, title: '03 · Optional ML', sub: 'extras/setup.sh', delay: 1.05});
+  sc.label({at: [270, 200, 23], side: 'r', len: 40, title: '01 · Fleet', sub: 'Stack 9.4+', delay: 1.1});
+  sc.label({at: [24, 60, 51], side: 'l', len: 60, title: 'Kibana', sub: '3 dashboards · 10 rules', delay: 1.1});
+  sc.run();
+})();
+</script>
+</body>
+</html>

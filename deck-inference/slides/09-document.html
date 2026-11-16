@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The classified document</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:44px;max-width:1120px}
+  .sub{font-size:16px;max-width:1000px}
+  .grid{position:absolute;left:72px;right:72px;top:244px;display:grid;grid-template-columns:1.25fr 1fr;gap:36px;z-index:2}
+  .win{border:1px solid var(--ink);background:#fff;box-shadow:8px 8px 0 var(--blue);align-self:start}
+  .win .bar{display:flex;gap:6px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--ink);font:500 10.5px var(--mono);color:var(--grey);text-transform:uppercase;letter-spacing:.05em}
+  .win .bar i{width:8px;height:8px;border:1px solid var(--ink);border-radius:50%;display:inline-block}
+  .win .bar span{margin-left:6px}
+  .win pre{margin:0;padding:10px 14px;font:400 11px/1.55 var(--mono);color:var(--char);white-space:pre}
+  .win pre .k{color:var(--ink);font-weight:600}
+  .win pre .p{color:var(--pink);font-weight:600}
+  .win pre .o{color:#B9472F;font-weight:600}
+  .win pre .g{color:var(--grey)}
+  .list{display:flex;flex-direction:column;border-top:1px solid var(--ink)}
+  .list div{padding:9px 0;border-bottom:1px solid var(--line)}
+  .list b{display:block;font:600 11px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--ink);margin-bottom:3px}
+  .list p{font-size:12.5px;line-height:1.45;color:var(--char)}
+  code{font-family:var(--mono);font-size:.92em}
+</style>
+</head>
+<body data-foot="Inference · The classified document">
+<div class="z">
+  <div class="eyebrow in1">Output · <b>claude_code.prompt_classification</b></div>
+  <h1 class="in2">Every result lands on the prompt. <span class="b">One field to filter, one to alert.</span></h1>
+  <p class="sub in3">A real document from the load test (synthetic prompt). The secret was redacted before any model ran, so it shows up as a category, not as text.</p>
+</div>
+<div class="grid">
+  <div class="win in3">
+    <div class="bar"><i></i><i></i><i></i><span>logs-claude_code.transcript-loadtest</span></div>
+<pre><span class="k">message</span>: "explain the flaky integration test in orders it times
+  out under load; the staging db password is <span class="o">[REDACTED:password]</span>!"
+<span class="k">claude_code.prompt_classification</span>:
+  <span class="k">categories</span>: [<span class="p">"task:explain_code"</span>, <span class="p">"secret:password"</span>]
+  <span class="k">flagged</span>: <span class="p">true</span>
+  <span class="k">task</span>: "explain_code", <span class="k">task_confidence</span>: 0.982
+  <span class="k">scores</span>: { security: {11 labels}, task: {13}, toxic: …,
+            security_risk: 0.810, <span class="g">…</span> }
+  <span class="k">semantic</span>: { concept: "unauthorized_access", score: 0.488 }
+  <span class="k">secrets</span>: { count: 1, findings: [{ type: "password", length: 10 }] }
+<span class="k">claude_code.inference</span>:
+  total_ms: 6438.9, embedding_ms: 74.1, classify_calls: 10
+  steps: { zeroshot_task_ms: 1844.7, zeroshot_security_ms: 1304.4, <span class="g">…</span> }</pre>
+  </div>
+  <div class="list in4">
+    <div><b>categories</b><p>Every label that crossed its threshold, as <code>group:key</code>. Dashboards and rules filter on this one keyword list.</p></div>
+    <div><b>flagged</b><p>True when any flagging category fired: here the secret. The detection rules in extras/ start from it.</p></div>
+    <div><b>scores</b><p>Raw probabilities from every model, kept below threshold too, for hunting and re-tuning.</p></div>
+    <div><b>semantic · secrets</b><p>The nearest threat concept, and the redaction findings copied in, so one object holds the verdict.</p></div>
+    <div><b>inference</b><p>Per-step timings in milliseconds, so slow models show up in the data itself.</p></div>
+  </div>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+</body>
+</html>

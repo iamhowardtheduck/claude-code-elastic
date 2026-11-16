@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboards</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:50px;max-width:1100px}
+  .sub{font-size:16px;max-width:900px}
+  .grid{position:absolute;left:72px;right:72px;top:226px;display:grid;grid-template-columns:repeat(3,1fr);gap:22px;z-index:2}
+  .card{display:flex;flex-direction:column;gap:8px;padding:20px 22px;min-height:340px}
+  .card .top{display:flex;align-items:flex-end;justify-content:space-between}
+  .card .stat{font-size:72px;letter-spacing:-2.5px}
+  .card .pl{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--grey);padding-bottom:10px}
+  .panels{display:grid;grid-template-columns:repeat(9,14px);gap:4px;margin:4px 0 6px}
+  .panels i{width:14px;height:14px;background:var(--blue);animation:pop .3s ease both}
+  .sec .panels i{background:var(--orange)}
+  .ml .panels i{background:var(--pink)}
+  .sec .stat{color:var(--orange)}
+  .ml .stat{color:var(--pink)}
+  @keyframes pop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
+  .card h3{font:600 19px var(--sans);letter-spacing:-.3px;margin-top:4px}
+  .card p{font-size:13.5px;line-height:1.5;color:var(--char)}
+  .card .who{margin-top:auto;padding-top:10px;border-top:1px dashed var(--line)}
+  .card.hot{border-color:var(--ink);box-shadow:8px 8px 0 var(--blue)}
+  .key{font:400 10.5px var(--mono);color:var(--grey);letter-spacing:.04em;text-transform:uppercase}
+</style>
+</head>
+<body data-foot="Overview · Dashboards">
+<div class="z">
+  <div class="eyebrow in1">Out of the box</div>
+  <h1 class="in2">Three dashboards for <span class="b">three audiences.</span></h1>
+  <p class="sub in3">Each square below is one panel on the dashboard.</p>
+</div>
+<div class="grid">
+  <div class="card hot in3"><div class="top"><span class="stat" data-n="16">16</span><span class="pl">panels</span></div><div class="panels" data-n="16" data-d=".5"></div><h3>Business Analytics</h3><p>Activity, users, projects, models, token volume, estimated spend from a model-pricing lookup, and topics.</p><div class="who"><span class="chip on">eng leaders · FinOps</span></div></div>
+  <div class="card sec in4"><div class="top"><span class="stat" data-n="17">17</span><span class="pl">panels</span></div><div class="panels" data-n="17" data-d=".7"></div><h3>Security</h3><p>Risky commands, secrets exposed, file and network access, auto-mode blocks, classification results and semantic threat search.</p><div class="who"><span class="chip" style="border-color:var(--orange)">SOC · AppSec</span></div></div>
+  <div class="card ml in5"><div class="top"><span class="stat" data-n="16">16</span><span class="pl">panels</span></div><div class="panels" data-n="16" data-d=".9"></div><h3>ML Inference Admin</h3><p>Is inference keeping up? Shows queue depth, throughput, utilization, errors, per-prompt inference time and ingest lag.</p><div class="who"><span class="chip" style="border-color:var(--pink)">platform team</span></div></div>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+<script>
+(function(){
+  document.querySelectorAll('.panels').forEach(p => { const n = +p.dataset.n, d = +p.dataset.d;
+    for (let i = 0; i < n; i++){ const b = document.createElement('i'); b.style.animationDelay = (d + i * .025) + 's'; p.appendChild(b); } });
+  document.querySelectorAll('.stat[data-n]').forEach(s => EW.count(s, +s.dataset.n, {delay: .35, dur: 1.1}));
+})();
+</script>
+</body>
+</html>

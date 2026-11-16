@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>What it solves</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:46px;max-width:1100px}
+  #ds{left:72px;top:220px;width:348px;height:420px}
+  .cap{position:absolute;left:72px;width:300px;top:574px;text-align:center;z-index:2}
+  .cap .tag{color:var(--blue)}
+  .cap div{font:400 11px var(--mono);color:var(--grey);margin-top:3px}
+  .rows{position:absolute;left:420px;right:72px;top:236px;display:flex;flex-direction:column;gap:14px;z-index:2}
+  .row{height:118px;display:grid;grid-template-columns:130px 1.25fr 1fr;gap:22px;align-items:center;border:1px solid var(--line);border-left:4px solid var(--c);background:#fff;padding:0 22px 0 18px}
+  .who{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);line-height:1.5}
+  .q{font-size:15px;line-height:1.45;color:var(--ink)}
+  .a{font-size:13px;line-height:1.5;color:var(--char);border-left:1px solid var(--ink);padding-left:14px}
+  code{font-family:var(--mono);font-size:.9em}
+</style>
+</head>
+<body data-foot="Overview · What it solves">
+<div class="z">
+  <div class="eyebrow in1">What it solves</div>
+  <h1 class="in2">One dataset answers questions <span class="b">three different teams are asking.</span></h1>
+</div>
+<svg id="ds" class="iso" viewBox="0 0 348 420"></svg>
+<div class="cap in5"><span class="tag">One dataset</span><div>structured · redacted · searchable</div></div>
+<div class="rows">
+  <div class="row in3" style="--c:var(--orange)"><div class="who">Security</div><div class="q">"Did an agent just run a destructive command, read <code>~/.aws/credentials</code>, or post to a webhook? Was a prompt injected?"</div><div class="a">Security dashboard and 10 rules, with the triggering prompt attached to every alert.</div></div>
+  <div class="row in4" style="--c:var(--blue)"><div class="who">Leadership<br>&amp; FinOps</div><div class="q">"Who's adopting Claude Code, on which projects, with which models, and what is it costing us?"</div><div class="a">Business Analytics with spend calculated from the pricing lookup.</div></div>
+  <div class="row in5" style="--c:var(--char)"><div class="who">Compliance<br>&amp; IR</div><div class="q">"Show me the full record of what the agent did on that host last Tuesday, after the laptop already deleted it."</div><div class="a">A durable, searchable, redacted audit trail that outlives the 30-day cleanup.</div></div>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+<script>
+(function(){
+  EW.dots({x: 60, y: 300, w: 340, h: 280, seed: 6, blobs: 4, thr: .55});
+  const svg = document.getElementById('ds');
+  const sc = EW.iso(svg, {ox: 150, oy: 235, s: .8});
+  sc.rect({x: -80, y: -80, w: 160, d: 160, z: 0, delay: .1});
+  // one dataset: a stack of uniform blue documents
+  for (let j = 0; j < 5; j++) sc.box({x: -60, y: -60, w: 120, d: 120, h: 12, z: j * 14, c: 'blue', delay: .25 + j * .07, drop: 60});
+  sc.run();
+  // three leaders from the dataset to the three teams
+  const ax = sc.P(60, -60, 0)[0];
+  const rowsY = [75, 207, 339], anchors = [sc.P(60, -60, 60)[1], sc.P(60, -60, 32)[1], sc.P(60, -60, 4)[1]];
+  rowsY.forEach((ry, i) => {
+    const d = `M${ax + 4},${anchors[i]} H290 V${ry} H346`;
+    const p = EW.el('path', {d, fill: 'none', stroke: '#1D1E24', 'stroke-width': 1}, svg);
+    const L = p.getTotalLength(); p.setAttribute('stroke-dasharray', L); p.setAttribute('stroke-dashoffset', L);
+    p.style.transition = `stroke-dashoffset .6s cubic-bezier(.2,.7,.2,1) ${.75 + i * .12}s`;
+    EW.el('circle', {cx: ax + 4, cy: anchors[i], r: 2.5, fill: '#1D1E24', class: 'in5'}, svg);
+    requestAnimationFrame(() => requestAnimationFrame(() => p.setAttribute('stroke-dashoffset', 0)));
+  });
+})();
+</script>
+</body>
+</html>

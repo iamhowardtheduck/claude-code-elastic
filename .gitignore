@@ -14,3 +14,20 @@ deck-performance/_site/
 deck-performance/.fslides/
 deck-performance/*.pdf
 deck-performance/.claude/
+
+# deck-inference
+deck-inference/node_modules/
+deck-inference/_site/
+deck-inference/.fslides/
+deck-inference/*.pdf
+deck-inference/.claude/
+
+# deck-full
+deck-full/node_modules/
+deck-full/_site/
+deck-full/.fslides/
+deck-full/*.pdf
+deck-full/.claude/
+
+# fslides kit skill copied into the original deck
+deck/.claude/

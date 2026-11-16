@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>How it works</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:46px;max-width:1100px}
+  .sub{font-size:16px;max-width:900px}
+  #flow{left:72px;top:252px;width:1136px;height:220px}
+  .caps{position:absolute;left:72px;right:72px;top:492px;display:grid;grid-template-columns:repeat(5,1fr);gap:16px;z-index:2}
+  .cap{border-top:1px solid var(--ink);padding-top:10px;display:flex;flex-direction:column;gap:5px}
+  .cap .tag{color:var(--grey);font-weight:500;font-size:10.5px}
+  .cap b{font:600 16px var(--sans);letter-spacing:-.3px;color:var(--ink)}
+  .cap small{font:400 11.5px/1.55 var(--mono);color:var(--char)}
+  .cap.hi{border-top:3px solid var(--blue)}
+  .cap.hi .tag{color:var(--blue)}
+  .cap.opt{border-top:1px dashed var(--ink)}
+  .cap.opt .tag{color:var(--pink)}
+</style>
+</head>
+<body data-foot="Overview · How it works">
+<div class="z">
+  <div class="eyebrow in1">What it is</div>
+  <h1 class="in2">Tail the files Claude already writes. <span class="b">Index them properly.</span></h1>
+  <p class="sub in3">Nothing changes in Claude Code itself. No proxy, no SDK, no wrapper. Install it through Fleet, assign a policy, and data shows up.</p>
+</div>
+<svg id="flow" class="iso" viewBox="0 0 1136 220"></svg>
+<div class="caps">
+  <div class="cap in3"><span class="tag">source</span><b>On disk</b><small>~/.claude/projects/**/*.jsonl<br>Claude Desktop main / mcp logs</small></div>
+  <div class="cap in3"><span class="tag">collect</span><b>Elastic Agent</b><small>filestream input<br>Win · macOS · Linux · Cowork</small></div>
+  <div class="cap hi in4"><span class="tag">ingest pipeline</span><b>Parse · Map · Redact</b><small>ECS + OTel gen_ai.*<br>secrets → [REDACTED:type]</small></div>
+  <div class="cap opt in4"><span class="tag">optional</span><b>ML inference</b><small>embedding + 6 NLP models<br>on human prompts only</small></div>
+  <div class="cap in5"><span class="tag">use</span><b>Kibana</b><small>3 dashboards<br>10 detection rules</small></div>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+<script>
+(function(){
+  const svg = document.getElementById('flow');
+  const U = 131.2, sc = EW.iso(svg, {ox: 113.6, oy: 140, s: 1});
+  const at = i => [i * U - 35, -i * U - 35];
+  // dashed floor line that the data travels along
+  const [lx0, ly0] = sc.P(-40, 40, 0), [lx1, ly1] = sc.P(4 * U + 40, -4 * U - 40, 0);
+  EW.el('line', {x1: lx0, y1: ly0, x2: lx1, y2: ly1, stroke: '#1D1E24', 'stroke-width': 1.2, 'stroke-dasharray': '2 5', class: 'in1'}, sc.floor);
+  // 0 on disk: a stack of JSONL files
+  let [x, y] = at(0);
+  [0, 15, 30].forEach((z, j) => sc.box({x, y, w: 70, d: 70, h: 12, z, c: 'slate', stroke: false, delay: .35 + j * .07, drop: 60}));
+  // 1 Elastic Agent
+  [x, y] = at(1); sc.box({x, y, w: 70, d: 70, h: 48, c: 'teal', delay: .5, drop: 70});
+  // 2 ingest pipeline
+  [x, y] = at(2); sc.box({x, y, w: 70, d: 70, h: 72, c: 'blue', delay: .62, drop: 80});
+  // 3 optional ML: pink model inside a dashed frame
+  [x, y] = at(3);
+  sc.box({x: x + 13, y: y + 13, w: 44, d: 44, h: 44, c: 'pink', delay: .74, drop: 70});
+  sc.box({x, y, w: 70, d: 70, h: 70, c: 'glass', wire: true, dash: '3 3', stroke: '#343741', delay: .86, drop: 0, snap: false, shadow: false, order: 50});
+  // 4 Kibana: a panel with bars
+  [x, y] = at(4);
+  sc.box({x, y, w: 70, d: 70, h: 10, c: 'white', delay: .86, drop: 60});
+  [22, 36, 52].forEach((h, j) => sc.box({x: x + 10 + j * 19, y: y + 40, w: 12, d: 18, h, z: 10, c: j === 2 ? 'blue' : 'slate', stroke: j === 2 ? '#1D1E24' : false, delay: 1.0 + j * .05, drop: 40}));
+  sc.run();
+  // data cubes travelling between stages: multi-colour raw data, blue after the pipeline
+  const raw = ['#48EFCF', '#FEC514', '#FF7E62'];
+  const q = pts => pts.map(p => sc.P(...p).map(v => v.toFixed(1)).join(',')).join(' ');
+  const cube = fill => { const g = EW.el('g', {opacity: 0}, sc.top), w = 12, x = -6, y = -6, z = 0;
+    EW.el('polygon', {points: q([[x, y + w, z + w], [x + w, y + w, z + w], [x + w, y + w, z], [x, y + w, z]]), fill, stroke: '#1D1E24', 'stroke-width': .8}, g);
+    EW.el('polygon', {points: q([[x + w, y, z + w], [x + w, y + w, z + w], [x + w, y + w, z], [x + w, y, z]]), fill: fill === '#0B64DD' ? '#0A4FB0' : '#343741', stroke: '#1D1E24', 'stroke-width': .8}, g);
+    EW.el('polygon', {points: q([[x, y, z + w], [x + w, y, z + w], [x + w, y + w, z + w], [x, y + w, z + w]]), fill: '#fff', stroke: '#1D1E24', 'stroke-width': .8}, g);
+    return g; };
+  const movers = [];
+  for (let gap = 0; gap < 4; gap++) for (let j = 0; j < 2; j++)
+    movers.push({g: cube(gap < 2 ? raw[(gap + j) % 3] : '#0B64DD'), gap, ph: j / 2});
+  const span = 1136 / 5;
+  EW.loop(t => {
+    if (t < 1.2) return;
+    movers.forEach(m => {
+      const p = ((t - 1.2) / 2.2 + m.ph) % 1;
+      const x0 = span * m.gap + 70, x1 = span * (m.gap + 1) - 70;
+      m.g.setAttribute('transform', `translate(${(x0 + (x1 - x0) * p).toFixed(1)},0)`);
+      m.g.setAttribute('opacity', Math.min(1, p * 6, (1 - p) * 6, (t - 1.2) * 2).toFixed(2));
+    });
+  });
+})();
+</script>
+</body>
+</html>
