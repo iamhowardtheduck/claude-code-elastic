@@ -1,3 +1,11 @@
+- version: 0.2.3
+  changes:
+  - description: Secret redaction now replaces the whole PEM private key (BEGIN banner to END banner), not just the banner line, which left the base64 key body stored. Redaction fails closed - if it errors, or the pipeline fails before it runs, the text fields are dropped and the event is tagged secret_redaction_failed. JSON-RPC error text in Desktop logs (error.message) is redacted too.
+    type: bugfix
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/pull/8
+  - description: Sensitive-file and exfil-site rules and Security panels match every file and URL of a tool call (ES|QL LIKE returned null on multi-valued fields, so calls touching several files were missed) and Windows paths. The classifiers receive the prompt capped at 4000 characters instead of the full message.
+    type: bugfix
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/pull/8
 - version: 0.2.2
   changes:
   - description: Map claude_code.message.input_transformations as flattened. Newer Claude Code versions write it as a list of objects, which the keyword mapping rejected (document_parsing_exception, lines lost to the failure store).

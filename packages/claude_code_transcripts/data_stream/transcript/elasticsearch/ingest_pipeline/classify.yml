@@ -1,6 +1,12 @@
 ---
 description: Classify human prompts from Claude Code transcripts with NLP models (called from claude-code-transcript)
 processors:
+- script:
+    tag: classify-input
+    lang: painless
+    description: 'Classifier input: the (already redacted) prompt, capped at 4000 chars. The models read at most 128-512 tokens, so a pasted 20 MB log is not sent to each of them'
+    if: ctx.message instanceof String
+    source: 'String m = ctx.message; ctx._classify_input = m.length() > 4000 ? m.substring(0, 4000) : m;'
 - inference:
     on_failure:
     - append:
@@ -12,7 +18,7 @@ processors:
       text_classification:
         num_top_classes: -1
     field_map:
-      message: text_field
+      _classify_input: text_field
     tag: classify-injection
     model_id: protectai__deberta-v3-base-prompt-injection-v2
 - script:
@@ -34,7 +40,7 @@ processors:
       text_classification:
         num_top_classes: -1
     field_map:
-      message: text_field
+      _classify_input: text_field
     tag: classify-jailbreak
     model_id: jackhhao__jailbreak-classifier
 - script:
@@ -56,7 +62,7 @@ processors:
       text_classification:
         num_top_classes: -1
     field_map:
-      message: text_field
+      _classify_input: text_field
     tag: classify-toxicity
     model_id: s-nlp__roberta_toxicity_classifier
 - script:
@@ -78,7 +84,7 @@ processors:
       text_classification:
         num_top_classes: -1
     field_map:
-      message: text_field
+      _classify_input: text_field
     tag: classify-offensive
     model_id: cardiffnlp__twitter-roberta-base-offensive
 - script:
@@ -112,7 +118,7 @@ processors:
         - normal software or IT work
         - casual conversation
     field_map:
-      message: text_field
+      _classify_input: text_field
     tag: classify-security
     model_id: cross-encoder__nli-deberta-v3-base-128
     if: ctx.message instanceof String && ctx.message.trim().length() >= 20
@@ -145,7 +151,7 @@ processors:
         - writing or editing code
         - casual conversation
     field_map:
-      message: text_field
+      _classify_input: text_field
     tag: classify-agent_action
     model_id: cross-encoder__nli-deberta-v3-base-128
     if: ctx.message instanceof String && ctx.message.trim().length() >= 20
@@ -183,7 +189,7 @@ processors:
         - a general knowledge question
         - feedback on a previous answer
     field_map:
-      message: text_field
+      _classify_input: text_field
     tag: classify-task
     model_id: cross-encoder__nli-deberta-v3-base-128
 - script:
@@ -210,7 +216,7 @@ processors:
         - thanks or praise
         - a question about Claude itself
     field_map:
-      message: text_field
+      _classify_input: text_field
     tag: classify-interaction
     model_id: cross-encoder__nli-deberta-v3-base-128
 - script:
@@ -240,7 +246,7 @@ processors:
         - illegal activity
         - weapons
     field_map:
-      message: text_field
+      _classify_input: text_field
     tag: classify-moderation
     model_id: cross-encoder__nli-deberta-v3-base-128
     if: ctx.message instanceof String && ctx.message.trim().length() >= 20
@@ -263,7 +269,7 @@ processors:
     inference_config:
       ner: {}
     field_map:
-      message: text_field
+      _classify_input: text_field
     tag: classify-ner
     model_id: dslim__bert-base-ner
 - script:
@@ -523,7 +529,9 @@ processors:
     lang: painless
     if: ctx.claude_code?.secrets?.types != null
 - remove:
-    field: _ml
+    field:
+    - _ml
+    - _classify_input
     ignore_missing: true
     tag: remove_ml
 on_failure:
@@ -536,6 +544,8 @@ on_failure:
     field: event.kind
     value: pipeline_error
 - remove:
-    field: _ml
+    field:
+    - _ml
+    - _classify_input
     ignore_missing: true
     tag: remove_temp_fields_on_failure
