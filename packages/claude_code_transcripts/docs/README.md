@@ -17,7 +17,7 @@ One document per conversation line. `event.action` is one of `user-prompt`, `ass
 - `gen_ai.*` (ECS + OpenTelemetry GenAI names): `provider.name`/`system`, `conversation.id`, `operation.name`, `request.model`, `response.model/id/finish_reasons`, `tool.name`, `tool.call.id`, `usage.input_tokens` (**includes cached tokens**, per OTel), `usage.output_tokens`, `usage.cache_read.input_tokens`, `usage.cache_creation.input_tokens`.
   For cost, use Anthropic's raw split under `claude_code.message.usage.*` (uncached `input_tokens`, cache reads and cache writes are priced differently).
 - One assistant turn can span several lines sharing `gen_ai.response.id`, each repeating usage: deduplicate on it before summing tokens.
-- Secrets (cloud keys, tokens, private keys, passwords, credentials in URLs and more) are replaced with `[REDACTED:<type>]` in `message`, `claude_code.message.content` and tool inputs. `claude_code.secrets.*` records only their type and length.
+- Secrets (cloud keys, tokens, private keys, passwords, credentials in URLs and more) are replaced with `[REDACTED:<type>]` in `message`, `claude_code.message.content` and tool inputs. `claude_code.secrets.*` records only their type and length. Redaction fails closed: if it cannot run, the text fields are dropped and the event is tagged `secret_redaction_failed`.
 - Tool inputs are extracted into `claude_code.tool_input.{command,file_path,url,skill,description}`.
 
 ### Desktop logs

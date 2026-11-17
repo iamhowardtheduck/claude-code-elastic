@@ -253,7 +253,7 @@ processors:
         try { m = /(?<![A-Za-z0-9])sk-(?!ant-)(?:proj-|svcacct-)?[A-Za-z0-9_\-]{32,}/.matcher(text); while (m.find()) { hit(f, seen, 'openai_api_key', m.group()); } } catch (Exception e) { errs.add('openai_api_key'); }
         try { m = /AIza[0-9A-Za-z_\-]{35}/.matcher(text); while (m.find()) { hit(f, seen, 'google_api_key', m.group()); } } catch (Exception e) { errs.add('google_api_key'); }
         try { m = /[sr]k_live_[0-9A-Za-z]{24,}/.matcher(text); while (m.find()) { hit(f, seen, 'stripe_key', m.group()); } } catch (Exception e) { errs.add('stripe_key'); }
-        try { m = /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP |ENCRYPTED )?PRIVATE KEY(?: BLOCK)?-----/.matcher(text); while (m.find()) { hit(f, seen, 'private_key', m.group()); } } catch (Exception e) { errs.add('private_key'); }
+        try { m = /-----BEGIN ((?:RSA |EC |DSA |OPENSSH |PGP |ENCRYPTED )?PRIVATE KEY(?: BLOCK)?)-----[\s\S]*?(?:-----END \1-----|$)/.matcher(text); while (m.find()) { hit(f, seen, 'private_key', m.group()); } } catch (Exception e) { errs.add('private_key'); }
         try { m = /eyJ[A-Za-z0-9_\-]{10,}\.eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}/.matcher(text); while (m.find()) { hit(f, seen, 'jwt', m.group()); } } catch (Exception e) { errs.add('jwt'); }
         try { m = /(?i)authorization\s?[:=]\s?['"]?(?:apikey|bearer|basic) ([A-Za-z0-9+\/=._\-]{16,})/.matcher(text); while (m.find()) { hit(f, seen, 'auth_header', m.group(1)); } } catch (Exception e) { errs.add('auth_header'); }
         // NAME=value / "NAME": "value" where NAME contains PASSWORD|PASSWD|SECRET|TOKEN|API_KEY|APIKEY (indexOf + anchored window)
@@ -366,6 +366,7 @@ processors:
         for (def i : order) { vals.add(seen.get(i)); tags.add('[REDACTED:' + f.get(i).type + ']'); }
         if (ctx.message != null) { ctx.message = walkReplace(ctx.message, vals, tags, 0); }
         if (cd.mcp?.payload != null) { cd.mcp.payload = walkReplace(cd.mcp.payload, vals, tags, 0); }
+        if (ctx.error instanceof Map && ctx.error.message instanceof String) { ctx.error.message = walkReplace(ctx.error.message, vals, tags, 0); }   // JSON-RPC error text, copied from the payload
         List types = new ArrayList(); for (def x : f) { if (!types.contains(x.type)) { types.add(x.type); } }
         sec.put('count', f.size()); sec.put('types', types); sec.put('findings', f); sec.put('redacted', true);
       }
@@ -463,13 +464,43 @@ processors:
         field: claude_desktop.secrets.errors
         value: redaction script failed
         tag: redact-secrets_on_failure_append_claude_desktop_secrets_errors
+    - script:
+        tag: redact-secrets_on_failure_fail_closed
+        lang: painless
+        description: 'Fail closed: drop the text that could not be scanned'
+        source: |
+          // Fail closed: text that was not scanned for secrets is not stored.
+          if (ctx.message != null) { ctx.message = '[REDACTED:redaction_failed]'; }
+          if (ctx.claude_desktop?.mcp instanceof Map) { ctx.claude_desktop.mcp.remove('payload'); }
+          if (ctx.error instanceof Map && ctx.error.message != null) { ctx.error.message = '[REDACTED:redaction_failed]'; }
+          if (!(ctx.tags instanceof List)) { ctx.tags = new ArrayList(); }
+          if (!ctx.tags.contains('secret_redaction_failed')) { ctx.tags.add('secret_redaction_failed'); }
+- set:
+    tag: set_redaction_ok
+    description: Marker for the pipeline on_failure handler - the text has been scanned (or dropped) for secrets
+    field: _redaction_ok
+    value: true
 - remove:
     description: _tmp holds the unredacted line; message keeps the redacted text
     field:
     - _tmp
+    - _redaction_ok
     ignore_missing: true
     tag: remove_tmp
 on_failure:
+- script:
+    tag: fail_closed_on_failure
+    lang: painless
+    if: ctx._redaction_ok != true
+    description: 'Fail closed: if the pipeline failed before secret redaction, drop the unscanned text'
+    source: |
+      // Fail closed: text that was not scanned for secrets is not stored.
+      if (ctx.message != null) { ctx.message = '[REDACTED:redaction_failed]'; }
+      if (ctx.claude_desktop?.mcp instanceof Map) { ctx.claude_desktop.mcp.remove('payload'); }
+      if (ctx.error instanceof Map && ctx.error.message != null) { ctx.error.message = '[REDACTED:redaction_failed]'; }
+      if (!(ctx.tags instanceof List)) { ctx.tags = new ArrayList(); }
+      if (!ctx.tags.contains('secret_redaction_failed')) { ctx.tags.add('secret_redaction_failed'); }
+
 - append:
     tag: append_error_message_on_failure
     field: error.message
@@ -481,5 +512,6 @@ on_failure:
 - remove:
     field:
     - _tmp
+    - _redaction_ok
     ignore_missing: true
     tag: remove_temp_fields_on_failure
