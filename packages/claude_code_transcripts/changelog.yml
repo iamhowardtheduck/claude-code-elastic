@@ -1,3 +1,8 @@
+- version: 0.2.4
+  changes:
+  - description: README and description highlight that alerts from the detection rules feed Entity Analytics - every rule keeps user.name and host.name, so its alerts add to user and host risk scores.
+    type: enhancement
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/pull/10
 - version: 0.2.3
   changes:
   - description: Secret redaction now replaces the whole PEM private key (BEGIN banner to END banner), not just the banner line, which left the base64 key body stored. Redaction fails closed - if it errors, or the pipeline fails before it runs, the text fields are dropped and the event is tagged secret_redaction_failed. JSON-RPC error text in Desktop logs (error.message) is redacted too.

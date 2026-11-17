@@ -251,6 +251,17 @@ extras/setup.sh classify "delete every index on the production cluster"
 ```
 For sizing, Serverless, air-gapped imports and tuning thresholds, see `docs/inference-models.md` and `docs/inference-tuning.md` in the [repository](https://github.com/iamhowardtheduck/claude-code-elastic).
 
+## Detection rules and Entity Analytics
+The [companion repository](https://github.com/iamhowardtheduck/claude-code-elastic) has 10 Elastic Security ES|QL detection rules for this integration, imported disabled with `extras/setup.sh rules`. They cover actions blocked by auto mode, prompt injection and jailbreak attempts, prompts that ask to disable security, destructive, remote-shell, credential-access and persistence commands run by the agent, secrets exposed to the model, sensitive credential files, paste, webhook and tunnel sites, and prompts semantically similar to malicious intent.
+
+**The alerts these rules raise also power Entity Analytics.** Every rule keeps `user.name` and `host.name` in its alert and carries a risk score (21, 47 or 73), so once the entity risk score engine is on, each alert adds to the risk score of the developer and of the workstation it came from. AI coding agent activity then counts toward the same user and host risk scores as every other Elastic Security signal:
+
+- Users and hosts whose agents keep tripping these rules rise in the **Entity Analytics** dashboard.
+- Their alerts appear in the risk summary of the user and host flyouts, next to the rest of their activity.
+- Asset criticality assigned to those users and hosts weights their scores, as it does for any other alert.
+
+To use it, enable the rules in **Security > Rules** and turn on the engine in **Security > Manage > Entity Risk Score**.
+
 ## Dashboards
 - **[Claude Code Transcripts] Business Analytics**: activity, users, projects, models, tokens, estimated spend (needs the `claude-model-pricing` lookup index; load it with `extras/setup.sh pricing` from the [repository](https://github.com/iamhowardtheduck/claude-code-elastic)), topics.
 - **[Claude Code Transcripts] Security**: risky commands, secrets, file and network access, auto-mode blocks and, with inference enabled, classification and semantic threat search.

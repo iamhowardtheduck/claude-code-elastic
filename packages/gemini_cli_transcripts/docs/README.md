@@ -31,6 +31,7 @@ The Gemini CLI Transcripts integration collects log messages of the following ty
 
 - Usage and cost analytics: activity by user and project, models, token usage, and estimated spend, on the **[Gemini CLI Transcripts] Business Analytics** dashboard.
 - Security monitoring: risky commands, secrets, file and network access, and failed tool calls on the **[Gemini CLI Transcripts] Security** dashboard. With ML inference, also prompt injection, jailbreaks, risky agent actions, personal data and semantic threat search.
+- Entity Analytics: alerts from the companion detection rules keep `user.name` and `host.name`, so they add to the user and host risk scores in Entity Analytics. See [Detection rules and Entity Analytics](#detection-rules-and-entity-analytics).
 - Tool auditing: which tools are used, on which hosts and by which users.
 - Secret exposure: `gemini_cli.secrets.types` shows which kinds of credentials appeared, without storing them.
 
@@ -66,7 +67,19 @@ To add the integration in Kibana:
    - **Exclude files**, **Ignore older**, **Maximum line size (bytes)**, **Tags**, **Processors** and **Custom configurations** (advanced): regular expressions of files to skip, skip files not changed within this period (default `720h`), the largest line the agent reads (lines with pasted images or large tool output can exceed the 10 MB default), extra tags, agent-side processors, and extra `filestream` options.
 3. Add the integration to the agent policy of the hosts where Gemini CLI runs, and save.
 
-The **[Gemini CLI Transcripts] Business Analytics** dashboard estimates spend from a `gemini-model-pricing` lookup index of Google's per-model list prices, including announced price changes and long-context prices. Create it before using the spend panels; the [companion repository](https://github.com/iamhowardtheduck/claude-code-elastic) has a loader (`extras/gemini/setup.sh pricing`) and eight detection rules (`extras/gemini/setup.sh rules`).
+The **[Gemini CLI Transcripts] Business Analytics** dashboard estimates spend from a `gemini-model-pricing` lookup index of Google's per-model list prices, including announced price changes and long-context prices. Create it before using the spend panels; the [companion repository](https://github.com/iamhowardtheduck/gemini-cli-elastic) has a loader (`extras/setup.sh pricing`).
+
+### Detection rules and Entity Analytics
+
+The [companion repository](https://github.com/iamhowardtheduck/gemini-cli-elastic) has eight Elastic Security ES|QL detection rules for this integration, imported disabled with `extras/setup.sh rules`. They cover prompt injection and jailbreak attempts, prompts that ask to disable security, destructive, remote-shell, credential-access and persistence commands run by the agent, secrets exposed to the model, sensitive credential files, paste, webhook and tunnel sites, and prompts semantically similar to malicious intent.
+
+**The alerts these rules raise also power Entity Analytics.** Every rule keeps `user.name` and `host.name` in its alert and carries a risk score (21, 47 or 73), so once the entity risk score engine is on, each alert adds to the risk score of the developer and of the workstation it came from. AI coding agent activity then counts toward the same user and host risk scores as every other Elastic Security signal:
+
+- Users and hosts whose agents keep tripping these rules rise in the **Entity Analytics** dashboard.
+- Their alerts appear in the risk summary of the user and host flyouts, next to the rest of their activity.
+- Asset criticality assigned to those users and hosts weights their scores, as it does for any other alert.
+
+To use it, enable the rules in **Security > Rules** and turn on the engine in **Security > Manage > Entity Risk Score**.
 
 ### Enable ML inference
 
@@ -217,7 +230,7 @@ It must return a 768-number embedding.
 
 Go to **Fleet > Agent policies > (policy) > Gemini CLI Transcripts > Edit integration > Gemini CLI session transcripts**, and turn on **Enable ML inference**, and **Prompt classification** if you completed steps 1–3.
 
-The [companion repository](https://github.com/iamhowardtheduck/claude-code-elastic) has a setup script that runs steps 2–4 (`extras/gemini/setup.sh models` and `extras/gemini/setup.sh inference-mapping`), and documents Serverless, air-gapped imports and threshold tuning.
+The [companion repository](https://github.com/iamhowardtheduck/gemini-cli-elastic) has a setup script that runs steps 2–4 (`extras/setup.sh models` and `extras/setup.sh inference-mapping`), and documents Serverless, air-gapped imports and threshold tuning.
 
 ### Validation
 
