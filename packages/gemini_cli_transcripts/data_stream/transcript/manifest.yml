@@ -27,6 +27,22 @@ streams:
     required: false
     show_user: false
     default: []
+  - name: enable_inference
+    type: bool
+    title: Enable ML inference
+    description: Embed every human prompt (semantic search panels and rules) and, if 'Prompt classification' is on, classify it with the NLP models. Requires the models from the integration README to be deployed and the embedding mapping from `extras/gemini/setup.sh inference-mapping`. Off = no inference calls at ingest.
+    multi: false
+    required: false
+    show_user: true
+    default: false
+  - name: inference_classification
+    type: bool
+    title: Prompt classification
+    description: Only applies when ML inference is enabled. Runs the prompt-injection, jailbreak, toxicity, offensive, zero-shot and NER models (about 20-45 s of ML time per prompt). Turn off for embedding-only.
+    multi: false
+    required: false
+    show_user: true
+    default: true
   - name: ignore_older
     type: text
     title: Ignore older

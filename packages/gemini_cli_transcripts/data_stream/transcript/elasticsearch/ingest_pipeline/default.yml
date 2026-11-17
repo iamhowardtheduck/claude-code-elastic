@@ -200,6 +200,17 @@ processors:
         field: gemini_cli.secrets.errors
         value: redaction script failed
         tag: redact-secrets_on_failure_append_gemini_cli_secrets_errors
+    - script:
+        tag: redact-secrets_on_failure_fail_closed
+        lang: painless
+        description: 'Fail closed: drop the text that could not be scanned'
+        source: |
+          // Fail closed: text that was not scanned for secrets is not stored.
+          if (ctx.message != null) { ctx.message = '[REDACTED:redaction_failed]'; }
+          def g = ctx.gemini_cli;
+          if (g != null) { g.remove('content'); g.remove('toolCalls'); g.remove('thoughts'); g.remove('tool_input'); }
+          if (ctx.tags instanceof List) { ctx.tags.removeIf(t -> t == 'gemini_cli_embed' || t == 'gemini_cli_classify'); } else { ctx.tags = new ArrayList(); }
+          if (!ctx.tags.contains('secret_redaction_failed')) { ctx.tags.add('secret_redaction_failed'); }
     description: Detect and redact secrets in message, content, toolCalls and thoughts (type + length only)
     tag: redact-secrets
     source: |
@@ -245,7 +256,7 @@ processors:
         try { m = /(?<![A-Za-z0-9])sk-(?!ant-)(?:proj-|svcacct-)?[A-Za-z0-9_\-]{32,}/.matcher(text); while (m.find()) { hit(f, seen, 'openai_api_key', m.group()); } } catch (Exception e) { errs.add('openai_api_key'); }
         try { m = /AIza[0-9A-Za-z_\-]{35}/.matcher(text); while (m.find()) { hit(f, seen, 'google_api_key', m.group()); } } catch (Exception e) { errs.add('google_api_key'); }
         try { m = /[sr]k_live_[0-9A-Za-z]{24,}/.matcher(text); while (m.find()) { hit(f, seen, 'stripe_key', m.group()); } } catch (Exception e) { errs.add('stripe_key'); }
-        try { m = /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP |ENCRYPTED )?PRIVATE KEY(?: BLOCK)?-----/.matcher(text); while (m.find()) { hit(f, seen, 'private_key', m.group()); } } catch (Exception e) { errs.add('private_key'); }
+        try { m = /-----BEGIN ((?:RSA |EC |DSA |OPENSSH |PGP |ENCRYPTED )?PRIVATE KEY(?: BLOCK)?)-----[\s\S]*?(?:-----END \1-----|$)/.matcher(text); while (m.find()) { hit(f, seen, 'private_key', m.group()); } } catch (Exception e) { errs.add('private_key'); }
         try { m = /eyJ[A-Za-z0-9_\-]{10,}\.eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}/.matcher(text); while (m.find()) { hit(f, seen, 'jwt', m.group()); } } catch (Exception e) { errs.add('jwt'); }
         try { m = /(?i)authorization\s?[:=]\s?['"]?(?:apikey|bearer|basic) ([A-Za-z0-9+\/=._\-]{16,})/.matcher(text); while (m.find()) { hit(f, seen, 'auth_header', m.group(1)); } } catch (Exception e) { errs.add('auth_header'); }
         // NAME=value / "NAME": "value" where NAME contains PASSWORD|PASSWD|SECRET|TOKEN|API_KEY|APIKEY (indexOf + anchored window)
@@ -340,6 +351,7 @@ processors:
         if (o instanceof List) { List l = (List) o; for (int i = 0; i < l.size(); i++) { l.set(i, walkReplace(l.get(i), vals, tags, depth + 1)); } return l; }
         return o;
       }
+
       // ---- main: scan every free-text location of a chat record, then redact every occurrence everywhere ----
       def g = ctx.gemini_cli;
       if (g == null) { return; }
@@ -455,6 +467,11 @@ processors:
       - client secret
       - client_secret
     if: ctx.gemini_cli != null
+- set:
+    tag: set_redaction_ok
+    description: Marker for the pipeline on_failure handler - the text has been scanned (or dropped) for secrets
+    field: _redaction_ok
+    value: true
 - script:
     description: toolCalls args -> gemini_cli.tool_input.* (command chunked for logsdb ignore_above)
     tag: extract-tool-input
@@ -483,6 +500,14 @@ processors:
         addOnce(files, a.file_path); addOnce(files, a.absolute_path); addOnce(files, a.path); addOnce(files, a.dir_path);
         if (a.paths instanceof List) { for (def p : a.paths) { addOnce(files, p); } }
         addOnce(urls, a.url);
+        if (t.name == 'web_fetch' && a.prompt instanceof String) {   // web_fetch takes URLs inside its prompt
+          def um = /https?:\/\/[^\s"'<>()\[\]]+/.matcher((String) a.prompt);
+          while (um.find()) {
+            String u = um.group();
+            while (u.length() > 0 && ".,;:!?".indexOf(u.substring(u.length() - 1)) >= 0) { u = u.substring(0, u.length() - 1); }
+            addOnce(urls, u);
+          }
+        }
         if (a.urls instanceof List) { for (def u : a.urls) { addOnce(urls, u); } }
         if (a.description instanceof String) { descs.add(a.description); }
         addOnce(queries, a.query); addOnce(queries, a.pattern);
@@ -494,7 +519,40 @@ processors:
       if (!descs.isEmpty()) { ti.put('description', descs); }
       if (!queries.isEmpty()) { ti.put('query', queries); }
       if (!ti.isEmpty()) { g.tool_input = ti; } else if (g.tool_input != null) { g.remove('tool_input'); }
+- pipeline:
+    tag: inference
+    name: '{{ IngestPipeline "inference" }}'
+    description: 'Optional ML inference (integration setting ''Enable ML inference''): embedding + prompt classification'
+    if: ctx.tags != null && (ctx.tags.contains('gemini_cli_embed') || ctx.tags.contains('gemini_cli_classify'))
+    ignore_failure: true
+- script:
+    tag: drop-inference-tags
+    lang: painless
+    description: Remove the internal inference switch tags
+    if: ctx.tags instanceof List
+    source: ctx.tags.removeIf(t -> t == 'gemini_cli_embed' || t == 'gemini_cli_classify'); if (ctx.tags.isEmpty()) { ctx.remove('tags'); }
+- remove:
+    tag: remove_temp_fields_end
+    description: Temporary fields (the inference sub-pipelines remove theirs, unless they failed)
+    field:
+    - _redaction_ok
+    - _embed_input
+    - _classify_input
+    - _ml
+    ignore_missing: true
 on_failure:
+- script:
+    tag: fail_closed_on_failure
+    lang: painless
+    if: ctx._redaction_ok != true
+    description: 'Fail closed: if the pipeline failed before secret redaction, drop the unscanned text'
+    source: |
+      // Fail closed: text that was not scanned for secrets is not stored.
+      if (ctx.message != null) { ctx.message = '[REDACTED:redaction_failed]'; }
+      def g = ctx.gemini_cli;
+      if (g != null) { g.remove('content'); g.remove('toolCalls'); g.remove('thoughts'); g.remove('tool_input'); }
+      if (ctx.tags instanceof List) { ctx.tags.removeIf(t -> t == 'gemini_cli_embed' || t == 'gemini_cli_classify'); } else { ctx.tags = new ArrayList(); }
+      if (!ctx.tags.contains('secret_redaction_failed')) { ctx.tags.add('secret_redaction_failed'); }
 - append:
     tag: append_error_message_on_failure
     field: error.message
@@ -503,3 +561,18 @@ on_failure:
     tag: set_event_kind_pipeline_error
     field: event.kind
     value: pipeline_error
+- append:
+    tag: append_tags_preserve_original_event_on_failure
+    field: tags
+    value: preserve_original_event
+    allow_duplicates: false
+- remove:
+    field:
+    - _tmp
+    - gemini_cli._version
+    - _redaction_ok
+    - _embed_input
+    - _classify_input
+    - _ml
+    ignore_missing: true
+    tag: remove_temp_fields_on_failure

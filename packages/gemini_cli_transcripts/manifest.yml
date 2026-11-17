@@ -1,8 +1,8 @@
 format_version: 3.6.0
 name: gemini_cli_transcripts
 title: Gemini CLI Transcripts
-version: 0.1.0
-description: Collect Gemini CLI chat transcripts (including subagent chats) from disk with Elastic Agent, mapped to ECS and gen_ai.*, with secret redaction.
+version: 0.2.2
+description: Collect Gemini CLI chat transcripts (including subagent chats) from disk with Elastic Agent, mapped to ECS and gen_ai.*, with secret redaction, optional ML inference on prompts, dashboards and detection rules.
 type: integration
 categories:
 - security

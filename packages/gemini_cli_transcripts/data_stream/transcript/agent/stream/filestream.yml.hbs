@@ -18,12 +18,16 @@ message_max_bytes: {{message_max_bytes}}
 ignore_older: {{ignore_older}}
 close.on_state_change.inactive: 10m
 prospector.scanner.fingerprint.enabled: true
-{{#if tags}}
 tags:
+{{#if enable_inference}}
+  - gemini_cli_embed
+{{#if inference_classification}}
+  - gemini_cli_classify
+{{/if}}
+{{/if}}
 {{#each tags as |tag|}}
   - {{tag}}
 {{/each}}
-{{/if}}
 processors:
   # Keep message records only. Session headers, $set / $patch / $rewindTo bookkeeping
   # and info / warning / error display records are dropped. JSON parse failures are kept.
