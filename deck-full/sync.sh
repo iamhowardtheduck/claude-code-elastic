@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copy the inference and load-test slides into the full deck (prefix i/p).
-# The overview slides (o*) live only here; deck/ keeps the original brand style.
+# The overview slides (o*) live only here; deck/ has its own separate copy.
 set -e
 cd "$(dirname "$0")"
 for f in ../deck-inference/slides/[0-9]*.html; do cp "$f" "slides/i$(basename "$f")"; done
