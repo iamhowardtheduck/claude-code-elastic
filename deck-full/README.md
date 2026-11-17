@@ -11,7 +11,7 @@ The overview, inference and load-test decks in one 36-slide [fslides](https://fs
 - **Watch it:** https://iamhowardtheduck.github.io/claude-code-elastic/full/
 - **PDF:** [docs/claude-code-transcripts-full.pdf](../docs/claude-code-transcripts-full.pdf)
 
-The same deck exists for Claude Code only (`../claude/deck-full/`) and Gemini CLI only (`../gemini/deck-full/`).
+The same deck exists for Claude Code only (`../claude/deck-full/`) and Gemini CLI only ([`deck-full/` in gemini-cli-elastic](https://github.com/iamhowardtheduck/gemini-cli-elastic/tree/main/deck-full)).
 
 ## Edit it
 

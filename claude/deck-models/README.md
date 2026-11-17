@@ -1,6 +1,6 @@
 # Models deck (Claude Code only)
 
-> Claude Code only: a copy of the original `deck-models/` deck. `../../deck-models/` covers Claude Code and Gemini CLI together, and `../../gemini/deck-models/` covers Gemini CLI only.
+> Claude Code only: a copy of the original `deck-models/` deck. `../../deck-models/` covers Claude Code and Gemini CLI together, and [`deck-models/` in gemini-cli-elastic](https://github.com/iamhowardtheduck/gemini-cli-elastic/tree/main/deck-models) covers Gemini CLI only.
 
 The seven ML models behind the redaction and classification pipeline, one slide each, in the elastic-web kit:
 

@@ -1,6 +1,6 @@
 # Overview deck (Claude Code only)
 
-> Claude Code only: a copy of the original `deck/` deck. `../../deck/` covers Claude Code and Gemini CLI together, and `../../gemini/deck/` covers Gemini CLI only.
+> Claude Code only: a copy of the original `deck/` deck. `../../deck/` covers Claude Code and Gemini CLI together, and [`deck/` in gemini-cli-elastic](https://github.com/iamhowardtheduck/gemini-cli-elastic/tree/main/deck) covers Gemini CLI only.
 
 A 12-slide [fslides](https://github.com/fslides/fslides) presentation on this integration: what it collects, why it's built the way it is, and what it solves for security, leadership and compliance teams.
 

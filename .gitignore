@@ -46,8 +46,3 @@ claude/*/_site/
 claude/*/.fslides/
 claude/*/.claude/
 claude/*/*.pdf
-gemini/*/node_modules/
-gemini/*/_site/
-gemini/*/.fslides/
-gemini/*/.claude/
-gemini/*/*.pdf
