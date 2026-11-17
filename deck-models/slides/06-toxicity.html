@@ -28,12 +28,12 @@
   .win .a b{color:#D9532F}
 </style>
 </head>
-<body data-foot="Claude Code Transcripts · Models · Toxicity">
+<body data-foot="Claude Code and Gemini CLI Transcripts · Models · Toxicity">
 <div class="z">
   <div class="eyebrow in1">Model 4 of 7 · <b>text classification</b></div>
   <h1 class="in2">Toxic language in prompts. <span class="b">Also a moderation witness.</span></h1>
   <p class="sub in3">A RoBERTa toxicity classifier from s-nlp, scoring neutral against toxic text.</p>
-  <table class="facts in4"><tr><td>ES model ID</td><td><b>s-nlp__roberta_toxicity_classifier</b></td></tr><tr><td>Hugging Face</td><td>s-nlp/roberta_toxicity_classifier</td></tr><tr><td>Input length</td><td>512 tokens</td></tr><tr><td>Labels</td><td>neutral, <span class="p">toxic</span></td></tr><tr><td>Rule</td><td>toxic ≥ 0.70 → category <code>toxic</code>, flagged</td></tr><tr><td>Output</td><td><code>prompt_classification.scores.toxic</code>, always kept</td></tr><tr><td>ML memory</td><td>about 1.3 GB at 1 allocation</td></tr></table>
+  <table class="facts in4"><tr><td>ES model ID</td><td><b>s-nlp__roberta_toxicity_classifier</b></td></tr><tr><td>Hugging Face</td><td>s-nlp/roberta_toxicity_classifier</td></tr><tr><td>Input length</td><td>512 tokens</td></tr><tr><td>Labels</td><td>neutral, <span class="p">toxic</span></td></tr><tr><td>Rule</td><td>toxic ≥ 0.70 → category <code>toxic</code>, flagged</td></tr><tr><td>Output</td><td><code>prompt_classification.scores.toxic</code>, always kept, under both prefixes</td></tr><tr><td>ML memory</td><td>about 1.3 GB at 1 allocation</td></tr></table>
   <div class="use in5"><p><b>Corroborates moderation.</b> Zero-shot moderation labels only count when toxic ≥ 0.10 or offensive ≥ 0.35, so this score keeps the moderation pass honest.</p></div>
 </div>
 <svg id="hero" class="iso" viewBox="0 0 560 380"></svg>

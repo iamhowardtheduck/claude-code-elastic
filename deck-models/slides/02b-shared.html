@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>One model set, two integrations</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:44px;max-width:1120px}
+  .sub{font-size:16px;max-width:1060px}
+  code{font-family:var(--mono);font-size:.92em}
+  .n{position:absolute;background:#fff;border:1px solid var(--ink);padding:12px 14px;z-index:3}
+  .n .tag{color:var(--grey)}
+  .n h3{font:600 16px var(--sans);letter-spacing:-.3px;margin-top:4px}
+  .n p code{white-space:nowrap}
+  .n p{font-size:12px;line-height:1.45;color:var(--char);margin-top:5px}
+  .n.cc{box-shadow:6px 6px 0 var(--orange)}
+  .n.gm{box-shadow:6px 6px 0 var(--blue)}
+  .n.out{border-color:var(--line)}
+  .ar{position:absolute;height:0;border-top:1.5px solid var(--ink);z-index:2}
+  .ar:after{content:'';position:absolute;right:-1px;top:-5px;border:4px solid transparent;border-left:7px solid var(--ink)}
+  #hero{left:380px;top:236px;width:520px;height:400px}
+  .note{position:absolute;left:72px;right:72px;top:620px;font-size:12.5px;color:var(--grey);z-index:2}
+  .note b{color:var(--ink)}
+</style>
+</head>
+<body data-foot="Claude Code and Gemini CLI Transcripts · Models · Shared">
+<div class="z">
+  <div class="eyebrow in1">Two integrations · <b>one set of deployments</b></div>
+  <h1 class="in2">Both pipelines call the same models. <span class="b">Deploy once.</span></h1>
+  <p class="sub in3">Claude Code Transcripts and Gemini CLI Transcripts each run their own <code>inference.yml</code> and <code>classify.yml</code>, with the same model IDs, thresholds and switches. Only the field prefix and two wordings differ.</p>
+</div>
+
+<div class="n cc in3" style="left:72px;top:262px;width:300px"><span class="tag">Claude Code Transcripts</span><h3>claude_code pipeline</h3><p>Zero-shot interaction label "a question about Claude itself". NER ignores Claude, Anthropic, Claude Code.</p></div>
+<div class="n gm in4" style="left:72px;top:440px;width:300px"><span class="tag">Gemini CLI Transcripts</span><h3>gemini_cli pipeline</h3><p>Zero-shot interaction label "a question about Gemini itself". NER ignores Gemini, Gemini CLI, Google.</p></div>
+<div class="ar in4" style="left:384px;top:320px;width:60px"></div>
+<div class="ar in4" style="left:384px;top:498px;width:60px"></div>
+
+<svg id="hero" class="iso" viewBox="0 0 520 400"></svg>
+
+<div class="ar in5" style="left:842px;top:320px;width:52px"></div>
+<div class="ar in5" style="left:842px;top:498px;width:52px"></div>
+<div class="n out in5" style="left:906px;top:262px;width:302px"><span class="tag">writes</span><h3><code>claude_code.*</code></h3><p><code>prompt_embedding</code> and <code>prompt_classification.*</code><br>in <code>logs-claude_code.transcript-*</code></p></div>
+<div class="n out in6" style="left:906px;top:440px;width:302px"><span class="tag">writes</span><h3><code>gemini_cli.*</code></h3><p><code>prompt_embedding</code> and <code>prompt_classification.*</code><br>in <code>logs-gemini_cli.transcript-*</code></p></div>
+
+<p class="note in6"><b>Sizing covers both.</b> Every human prompt from either integration makes the same 11 ML calls, so size the allocations, above all zero-shot, for the combined prompt rate.</p>
+
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+<script>
+(function(){
+  const sc = EW.iso(document.getElementById('hero'), {ox: 250, oy: 120, s: .62});
+  sc.rect({x: -30, y: -30, w: 360, d: 330, z: 0, delay: .1});
+  sc.box({x: 0, y: 0, w: 300, d: 270, h: 40, c: 'slate', delay: .15, drop: 120, order: -1000});
+  sc.box({x: 20, y: 20, w: 70, d: 70, h: 70, z: 40, c: 'blue', delay: .45, drop: 90, float: 3});
+  const m = [['pink', 110, 20], ['pink', 200, 20], ['orange', 110, 110], ['orange', 200, 110], ['pink', 110, 200], ['teal', 200, 200]];
+  m.forEach(([c, x, y], i) => sc.box({x, y, w: 60, d: 60, h: i === 4 ? 90 : 48, z: 40, c, delay: .6 + i * .09, drop: 80}));
+  sc.run();
+})();
+</script>
+</body>
+</html>

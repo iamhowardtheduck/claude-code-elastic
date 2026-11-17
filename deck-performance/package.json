@@ -1,5 +1,5 @@
 {
-  "name": "deck-performance",
+  "name": "claude-code-transcripts-load-test",
   "version": "1.0.0",
   "private": true,
   "scripts": {

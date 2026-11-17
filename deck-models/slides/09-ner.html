@@ -28,12 +28,12 @@
   .win .a b{color:#02897F}
 </style>
 </head>
-<body data-foot="Claude Code Transcripts · Models · Named entities">
+<body data-foot="Claude Code and Gemini CLI Transcripts · Models · Named entities">
 <div class="z">
   <div class="eyebrow in1">Model 7 of 7 · <b>named entity recognition</b></div>
   <h1 class="in2">Who and where a prompt names. <span class="b">People flag as PII.</span></h1>
   <p class="sub in3">A BERT model fine-tuned for named entities. It finds people, organizations, locations and miscellaneous entities in the prompt.</p>
-  <table class="facts in4"><tr><td>ES model ID</td><td><b>dslim__bert-base-ner</b></td></tr><tr><td>Hugging Face</td><td>dslim/bert-base-ner</td></tr><tr><td>Input length</td><td>model default</td></tr><tr><td>Entities</td><td>PER, ORG, LOC, MISC at ≥ 0.80; Claude, Anthropic and Claude Code ignored</td></tr><tr><td>Rule</td><td>adds <code>pii:person</code>, <code>pii:organization</code>, <code>pii:location</code>; only <span class="p">person</span> flags</td></tr><tr><td>Output</td><td><code>prompt_classification.entities</code> by type</td></tr><tr><td>ML memory</td><td>about 1.1 GB at 1 allocation</td></tr></table>
+  <table class="facts in4"><tr><td>ES model ID</td><td><b>dslim__bert-base-ner</b></td></tr><tr><td>Hugging Face</td><td>dslim/bert-base-ner</td></tr><tr><td>Input length</td><td>model default</td></tr><tr><td>Entities</td><td>PER, ORG, LOC, MISC at ≥ 0.80; ignored: Claude, Anthropic, Claude Code (Claude pipeline) or Gemini, Gemini CLI, Google (Gemini pipeline)</td></tr><tr><td>Rule</td><td>adds <code>pii:person</code>, <code>pii:organization</code>, <code>pii:location</code>; only <span class="p">person</span> flags</td></tr><tr><td>Output</td><td><code>prompt_classification.entities</code> by type, under both prefixes</td></tr><tr><td>ML memory</td><td>about 1.1 GB at 1 allocation</td></tr></table>
   <div class="use in5"><p><b>Used for</b> spotting personal data pasted into prompts: names of customers or colleagues, places, companies. MISC entities are kept but add no category.</p></div>
 </div>
 <svg id="hero" class="iso" viewBox="0 0 560 380"></svg>
@@ -52,7 +52,7 @@
   const ents = [['PER', 'pink'], ['ORG', 'white'], ['LOC', 'white'], ['MISC', 'slate']];
   ents.forEach(([n, c], i) => sc.box({x: 250, y: 30 + i * 36, w: 26, d: 26, h: 26, c, stroke: c === 'slate' ? false : undefined, delay: .7 + i * .08, drop: 50}));
   sc.label({at: [276, 30, 26], side: 'r', len: 40, title: 'PER → person', sub: 'flags', raw: true, delay: 1.45});
-  sc.label({at: [276, 138, 0], side: 'r', len: 40, title: 'ORG, LOC', sub: 'pii:organization, pii:location', raw: true, delay: 1.55});
+  sc.label({at: [276, 138, 0], side: 'r', len: 40, title: 'ORG, LOC', sub: ['pii:organization,', 'pii:location'], raw: true, delay: 1.55});
 
   sc.run();
 })();

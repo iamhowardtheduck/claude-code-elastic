@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Claude Code and Gemini CLI Transcripts: Shared and different</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+.win{background:#fff;border:1px solid var(--ink);box-shadow:8px 8px 0 var(--blue)}
+.win .bar{height:30px;border-bottom:1px solid var(--ink);display:flex;align-items:center;gap:6px;padding:0 12px;font:500 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--char)}
+.win .bar i{width:9px;height:9px;border:1px solid var(--ink);border-radius:50%}
+.win .bar span{margin-left:10px}
+
+h1{font-size:44px;max-width:540px}
+.rows{margin-top:28px;max-width:500px;position:relative;z-index:2}
+.row{padding:13px 0;border-top:1px solid var(--line)}
+.row:last-child{border-bottom:1px solid var(--line)}
+.row .tag{margin-bottom:6px;color:var(--blue)}
+.row .cap{font-size:14.5px}
+.win{position:absolute;left:640px;top:104px;width:568px;z-index:2}
+table{width:100%;border-collapse:collapse;font-size:13.5px;color:var(--char)}
+th{font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);text-align:left;padding:12px 14px 10px;border-bottom:1px solid var(--ink)}
+td{padding:9px 14px;border-top:1px solid var(--line);vertical-align:top;line-height:1.35}
+tr:first-child td{border-top:0}
+td:first-child{font:500 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--grey);width:112px;padding-top:11px}
+th .sw{display:inline-block;width:9px;height:9px;margin-right:7px}
+tbody tr{animation:ew-in .45s cubic-bezier(.2,.7,.2,1) both}
+.mono{font-size:12px}
+</style>
+</head>
+<body data-foot="Claude Code + Gemini CLI Transcripts · Shared and different">
+<div class="z">
+  <div class="eyebrow in1">Two integrations · <b>one approach</b></div>
+  <h1 class="in2">Shared where it matters. <span class="b">Different where the files are.</span></h1>
+  <div class="rows">
+    <div class="row in3"><div class="tag">Shared · schema</div><p class="cap">ECS plus <span class="mono">gen_ai.*</span>, the same 8 <span class="mono">event.action</span> values and <span class="mono">user.name</span>. One ES|QL query covers both agents.</p></div>
+    <div class="row in4"><div class="tag">Shared · redaction</div><p class="cap">The same secret scanner, generated from one source, failing closed in both.</p></div>
+    <div class="row in5"><div class="tag">Shared · ML inference</div><p class="cap">The same deployed models, thresholds and threat phrases serve both integrations.</p></div>
+  </div>
+</div>
+<div class="win in3"><div class="bar"><i></i><i></i><i></i><span>What differs</span></div>
+<table>
+<thead><tr><th></th><th><span class="sw" style="background:var(--orange)"></span>Claude Code</th><th><span class="sw" style="background:var(--blue)"></span>Gemini CLI</th></tr></thead>
+<tbody>
+<tr style="animation-delay:.55s"><td>Source</td><td><span class="mono">~/.claude/projects</span> + Desktop logs</td><td><span class="mono">~/.gemini/tmp/*/chats</span> + subagent chats</td></tr>
+<tr style="animation-delay:.63s"><td>Data streams</td><td>3</td><td>1</td></tr>
+<tr style="animation-delay:.71s"><td>Tool call</td><td>2 lines</td><td>3 records</td></tr>
+<tr style="animation-delay:.79s"><td>Tokens</td><td>Dedupe on <span class="mono">gen_ai.response.id</span></td><td>Summed directly</td></tr>
+<tr style="animation-delay:.87s"><td>Document _id</td><td><span class="mono">event.id</span></td><td>Hash of host, file, message ID, version</td></tr>
+<tr style="animation-delay:.95s"><td>Spend lookup</td><td><span class="mono">claude-model-pricing</span></td><td><span class="mono">gemini-model-pricing</span></td></tr>
+<tr style="animation-delay:1.03s"><td>Dashboards</td><td>3</td><td>2</td></tr>
+<tr style="animation-delay:1.11s"><td>Rules</td><td>10</td><td>8 (no auto-mode)</td></tr>
+</tbody>
+</table>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+<script>
+(function(){
+
+})();
+</script>
+</body>
+</html>

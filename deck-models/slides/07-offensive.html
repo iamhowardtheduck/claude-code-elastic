@@ -28,12 +28,12 @@
   .win .a b{color:#D9532F}
 </style>
 </head>
-<body data-foot="Claude Code Transcripts · Models · Offensive">
+<body data-foot="Claude Code and Gemini CLI Transcripts · Models · Offensive">
 <div class="z">
   <div class="eyebrow in1">Model 5 of 7 · <b>text classification</b></div>
   <h1 class="in2">Offensive language. <span class="b">A second opinion next to toxicity.</span></h1>
   <p class="sub in3">A RoBERTa model from Cardiff NLP, trained on tweets, scoring offensive against non-offensive text.</p>
-  <table class="facts in4"><tr><td>ES model ID</td><td><b>cardiffnlp__twitter-roberta-base-offensive</b></td></tr><tr><td>Hugging Face</td><td>cardiffnlp/twitter-roberta-base-offensive</td></tr><tr><td>Input length</td><td>512 tokens</td></tr><tr><td>Labels</td><td>non_offensive, <span class="p">offensive</span></td></tr><tr><td>Rule</td><td>offensive ≥ 0.80 → category <code>offensive</code>, flagged</td></tr><tr><td>Output</td><td><code>prompt_classification.scores.offensive</code>, always kept</td></tr><tr><td>ML memory</td><td>about 1.3 GB at 1 allocation</td></tr></table>
+  <table class="facts in4"><tr><td>ES model ID</td><td><b>cardiffnlp__twitter-roberta-base-offensive</b></td></tr><tr><td>Hugging Face</td><td>cardiffnlp/twitter-roberta-base-offensive</td></tr><tr><td>Input length</td><td>512 tokens</td></tr><tr><td>Labels</td><td>non_offensive, <span class="p">offensive</span></td></tr><tr><td>Rule</td><td>offensive ≥ 0.80 → category <code>offensive</code>, flagged</td></tr><tr><td>Output</td><td><code>prompt_classification.scores.offensive</code>, always kept, under both prefixes</td></tr><tr><td>ML memory</td><td>about 1.3 GB at 1 allocation</td></tr></table>
   <div class="use in5"><p><b>Corroborates moderation.</b> An offensive score of 0.35 or more lets the zero-shot moderation labels count, alongside the toxicity model.</p></div>
 </div>
 <svg id="hero" class="iso" viewBox="0 0 560 380"></svg>

@@ -28,12 +28,12 @@
   .win .a b{color:var(--blue)}
 </style>
 </head>
-<body data-foot="Claude Code Transcripts · Models · Embedding">
+<body data-foot="Claude Code and Gemini CLI Transcripts · Models · Embedding">
 <div class="z">
   <div class="eyebrow in1">Model 1 of 7 · <b>text embedding, Elastic Inference Service</b></div>
   <h1 class="in2">One vector per prompt. <span class="b">Search by meaning, flag by meaning.</span></h1>
   <p class="sub in3">The redacted human prompt is embedded through the <code>.jina-embeddings-v5-text-nano</code> inference endpoint. It runs on EIS, not on your ML nodes, and is the only model the <b>Enable ML inference</b> switch needs.</p>
-  <table class="facts in4"><tr><td>Endpoint</td><td><b>.jina-embeddings-v5-text-nano</b></td></tr><tr><td>Served by</td><td>Elastic Inference Service (EIS), billed per million input tokens</td></tr><tr><td>Input</td><td>human prompt only, after redaction, capped at 8,000 characters</td></tr><tr><td>Output</td><td><code>claude_code.prompt_embedding</code>: 768 dims, cosine, bbq_hnsw</td></tr><tr><td>Cost</td><td>about 0.1 s per prompt; no ML node memory</td></tr></table>
+  <table class="facts in4"><tr><td>Endpoint</td><td><b>.jina-embeddings-v5-text-nano</b></td></tr><tr><td>Served by</td><td>Elastic Inference Service (EIS), billed per million input tokens</td></tr><tr><td>Input</td><td>human prompt only, after redaction, capped at 8,000 characters</td></tr><tr><td>Output</td><td><code>claude_code.prompt_embedding</code> or <code>gemini_cli.prompt_embedding</code>: 768 dims, cosine, bbq_hnsw</td></tr><tr><td>Cost</td><td>about 0.1 s per prompt; no ML node memory</td></tr></table>
   <div class="use in5"><p><b>Semantic search.</b> kNN and hybrid search over every prompt, including the Security dashboard's free-text panel.</p><p><b>Semantic threat flags.</b> The same vector is compared with 29 threat phrases in 10 concepts. A score of 0.60 or more adds <code>security:semantic_&lt;concept&gt;</code> and <code>flagged: true</code>. No extra model call.</p></div>
 </div>
 <svg id="hero" class="iso" viewBox="0 0 560 380"></svg>

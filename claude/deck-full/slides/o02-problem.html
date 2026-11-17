@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The problem</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:44px;max-width:580px}
+  .list{margin-top:30px;display:flex;flex-direction:column;gap:12px;max-width:540px}
+  .card{display:grid;grid-template-columns:44px 1fr;gap:4px 14px;padding:14px 18px}
+  .card .n{font:500 26px var(--sans);letter-spacing:-1px;color:var(--blue);grid-row:span 2;line-height:1}
+  .card h3{font:600 16px var(--sans);letter-spacing:-.3px}
+  .card h3 .tag{color:var(--grey);font-weight:500;font-size:10px;margin-left:8px}
+  .card p{font-size:13px;line-height:1.5;color:var(--char)}
+  code{font-family:var(--mono);font-size:.92em}
+  #hero{left:660px;top:40px;width:620px;height:620px}
+</style>
+</head>
+<body data-foot="Overview · The problem">
+<div class="z">
+  <div class="eyebrow in1">The problem</div>
+  <h1 class="in2">Coding agents are the newest actor on your network. <span class="b">And the least watched.</span></h1>
+  <div class="list">
+    <div class="card in3"><span class="n">01</span><h3>Agents act, nobody sees<span class="tag">blind spot</span></h3><p>Claude runs <code>rm</code>, <code>curl</code> and <code>git push</code> on real machines. EDR sees a shell. It doesn't see the prompt that caused it.</p></div>
+    <div class="card in4"><span class="n">02</span><h3>The record deletes itself<span class="tag">evaporating</span></h3><p>Transcripts sit as JSONL in <code>~/.claude/projects</code>, one laptop at a time, and Claude Code removes them after <b>30 days</b>.</p></div>
+    <div class="card in5"><span class="n">03</span><h3>No answers for anyone<span class="tag">unanswerable</span></h3><p>Who's using it? On which projects? What does it cost? Did a secret just get pasted into a prompt? Today nobody can say.</p></div>
+  </div>
+</div>
+<svg id="hero" class="iso" viewBox="0 0 620 620"></svg>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+<script>
+(function(){
+  EW.dots({x: 700, y: 40, w: 580, h: 620, seed: 11, blobs: 6, thr: .5});
+  const sc = EW.iso(document.getElementById('hero'), {ox: 200, oy: 250, s: .85});
+  // one developer laptop
+  sc.box({x: 0, y: 0, w: 250, d: 180, h: 14, c: 'slate', stroke: false, delay: .1, drop: 80, order: -1000});
+  // the agent acts
+  sc.box({x: 30, y: 24, w: 64, d: 64, h: 64, z: 14, c: 'pink', delay: .4, drop: 80});
+  // EDR only sees a shell
+  sc.box({x: 160, y: 24, w: 50, d: 50, h: 30, z: 14, c: 'ink', delay: .55, drop: 70});
+  // the transcript record: one cube per day, the oldest fading out
+  for (let r = 0; r < 3; r++) for (let k = 0; k < 10; k++){
+    const day = r * 10 + k;
+    sc.box({x: 22 + k * 21, y: 108 + r * 21, w: 14, d: 14, h: 14, z: 14, c: ['teal', 'yellow', 'orange', 'blue'][(k + r * 3) % 4], sw: .8, delay: .65 + day * .012, drop: 50, op: .12 + .88 * (day / 29), order: 1});
+  }
+  sc.label({at: [94, 30, 14 + 44], side: 'r', len: 70, title: 'AGENT ACTS', sub: 'rm, curl, git push', raw: true, delay: .9});
+  sc.label({at: [210, 40, 14 + 18], side: 'r', len: 40, title: 'EDR', sub: ['sees a shell', 'not the prompt'], delay: 1.0});
+  sc.label({at: [225, 157, 14 + 7], side: 'r', len: 90, title: '~/.claude/projects', sub: ['JSONL, one laptop at a time', 'removed after 30 days'], raw: true, delay: 1.1});
+  sc.run();
+})();
+</script>
+</body>
+</html>

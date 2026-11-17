@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Synthetic Claude Code transcript load generator for throughput testing.
+"""Synthetic Claude Code / Gemini CLI transcript load generator for throughput testing.
 
 Writes made-up sessions (fictional users, hosts, projects and prompts) straight into the
 transcript data stream of a separate namespace, so the integration's ingest pipelines
@@ -12,9 +12,13 @@ while the test data stays isolated from real data and is removed with one call.
   python3 tools/loadgen.py sample                                   # print one generated session, send nothing
   python3 tools/loadgen.py report [--since 30m]                     # per-minute throughput, inference time, lag
   python3 tools/loadgen.py cleanup                                  # delete the load-test data stream
+  python3 tools/loadgen.py --product gemini run --rate 1             # same, as Gemini CLI chat records
 
 Connection: ES_URL or CLOUD_ID, plus ES_API_KEY or ES_USER/ES_PASSWORD (CA_CERT optional).
-Target: logs-claude_code.transcript-<namespace> (default namespace 'loadtest').
+Target: logs-claude_code.transcript-<namespace>, or logs-gemini_cli.transcript-<namespace> with
+--product gemini (default namespace 'loadtest'). Both use the same prompt mix; a Gemini tool call
+writes three records (model message, the same message again with toolCalls, functionResponse)
+where Claude Code writes two (tool_use, tool_result).
 
 What is measured: Elasticsearch-side ingest (pipelines + ML inference) and indexing. The
 Elastic Agent is not in the path; at these rates it is not the bottleneck, but the Fleet
@@ -161,6 +165,53 @@ class Session:
         out.append(self._line(cc, []))
         return out
 
+class GeminiSession(Session):
+    """One fictional Gemini CLI session; yields chat records in the shape the agent ships."""
+    def __init__(self, rng, ns_tag):
+        super().__init__(rng, ns_tag)
+        self.sid8 = self.sid[:8]
+        self.path = (f"/home/{self.user}/.gemini/tmp/{self.project}/chats/"
+                     f"session-{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H-%M')}-{self.sid8}.jsonl")
+
+    def _rec(self, g, tags):
+        g.setdefault("id", str(uuid.uuid4())); g["timestamp"] = _now()
+        return {"log": {"file": {"path": self.path}}, "host": {"name": self.host, "hostname": self.host},
+                "input": {"type": "filestream"}, "tags": tags + [self.ns_tag], "gemini_cli": g}
+
+    def _tokens(self):
+        r = self.rng; inp = r.randint(8000, 60000)
+        out, th, ca = r.randint(10, 900), r.randint(0, 600), r.randint(0, inp // 2)
+        return {"input": inp, "output": out, "cached": ca, "thoughts": th, "tool": 0, "total": inp + out + th}
+
+    def turn(self, extra_lines, adversarial_rate, secret_rate, tags, unique=True):
+        rng = self.rng
+        text = prompt_text(rng, self.turns == 0, adversarial_rate, secret_rate, unique)
+        self.turns += 1
+        out = [self._rec({"type": "user", "content": [{"text": text}]}, tags)]
+        model = rng.choice(["gemini-4-carbon", "gemini-3.8-flash", "gemini-2.5-pro"])
+        thoughts = [{"subject": "Planning the change", "description": "I'll inspect the relevant file first.", "timestamp": _now()}]
+        for _ in range(extra_lines // 2):          # same number of tool calls as the Claude generator
+            mid = str(uuid.uuid4()); cid = f"call_{uuid.uuid4().hex[:20]}"
+            tool, args = rng.choice([("run_shell_command", {"command": rng.choice(["pytest -q", "git status", "npm test", "ls src"]), "description": "Run it"}),
+                                     ("read_file", {"absolute_path": f"{self.cwd}/src/app.py"}),
+                                     ("replace", {"file_path": f"{self.cwd}/src/app.py", "old_string": "a", "new_string": "b"}),
+                                     ("search_file_content", {"pattern": "retry"}),
+                                     ("write_file", {"file_path": f"{self.cwd}/src/new_module.py", "content": "x = 1"})])
+            base = {"id": mid, "type": "gemini", "content": "Let me look at that.", "thoughts": thoughts, "tokens": self._tokens(), "model": model}
+            out.append(self._rec(dict(base), []))                                   # message, then re-appended with its tool calls
+            res = [{"functionResponse": {"id": cid, "name": tool, "response": {"output": "ok\n" * rng.randint(1, 40)}}}]
+            out.append(self._rec(dict(base, toolCalls=[{"id": cid, "name": tool, "args": args, "result": res, "status": "success",
+                                                        "timestamp": _now(), "displayName": tool, "renderOutputAsMarkdown": False}]), []))
+            out.append(self._rec({"type": "user", "content": res}, []))
+        out.append(self._rec({"type": "gemini", "content": "Done. " + rng.choice(["Tests pass.", "I updated two files.", "Here is a summary."]),
+                              "thoughts": [], "tokens": self._tokens(), "model": model}, []))
+        return out
+
+PRODUCTS = {   # dataset, field prefix, inference switch tags, session class
+    "claude": ("claude_code.transcript", "claude_code", ["claude_code_embed", "claude_code_classify"], Session),
+    "gemini": ("gemini_cli.transcript", "gemini_cli", ["gemini_cli_embed", "gemini_cli_classify"], GeminiSession),
+}
+
 # ------------------------------------------------------------------ run
 def parse_ramp(a):
     if a.ramp:
@@ -170,10 +221,11 @@ def parse_ramp(a):
 def cmd_run(a):
     if not ES:
         sys.exit("ES_URL (or CLOUD_ID) not set")
-    index = f"logs-claude_code.transcript-{a.namespace}"
-    tags = ["claude_code_embed"] + ([] if a.no_classify else ["claude_code_classify"])
+    dataset, _, sw, Sess = PRODUCTS[a.product]
+    index = f"logs-{dataset}-{a.namespace}"
+    tags = [sw[0]] + ([] if a.no_classify else [sw[1]])
     rng = random.Random(a.seed)
-    sessions = [Session(rng, "loadgen") for _ in range(a.sessions)]
+    sessions = [Sess(rng, "loadgen") for _ in range(a.sessions)]
     work = queue.Queue(maxsize=a.workers * 4)
     lock = threading.Lock()
     st = {"prompts": 0, "lines": 0, "ok": 0, "item_err": 0, "req_err": 0, "lat": [], "errs": {}, "backlog_drops": 0}
@@ -243,7 +295,7 @@ def cmd_run(a):
             while time.time() < end:
                 s = rng.choice(sessions)
                 if s.turns >= rng.randint(8, 40):          # start a fresh session now and then
-                    sessions[sessions.index(s)] = s = Session(rng, "loadgen")
+                    sessions[sessions.index(s)] = s = Sess(rng, "loadgen")
                 lines = s.turn(a.lines_per_prompt, a.adversarial_rate, a.secret_rate, tags, not a.repeatable_prompts)
                 buf += lines; buf_prompts += 1
                 with lock:
@@ -270,7 +322,7 @@ def cmd_run(a):
           f"generator_backlog_skips={st['backlog_drops']}")
     for k, v in sorted(st["errs"].items(), key=lambda kv: -kv[1])[:8]:
         print(f"  {v:6d}  {k}")
-    print(f"next: python3 tools/loadgen.py report --namespace {a.namespace}")
+    print(f"next: python3 tools/loadgen.py --product {a.product} report --namespace {a.namespace}")
 
 # ------------------------------------------------------------------ report / cleanup / sample
 def esql(q):
@@ -286,37 +338,40 @@ def table(cols, rows):
         print("  ".join(str(v).rjust(w[i]) for i, v in enumerate(r)))
 
 def cmd_report(a):
-    src = f"logs-claude_code.transcript-{a.namespace}"
+    dataset, f, _, _ = PRODUCTS[a.product]
+    src = f"logs-{dataset}-{a.namespace}"
     since = f"NOW() - {a.since.replace('m', ' minutes').replace('h', ' hours')}"
     cols, rows = esql(f"""FROM {src} | WHERE @timestamp > {since}
 | EVAL lag_s = DATE_DIFF("millisecond", @timestamp, event.ingested) / 1000.0
 | STATS lines = COUNT(*),
-        prompts = COUNT(*) WHERE claude_code.human_prompt == true,
-        classified = COUNT(claude_code.prompt_classification.categories),
-        embedded = COUNT(claude_code.inference.embedding_ms),
-        cls_errors = COUNT(claude_code.prompt_classification.errors),
-        p50_classify_ms = PERCENTILE(claude_code.inference.classify_ms, 50),
-        p95_classify_ms = PERCENTILE(claude_code.inference.classify_ms, 95),
-        p95_embed_ms = PERCENTILE(claude_code.inference.embedding_ms, 95),
+        prompts = COUNT(*) WHERE {f}.human_prompt == true,
+        classified = COUNT({f}.prompt_classification.categories),
+        embedded = COUNT({f}.inference.embedding_ms),
+        cls_errors = COUNT({f}.prompt_classification.errors),
+        p50_classify_ms = PERCENTILE({f}.inference.classify_ms, 50),
+        p95_classify_ms = PERCENTILE({f}.inference.classify_ms, 95),
+        p95_embed_ms = PERCENTILE({f}.inference.embedding_ms, 95),
         p50_lag_s = PERCENTILE(lag_s, 50), p95_lag_s = PERCENTILE(lag_s, 95)
   BY minute = DATE_TRUNC(1 minute, @timestamp) | SORT minute""")
     rows = [[(round(v) if isinstance(v, float) else v) for v in r] for r in rows]
     table(cols, rows)
 
 def cmd_cleanup(a):
-    name = f"logs-claude_code.transcript-{a.namespace}"
+    name = f"logs-{PRODUCTS[a.product][0]}-{a.namespace}"
     if a.namespace in ("default", ""):
         sys.exit("refusing to delete the default namespace")
     code, r = es("DELETE", f"/_data_stream/{name}")
     print(code, json.dumps(r)[:200])
 
 def cmd_sample(a):
-    s = Session(random.Random(a.seed), "loadgen")
-    for d in s.turn(a.lines_per_prompt, a.adversarial_rate, a.secret_rate, ["claude_code_embed", "claude_code_classify"]):
+    _, _, sw, Sess = PRODUCTS[a.product]
+    s = Sess(random.Random(a.seed), "loadgen")
+    for d in s.turn(a.lines_per_prompt, a.adversarial_rate, a.secret_rate, sw):
         print(json.dumps(d))
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--product", choices=sorted(PRODUCTS), default="claude", help="transcript format and target dataset (default claude)")
     sub = ap.add_subparsers(dest="cmd", required=True)
     def common(p):
         p.add_argument("--namespace", default="loadtest")

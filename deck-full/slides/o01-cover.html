@@ -2,65 +2,47 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Cover</title>
+<title>Claude Code and Gemini CLI Transcripts: Cover</title>
 <link rel="stylesheet" href="style/eweb.css">
 <style>
-  h1{font-size:60px;line-height:.98;letter-spacing:-2.4px;margin-top:120px}
-  .sub{font-size:18px;max-width:520px;margin-top:24px}
-  .chips{margin-top:28px;display:flex;gap:8px;flex-wrap:wrap;max-width:540px}
-  .chip.lc{text-transform:none}
-  #hero{left:640px;top:0;width:640px;height:720px}
+h1{font-size:88px;line-height:.96;letter-spacing:-3.6px;margin-top:118px}
+.sub{font-size:19px;max-width:500px;margin-top:26px}
+.chips{margin-top:30px;display:flex;gap:8px;flex-wrap:wrap;max-width:500px}
+#hero{left:600px;top:0;width:680px;height:720px}
 </style>
 </head>
-<body data-foot="Claude Code Transcripts · Overview">
+<body data-foot="Claude Code + Gemini CLI Transcripts · two integrations">
 <div class="z">
-  <div class="eyebrow in1">Elastic integration · <b style="text-transform:none">claude_code_transcripts</b></div>
-  <h1 class="in2">Every Claude Code<br>session, <span class="b">searchable<br>in Elastic.</span></h1>
-  <p class="sub in3">Your AI agents read files, run shell commands and spend tokens on every developer laptop. This integration turns all of that into structured, redacted, ML-enriched data, with dashboards and detections included.</p>
-  <div class="chips in4"><span class="chip on">ECS</span><span class="chip lc">gen_ai.*</span><span class="chip">Elastic Agent 9.4+</span><span class="chip lc">elastic/integrations#22450</span></div>
+  <div class="eyebrow in1">Elastic integrations · <b>claude_code_transcripts</b> · <b>gemini_cli_transcripts</b></div>
+  <h1 class="in2">Every session.<br><span class="b">Searchable.</span></h1>
+  <p class="sub in3">Claude Code and Gemini CLI transcripts land in Elastic structured, redacted and ML-enriched, with dashboards and detections included.</p>
+  <div class="chips in4"><span class="chip">ECS</span><span class="chip">gen_ai.*</span><span class="chip">Elastic Agent 9.4+</span><span class="chip on">Claude Code + Gemini CLI</span></div>
 </div>
-<svg id="hero" class="iso" viewBox="0 0 640 720"></svg>
+<svg id="hero" class="iso" viewBox="0 0 720 720"></svg>
 <script src="style/eweb.js"></script>
 <script src="/js/fuckslides.js"></script>
 <script>
 (function(){
-  EW.dots({x: 640, y: 30, w: 640, h: 660, seed: 4, blobs: 6, thr: .5});
-  const sc = EW.iso(document.getElementById('hero'), {ox: 300, oy: 318, s: .78});
-  sc.rect({x: -30, y: -30, w: 330, d: 330, z: 0, delay: .05});
-  const plat = sc.box({x: 0, y: 0, w: 270, d: 270, h: 46, c: 'blue', delay: .1, drop: 120, order: -1000});
-  // indexed events: uniform blue documents, one redacted secret in orange
-  for (let r = 0; r < 4; r++) for (let k = 0; k < 4; k++)
-    sc.box({x: 130 + k * 34, y: 130 + r * 34, w: 24, d: 24, h: 24, z: 46, c: (r === 0 && k === 3) ? 'orange' : 'blue', delay: .45 + (r * 4 + k) * .03, drop: 70, order: 1});
-  // the agent session hovers above the platform
-  sc.box({x: 30, y: 30, w: 80, d: 80, h: 80, z: 176, c: 'pink', delay: .7, drop: 80, float: 6, floatSpeed: 1.1, order: 3000});
-  sc.label({at: [110, 40, 176 + 46], side: 'r', len: 60, title: 'Claude Code session', sub: 'prompts · tools · tokens', delay: .95});
-  sc.label({at: [256, 142, 58], side: 'r', len: 120, title: 'Secret redacted', sub: 'aws_secret_key', delay: 1.0});
-  sc.label({at: [130, 244, 58], side: 'l', len: 120, title: 'Indexed events', sub: 'ECS + gen_ai.*', delay: 1.05});
-  sc.label({at: [270, 220, 23], side: 'r', len: 40, title: 'Elasticsearch', sub: 'dashboards · detections', delay: 1.1});
-  sc.run();
-  // soft shadow on the platform under the hovering cube
-  const fid = document.querySelector('#hero filter').id;
-  const sh = EW.el('polygon', {points: [[38, 38], [118, 38], [118, 118], [38, 118]].map(([x, y]) => sc.P(x, y, 46).join(',')).join(' '), fill: 'rgba(30,40,80,.28)', filter: `url(#${fid})`, opacity: 0});
-  plat.g.after(sh);
-  // raw events falling from the session into the platform: multi-colour in, blue out
-  const cols = ['#48EFCF', '#FEC514', '#FF7E62'];
-  const cube = (fill) => { const g = EW.el('g', {opacity: 0}, sc.body); const w = 12, x = 64, y = 64, z = 0;
-    const q = pts => pts.map(p => sc.P(...p).map(v => v.toFixed(1)).join(',')).join(' ');
-    EW.el('polygon', {points: q([[x, y + w, z + w], [x + w, y + w, z + w], [x + w, y + w, z], [x, y + w, z]]), fill, stroke: '#1D1E24', 'stroke-width': .8}, g);
-    EW.el('polygon', {points: q([[x + w, y, z + w], [x + w, y + w, z + w], [x + w, y + w, z], [x + w, y, z]]), fill: '#343741', stroke: '#1D1E24', 'stroke-width': .8}, g);
-    EW.el('polygon', {points: q([[x, y, z + w], [x + w, y, z + w], [x + w, y + w, z + w], [x, y + w, z + w]]), fill: '#fff', stroke: '#1D1E24', 'stroke-width': .8}, g);
-    return g; };
-  const drops = cols.map(c => cube(c));
-  EW.loop(t => {
-    const k = Math.min(1, Math.max(0, (t - .9) / .6)), f = t > 1.6 ? Math.sin((t - 1.6) * 1.1) : 0;
-    sh.setAttribute('opacity', (k * (.85 - .25 * f)).toFixed(3));
-    drops.forEach((g, i) => {
-      if (t < 1.4) return;
-      const p = ((t - 1.4) / 2.4 + i / 3) % 1, zz = 112 - p * 58;
-      g.setAttribute('transform', `translate(0,${(-zz * .78).toFixed(1)})`);
-      g.setAttribute('opacity', (Math.min(1, p * 5, (1 - p) * 5)).toFixed(2));
-    });
-  });
+EW.dots({x: 700, y: 30, w: 580, h: 620, seed: 4, blobs: 6, thr: .5});
+const sc = EW.iso(document.getElementById('hero'), {ox: 300, oy: 282, s: .8});
+sc.rect({x: -30, y: -30, w: 330, d: 330, z: 0, delay: .1});
+const plat = sc.box({x: 0, y: 0, w: 270, d: 270, h: 46, c: 'blue', delay: .15, drop: 120, order: -1000});
+[128, 108, 88, 68, 48].forEach((h, i) => sc.box({x: 22 + i * 35.5, y: 150, w: 26, d: 100, h, z: 46, c: 'slate', stroke: false, delay: .55 + i * .07, drop: 90, order: 1}));
+sc.box({x: 190, y: 26, w: 60, d: 60, h: 76, z: 46, c: 'teal', delay: .82, drop: 90});
+const foot = sc.rect({x: 60, y: 22, w: 104, d: 104, z: 46, sw: 1.2, delay: 1.0});
+sc.box({x: 60, y: 22, w: 104, d: 104, h: 104, z: 176, c: 'glass', wire: true, inner: true, stroke: '#343741', delay: 1.05, drop: 60, float: 7, floatSpeed: 1.1, order: 2000});
+sc.box({x: 72, y: 34, w: 80, d: 80, h: 80, z: 188, c: 'pink', delay: 1.1, drop: 80, float: 7, floatSpeed: 1.1, order: 3000});
+sc.label({at: [164, 22, 176 + 52], side: 'r', len: 50, title: 'Claude Code · Gemini CLI', sub: 'Every session captured', raw: true, delay: .95});
+sc.label({at: [250, 26, 46 + 38], side: 'r', len: 40, title: 'Ingest pipeline', sub: 'Parse, map, redact', delay: 1.05});
+sc.label({at: [270, 170, 16], side: 'r', len: 110, title: 'Elastic', sub: ['Search AI platform', 'Dashboards + rules'], raw: true, delay: 1.15});
+sc.run();
+const fid = document.querySelector('#hero filter').id;
+const sh = EW.el('polygon', {points: [[70, 32], [158, 32], [158, 120], [70, 120]].map(([x, y]) => sc.P(x, y, 46).join(',')).join(' '), fill: 'rgba(30,40,80,.30)', filter: `url(#${fid})`, opacity: 0});
+plat.g.after(foot.g); foot.g.after(sh);
+const c = sc.P(114, 76, 46).map(v => v.toFixed(1));
+EW.loop(t => { const k = Math.min(1, Math.max(0, (t - 1.1) / .6)), f = t > 1.8 ? Math.sin((t - 1.8) * 1.1) : 0;
+  sh.setAttribute('opacity', (k * (.85 - .25 * f)).toFixed(3));
+  sh.setAttribute('transform', `translate(${c.join(',')}) scale(${(1 - .06 * f).toFixed(3)}) translate(${c.map(v => -v).join(',')})`); });
 })();
 </script>
 </body>

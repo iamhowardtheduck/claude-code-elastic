@@ -2,52 +2,50 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>The problem</title>
+<title>Claude Code and Gemini CLI Transcripts: The problem</title>
 <link rel="stylesheet" href="style/eweb.css">
 <style>
-  h1{font-size:44px;max-width:580px}
-  .list{margin-top:30px;display:flex;flex-direction:column;gap:12px;max-width:540px}
-  .card{display:grid;grid-template-columns:44px 1fr;gap:4px 14px;padding:14px 18px}
-  .card .n{font:500 26px var(--sans);letter-spacing:-1px;color:var(--blue);grid-row:span 2;line-height:1}
-  .card h3{font:600 16px var(--sans);letter-spacing:-.3px}
-  .card h3 .tag{color:var(--grey);font-weight:500;font-size:10px;margin-left:8px}
-  .card p{font-size:13px;line-height:1.5;color:var(--char)}
-  code{font-family:var(--mono);font-size:.92em}
-  #hero{left:660px;top:40px;width:620px;height:620px}
+h1{font-size:48px;max-width:560px}
+.rows{margin-top:34px;max-width:520px;position:relative;z-index:2}
+.row{padding:16px 0;border-top:1px solid var(--line)}
+.row:last-child{border-bottom:1px solid var(--line)}
+.row .tag{margin-bottom:6px}
+.row .cap{font-size:15px}
+#scene{left:620px;top:40px;width:660px;height:620px}
 </style>
 </head>
-<body data-foot="Overview · The problem">
+<body data-foot="Claude Code + Gemini CLI Transcripts · The problem">
 <div class="z">
   <div class="eyebrow in1">The problem</div>
-  <h1 class="in2">Coding agents are the newest actor on your network. <span class="b">And the least watched.</span></h1>
-  <div class="list">
-    <div class="card in3"><span class="n">01</span><h3>Agents act, nobody sees<span class="tag">blind spot</span></h3><p>Claude runs <code>rm</code>, <code>curl</code> and <code>git push</code> on real machines. EDR sees a shell. It doesn't see the prompt that caused it.</p></div>
-    <div class="card in4"><span class="n">02</span><h3>The record deletes itself<span class="tag">evaporating</span></h3><p>Transcripts sit as JSONL in <code>~/.claude/projects</code>, one laptop at a time, and Claude Code removes them after <b>30 days</b>.</p></div>
-    <div class="card in5"><span class="n">03</span><h3>No answers for anyone<span class="tag">unanswerable</span></h3><p>Who's using it? On which projects? What does it cost? Did a secret just get pasted into a prompt? Today nobody can say.</p></div>
+  <h1 class="in2">Coding agents act on real machines. <span class="b">Nobody is watching.</span></h1>
+  <div class="rows">
+    <div class="row in3"><div class="tag">01 · Blind spot</div><p class="cap">Claude Code and Gemini CLI run <span class="mono">rm</span>, <span class="mono">curl</span> and <span class="mono">git push</span>. EDR sees a shell, not the prompt that caused it.</p></div>
+    <div class="row in4"><div class="tag">02 · The record deletes itself</div><p class="cap">Transcripts sit as JSONL in <span class="mono">~/.claude/projects</span> and <span class="mono">~/.gemini/tmp</span>, one laptop at a time. Both delete them after 30 days.</p></div>
+    <div class="row in5"><div class="tag">03 · No answers</div><p class="cap">Who uses it, on which projects, at what cost? Did a secret just get pasted into a prompt? Nobody can say.</p></div>
   </div>
 </div>
-<svg id="hero" class="iso" viewBox="0 0 620 620"></svg>
+<svg id="scene" class="iso" viewBox="0 0 660 620"></svg>
 <script src="style/eweb.js"></script>
 <script src="/js/fuckslides.js"></script>
 <script>
 (function(){
-  EW.dots({x: 700, y: 40, w: 580, h: 620, seed: 11, blobs: 6, thr: .5});
-  const sc = EW.iso(document.getElementById('hero'), {ox: 200, oy: 250, s: .85});
-  // one developer laptop
-  sc.box({x: 0, y: 0, w: 250, d: 180, h: 14, c: 'slate', stroke: false, delay: .1, drop: 80, order: -1000});
-  // the agent acts
-  sc.box({x: 30, y: 24, w: 64, d: 64, h: 64, z: 14, c: 'pink', delay: .4, drop: 80});
-  // EDR only sees a shell
-  sc.box({x: 160, y: 24, w: 50, d: 50, h: 30, z: 14, c: 'ink', delay: .55, drop: 70});
-  // the transcript record: one cube per day, the oldest fading out
-  for (let r = 0; r < 3; r++) for (let k = 0; k < 10; k++){
-    const day = r * 10 + k;
-    sc.box({x: 22 + k * 21, y: 108 + r * 21, w: 14, d: 14, h: 14, z: 14, c: ['teal', 'yellow', 'orange', 'blue'][(k + r * 3) % 4], sw: .8, delay: .65 + day * .012, drop: 50, op: .12 + .88 * (day / 29), order: 1});
-  }
-  sc.label({at: [94, 30, 14 + 44], side: 'r', len: 70, title: 'AGENT ACTS', sub: 'rm, curl, git push', raw: true, delay: .9});
-  sc.label({at: [210, 40, 14 + 18], side: 'r', len: 40, title: 'EDR', sub: ['sees a shell', 'not the prompt'], delay: 1.0});
-  sc.label({at: [225, 157, 14 + 7], side: 'r', len: 90, title: '~/.claude/projects', sub: ['JSONL, one laptop at a time', 'removed after 30 days'], raw: true, delay: 1.1});
-  sc.run();
+EW.dots({x: 660, y: 60, w: 600, h: 580, seed: 9, blobs: 5, thr: .55});
+const sc = EW.iso(document.getElementById('scene'), {ox: 310, oy: 140, s: .7});
+const data = [];
+const cols = ['teal', 'yellow', 'blue', 'orange'];
+[0, 170, 340].forEach((y, i) => {
+  sc.box({x: 0, y, w: 150, d: 100, h: 14, c: 'slate', stroke: false, delay: .2 + i * .12, drop: 80});
+  sc.box({x: 22, y: y + 30, w: 40, d: 40, h: 40, z: 14, c: 'pink', delay: .55 + i * .12, drop: 70});
+  [[88, 22], [112, 22], [88, 50], [112, 50]].forEach(([dx, dy], j) => {
+    data.push(sc.box({x: dx, y: y + dy, w: 14, d: 14, h: 14, z: 14, c: cols[(i + j) % 4], sw: .8, delay: .85 + i * .1 + j * .04, drop: 40, phase: i + j}));
+  });
+});
+sc.rect({x: 260, y: 140, w: 150, d: 150, z: 0, sw: 1.2, delay: 1.1});
+sc.label({at: [150, 0, 7], side: 'r', len: 40, title: 'Developer laptops', sub: 'Agent with a shell', delay: .95});
+sc.label({at: [410, 215, 0], side: 'r', len: 40, title: 'Central record', sub: 'Does not exist', delay: 1.15});
+sc.run();
+// after settling, the transcript cubes fade in and out: the record keeps evaporating
+EW.loop(t => { if (t < 1.8) return; data.forEach((b, i) => { b.op = .35 + .65 * (.5 + .5 * Math.cos((t - 1.8) * 1.3 + i * .55)); }); });
 })();
 </script>
 </body>

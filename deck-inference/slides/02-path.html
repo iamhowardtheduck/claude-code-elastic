@@ -21,11 +21,11 @@
 <div class="z">
   <div class="eyebrow in1">The path of a prompt · <b>three pipelines</b></div>
   <h1 class="in2">Redaction runs first. <span class="b">The models never see a secret.</span></h1>
-  <p class="sub in3">Every transcript line goes through <code>default.yml</code>. Human prompts then branch into <code>inference.yml</code> when the policy turns inference on.</p>
+  <p class="sub in3">Claude Code lines and Gemini CLI records each go through their package's <code>default.yml</code>. Human prompts then branch into <code>inference.yml</code> when the policy turns inference on.</p>
   <div class="steps in4">
-    <div><b>1 · Parse</b><span>JSON to ECS and <code>gen_ai.*</code>, user and project from the path.</span></div>
-    <div class="o"><b>2 · Redact</b><span>19 detector types over message, content and tool inputs.</span></div>
-    <div><b>3 · Tool input</b><span>Redacted tool inputs copied into searchable fields.</span></div>
+    <div><b>1 · Parse</b><span>JSON to ECS and <code>gen_ai.*</code>, the same 8 <code>event.action</code> values for both sources.</span></div>
+    <div class="o"><b>2 · Redact</b><span>19 detector types over the message, content and tool calls, plus Gemini CLI <code>thoughts</code>.</span></div>
+    <div><b>3 · Tool input</b><span>Redacted tool inputs copied into <code>&lt;prefix&gt;.tool_input.*</code>.</span></div>
     <div class="p"><b>4 · Infer</b><span>Embedding, then <code>classify.yml</code>, then semantic flags. Human prompts only.</span></div>
   </div>
 </div>
@@ -38,9 +38,9 @@
   sc.rect({x: -24, y: -24, w: 108, d: 560, z: 0, delay: .05, dash: '2 4'});
   sc.box({x: 0, y: 0, w: 60, d: 512, h: 16, c: 'slate', stroke: false, delay: .1, drop: 60, order: -1000});
   const st = [
-    {c: 'white', h: 40, t: 'Parse', sub: 'default.yml'},
+    {c: 'white', h: 40, t: 'Parse', sub: 'both packages'},
     {c: 'orange', h: 64, t: 'Redact', sub: '[REDACTED:type]'},
-    {c: 'white', h: 32, t: 'Tool input', sub: 'claude_code.tool_input.*'},
+    {c: 'white', h: 32, t: 'Tool input', sub: '<prefix>.tool_input.*'},
     {c: 'blue', h: 48, t: 'Embed', sub: 'EIS jina-v5-nano'},
     {c: 'pink', h: 72, t: 'Classify', sub: '10 model calls'},
     {c: 'teal', h: 36, t: 'Semantic flags', sub: '29 threat phrases'}

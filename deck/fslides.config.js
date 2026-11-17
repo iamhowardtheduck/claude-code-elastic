@@ -1,7 +1,7 @@
 module.exports = {
   style: 'elastic-web',
   name: 'claude-code-transcripts',
-  title: 'Claude Code Transcripts for Elastic',
+  title: 'Claude Code and Gemini CLI Transcripts for Elastic',
   port: 30000,
   slidesDir: 'slides',
 
@@ -11,13 +11,14 @@ module.exports = {
     '03-what.html',
     '04-contains.html',
     '05-every-line.html',
-    '06-redaction.html',
-    '07-inference.html',
-    '08-dashboards.html',
-    '09-detections.html',
-    '10-why.html',
-    '11-solves.html',
-    '12-start.html',
+    '06-shared.html',
+    '07-redaction.html',
+    '08-inference.html',
+    '09-dashboards.html',
+    '10-detections.html',
+    '11-why.html',
+    '12-solves.html',
+    '13-start.html',
   ],
 
   labels: [
@@ -26,6 +27,7 @@ module.exports = {
     'How It Works',
     'Data Streams',
     'Every Line Structured',
+    'Shared and Different',
     'Secret Redaction',
     'ML Inference',
     'Dashboards',
