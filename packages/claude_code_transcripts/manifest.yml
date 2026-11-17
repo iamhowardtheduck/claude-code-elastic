@@ -1,7 +1,7 @@
 format_version: 3.6.0
 name: claude_code_transcripts
 title: Claude Code Transcripts
-version: 0.2.4
+version: 0.2.5
 description: Collect Claude Code session transcripts and Claude Desktop app/MCP logs from disk with Elastic Agent, mapped to ECS and gen_ai.*, with secret redaction, optional ML inference on prompts, and detection rules whose alerts feed Entity Analytics user and host risk scores.
 type: integration
 categories:
