@@ -1,6 +1,6 @@
 # Full deck (Claude Code only)
 
-> Claude Code only: a copy of the original `deck-full/` deck. `../../deck-full/` covers Claude Code and Gemini CLI together, and `../../gemini/deck-full/` covers Gemini CLI only.
+> Claude Code only: a copy of the original `deck-full/` deck. `../../deck-full/` covers Claude Code and Gemini CLI together, and [`deck-full/` in gemini-cli-elastic](https://github.com/iamhowardtheduck/gemini-cli-elastic/tree/main/deck-full) covers Gemini CLI only.
 
 The overview, inference and load-test decks in one 32-slide [fslides](https://fslides.dev) presentation, all in the elastic-web kit:
 

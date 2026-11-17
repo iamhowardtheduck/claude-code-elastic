@@ -1,6 +1,6 @@
 # Load-test deck (Claude Code only)
 
-> Claude Code only: a copy of the original `deck-performance/` deck. `../../deck-performance/` covers Claude Code and Gemini CLI together, and `../../gemini/deck-performance/` covers Gemini CLI only.
+> Claude Code only: a copy of the original `deck-performance/` deck. `../../deck-performance/` covers Claude Code and Gemini CLI together, and [`deck-performance/` in gemini-cli-elastic](https://github.com/iamhowardtheduck/gemini-cli-elastic/tree/main/deck-performance) covers Gemini CLI only.
 
 An 11-slide [fslides](https://fslides.dev) presentation of the 2026-11-15 throughput test: the integration on a fresh Elastic Cloud Hosted 9.5.6 deployment, driven by `tools/loadgen.py` toward a customer peak of 25,000 prompts an hour (100,000 a day). It covers embedding-only ingest, classification on adaptive and fixed allocations, why ML autoscaling did not scale, the inference-cache caveat, and the ML sizing for that peak.
 

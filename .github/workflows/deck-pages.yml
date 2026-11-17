@@ -10,7 +10,6 @@ on:
       - "deck-full/**"
       - "deck-models/**"
       - "claude/**"
-      - "gemini/**"
       - "docs/**/*.pdf"
       - ".github/workflows/deck-pages.yml"
   workflow_dispatch:
@@ -35,7 +34,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Build the 15 decks (combined, Claude Code only, Gemini CLI only)
+      - name: Build the 10 decks (combined, Claude Code only)
         env:
           PUPPETEER_SKIP_DOWNLOAD: "true"
         run: |
@@ -43,7 +42,7 @@ jobs:
           build() {   # deck dir, path under the Pages site (parents before their subfolders)
             (cd "$1" && npm install --no-audit --no-fund && npx fslides build "$GITHUB_WORKSPACE/_site/$2")
           }
-          for set in "" claude/ gemini/; do
+          for set in "" claude/; do
             build "${set}deck"             "${set}"
             build "${set}deck-performance" "${set}load-test"
             build "${set}deck-inference"   "${set}inference"
@@ -54,7 +53,6 @@ jobs:
         run: |
           cp docs/claude-code-transcripts-*.pdf _site/
           cp docs/claude/*.pdf _site/claude/
-          cp docs/gemini/*.pdf _site/gemini/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

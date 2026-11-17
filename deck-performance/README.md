@@ -1,6 +1,6 @@
 # Load-test deck (Claude Code and Gemini CLI)
 
-> Covers Claude Code and Gemini CLI together. `../claude/deck-performance/` covers Claude Code only, and `../gemini/deck-performance/` covers Gemini CLI only.
+> Covers Claude Code and Gemini CLI together. `../claude/deck-performance/` covers Claude Code only, and [`deck-performance/` in gemini-cli-elastic](https://github.com/iamhowardtheduck/gemini-cli-elastic/tree/main/deck-performance) covers Gemini CLI only.
 
 A 13-slide [fslides](https://fslides.dev) presentation of two throughput tests. First, the 2026-11-15 Claude Code test: the Claude Code Transcripts integration on a fresh Elastic Cloud Hosted 9.5.6 deployment, driven by `tools/loadgen.py` toward a customer peak of 25,000 prompts an hour (100,000 a day), covering embedding-only ingest, classification on adaptive and fixed allocations, why ML autoscaling did not scale and the inference-cache caveat. Second, the 2026-11-17 head-to-head: Claude Code and Gemini CLI back to back on one self-managed Elasticsearch 9.5.6 cluster with the same generator (`--product claude|gemini`), which measured the same ML cost per prompt for both (zero-shot 83.7% vs 82.7% of classifier time). The ML sizing for the peak follows, applied to the combined prompt rate.
 
