@@ -1,0 +1,5 @@
+- version: 0.1.0
+  changes:
+  - description: 'Initial release: Gemini CLI chats from ~/.gemini/tmp/<project>/chats/**/*.jsonl (Windows, Linux, macOS, subagent chats) mapped to ECS and gen_ai.*, with secret redaction. Token usage is counted once per model turn, although the CLI re-appends a model record as it grows.'
+    type: enhancement
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/pull/8
