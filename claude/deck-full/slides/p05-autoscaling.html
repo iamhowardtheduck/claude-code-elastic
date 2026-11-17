@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Autoscaling</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:44px;max-width:1080px}
+  .sub{font-size:16px;max-width:900px}
+  .wrap{position:absolute;left:72px;right:72px;top:250px;display:grid;grid-template-columns:1.15fr 1fr;gap:40px;z-index:2}
+  .mem .tag{margin-bottom:12px}
+  .stack{display:flex;height:54px;border:1px solid var(--ink);position:relative}
+  .stack i{display:flex;align-items:center;justify-content:center;font:500 10px var(--mono);color:#fff;border-right:1px solid #fff;transform-origin:left;animation:grow .5s cubic-bezier(.2,.7,.2,1) both;white-space:nowrap;overflow:hidden}
+  .stack i.free{background:#fff;color:var(--grey);border-right:0}
+  @keyframes grow{from{transform:scaleX(0)}to{transform:none}}
+  .need{position:relative;margin-top:14px;height:54px;width:30%;margin-left:auto;border:1.5px dashed #E0352B;display:flex;align-items:center;justify-content:center;font:600 11px var(--mono);color:#E0352B;text-transform:uppercase;letter-spacing:.04em}
+  .scale{display:flex;justify-content:space-between;font:400 10.5px var(--mono);color:var(--grey);margin-top:6px}
+  .legend{margin-top:14px;font-size:13px;line-height:1.5;color:var(--char)}
+  .legend b{color:var(--ink)}
+  .dec{display:flex;flex-direction:column;gap:12px}
+  .card .tag{color:var(--grey);font-weight:500;font-size:10.5px;margin-bottom:6px}
+  .card .tag b{color:var(--ink);font-weight:600}
+  .card p{font:400 13px/1.45 var(--mono);color:var(--char)}
+  .card .verdict{margin-top:8px;font:600 11px var(--mono);text-transform:uppercase;letter-spacing:.05em}
+  .no{color:#E0352B}.yes{color:var(--teal-d)}
+  .card.fix{border-color:var(--ink);box-shadow:8px 8px 0 var(--teal-d)}
+</style>
+</head>
+<body data-foot="Load test · Autoscaling">
+<div class="z">
+  <div class="eyebrow in1">Why phase 2 never scaled · <b>ML autoscaling</b></div>
+  <h1 class="in2">The ML tier was allowed to grow to 64 GB. <span class="b">It never asked to.</span></h1>
+  <p class="sub in3">Extra allocations for a model that is already running did not trigger a memory scale-up. Adaptive or fixed, the queue grew and the node stayed at 16 GB.</p>
+</div>
+<div class="wrap">
+  <div class="mem in3">
+    <div class="tag">16 GB ML node · 9.4 GB usable for models</div>
+    <div class="stack">
+      <i style="width:26%;background:var(--blue);animation-delay:.5s">injection</i>
+      <i style="width:24%;background:var(--pink);animation-delay:.6s">zero-shot</i>
+      <i style="width:12.5%;background:var(--char);animation-delay:.7s">toxicity</i>
+      <i style="width:12.5%;background:var(--char);animation-delay:.75s">offensive</i>
+      <i style="width:11.5%;background:var(--slate);color:var(--ink);animation-delay:.8s">jailbreak</i>
+      <i style="width:9.5%;background:var(--slate-l);color:var(--ink);animation-delay:.85s">NER</i>
+      <i class="free" style="width:4%;animation-delay:.9s"></i>
+    </div>
+    <div class="scale"><span>0 GB</span><span>free: 378 MB</span><span>9.4 GB</span></div>
+    <div class="need in5">next zero-shot allocation: 707 MB</div>
+    <p class="legend in5">Six models fill the node with one allocation each. The <b>zero-shot target rose to 3, then 16</b>, but no allocation could be placed.</p>
+  </div>
+  <div class="dec">
+    <div class="card in4"><div class="tag"><b>Memory decider</b> · reason</div><p>"queued jobs will eventually be assignable at the current size"</p><div class="verdict no">no memory requested</div></div>
+    <div class="card in5"><div class="tag"><b>Processor decider</b> · 16 fixed allocations</div><p>requests 21 processors, node has 9</p><div class="verdict no">Elastic Cloud did not resize in 5 min</div></div>
+    <div class="card fix in6"><div class="tag"><b>What worked</b> · ML minimum raised to 64 GB</div><p>64 GB node joined in about 3 min. 16 allocations placed, 814 queued requests cleared in about 90 s.</p><div class="verdict yes">provision ML capacity up front</div></div>
+  </div>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+</body>
+</html>

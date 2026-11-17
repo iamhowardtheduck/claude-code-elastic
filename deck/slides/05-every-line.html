@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Claude Code Transcripts: Every line structured</title>
+<title>Claude Code and Gemini CLI Transcripts: Every line structured</title>
 <link rel="stylesheet" href="style/eweb.css">
 <style>
 .win{background:#fff;border:1px solid var(--ink);box-shadow:8px 8px 0 var(--blue)}
@@ -25,15 +25,15 @@ pre .hl{background:linear-gradient(rgba(255,126,98,.22),rgba(255,126,98,.22)) no
 @keyframes mark{to{background-size:100% 100%}}
 </style>
 </head>
-<body data-foot="Claude Code Transcripts · Every line structured">
+<body data-foot="Claude Code + Gemini CLI Transcripts · Every line structured">
 <div class="left">
   <div class="eyebrow in1">What's in a document</div>
-  <h1 class="in2">Every turn, tool call and token. <span class="b">On standard field names.</span></h1>
-  <div class="lbl in3">event.action</div>
+  <h1 class="in2">Every turn, tool call and token. <span class="b">Same fields for both agents.</span></h1>
+  <div class="lbl in3">event.action · identical in both</div>
   <div class="chips in3"><span class="chip">user-prompt</span><span class="chip">assistant-response</span><span class="chip">tool-use</span><span class="chip">tool-result</span><span class="chip">assistant-thinking</span><span class="chip">subagent-prompt</span><span class="chip">local-command</span><span class="chip">system-notification</span></div>
   <div class="lbl in4">Extracted tool inputs</div>
   <div class="chips in4"><span class="chip on">tool_input.command</span><span class="chip on">tool_input.file_path</span><span class="chip on">tool_input.url</span><span class="chip on">tool_input.skill</span></div>
-  <p class="note in5"><b><span class="mono">claude_code.human_prompt: true</span></b> marks what a person typed, as opposed to what the agent generated.</p>
+  <p class="note in5"><b><span class="mono">*.human_prompt: true</span></b> marks what a person typed in either agent. Raw fields stay under <span class="mono">claude_code.*</span> or <span class="mono">gemini_cli.*</span>.</p>
 </div>
 <div class="win in3"><div class="bar"><i></i><i></i><i></i><span>logs-claude_code_transcripts.transcript-*</span></div><pre><span class="ln " style="animation-delay:0.45s">{</span><span class="ln " style="animation-delay:0.53s">  <i>"event.action"</i>: "tool-use",</span><span class="ln " style="animation-delay:0.61s">  <i>"user.name"</i>: "dev42",</span><span class="ln " style="animation-delay:0.69s">  <i>"process.working_directory"</i>: "~/src/payments",</span><span class="ln " style="animation-delay:0.77s">  <i>"gen_ai.request.model"</i>: "claude-opus-5-5",</span><span class="ln " style="animation-delay:0.85s">  <i>"gen_ai.tool.name"</i>: "Bash",</span><span class="ln hl" style="animation-delay:0.93s">  <i>"claude_code.tool_input.command"</i>:</span><span class="ln hl" style="animation-delay:1.01s">      "kubectl delete ns staging",</span><span class="ln " style="animation-delay:1.09s">  <i>"claude_code.permissionMode"</i>: "auto",</span><span class="ln " style="animation-delay:1.17s">  <i>"claude_code.gitBranch"</i>: "main",</span><span class="ln " style="animation-delay:1.25s">  <i>"gen_ai.usage.output_tokens"</i>: <em>412</em>,</span><span class="ln " style="animation-delay:1.33s">  <i>"gen_ai.usage.cache_read.input_tokens"</i>: <em>38120</em></span><span class="ln " style="animation-delay:1.41s">}</span></pre></div>
 <script src="style/eweb.js"></script>

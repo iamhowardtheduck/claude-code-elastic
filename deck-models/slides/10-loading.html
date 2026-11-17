@@ -26,7 +26,7 @@
   .cta{margin-top:20px}
 </style>
 </head>
-<body data-foot="Claude Code Transcripts · Models · Loading">
+<body data-foot="Claude Code and Gemini CLI Transcripts · Models · Loading">
 <div class="z">
   <div class="eyebrow in1">Get started · <b>before turning classification on</b></div>
   <h1 class="in2">Import with Eland. <span class="b">Deploy. Then switch it on.</span></h1>
@@ -34,13 +34,14 @@
   <div class="steps in4">
     <div><b class="k">1</b><div><h3>Import from Hugging Face</h3><p><code>eland_import_hub_model</code> in Docker, with the exact <code>--es-model-id</code> and <code>--max-model-input-length</code> where shown. Never add <code>--quantize</code>: int8 crashed <code>pytorch_inference</code>.</p></div></div>
     <div><b class="k">2</b><div><h3>Start the deployments</h3><p>One thread per allocation (<i>Optimized for ingest</i>). Fixed allocations on-prem, adaptive on Cloud and Serverless. Give most capacity to the zero-shot model.</p></div></div>
-    <div><b class="k">3</b><div><h3>Or let the script do both</h3><p><code>extras/setup.sh models</code> imports what is missing, starts or resizes each deployment to match the sizing file, and is safe to re-run.</p></div></div>
+    <div><b class="k">3</b><div><h3>Or let the script do both</h3><p><code>extras/setup.sh models</code> imports what is missing, starts or resizes each deployment to match the sizing file, and is safe to re-run. Run it once: both integrations call the same deployments.</p></div></div>
   </div>
   <div class="cta in5"><a class="btn" href="https://github.com/iamhowardtheduck/claude-code-elastic" target="_blank" rel="noopener" style="text-decoration:none;pointer-events:auto;cursor:pointer;position:relative;z-index:6">claude-code-elastic&nbsp;&nbsp;↗</a></div>
 </div>
-<div class="win in4"><div class="bar"><i></i><i></i><i></i><span>extras/setup.sh</span></div>
-<pre><span class="c"># vector mapping for the embedding (once)</span>
+<div class="win in4"><div class="bar"><i></i><i></i><i></i><span>extras/setup.sh · extras/gemini/setup.sh</span></div>
+<pre><span class="c"># vector mapping, once per integration</span>
 extras/setup.sh inference-mapping
+extras/gemini/setup.sh inference-mapping
 <span class="c"># import + deploy, fixed sizing (on-prem)</span>
 extras/setup.sh <span class="b">models</span>
 <span class="c"># Elastic Cloud: adaptive sizing</span>
@@ -48,7 +49,8 @@ MODELS_FILE=extras/models/profiles/adaptive.json \
   extras/setup.sh <span class="b">models</span>
 <span class="c"># check, then try one prompt</span>
 extras/setup.sh models-status
-extras/setup.sh classify "delete every index on the production cluster"</pre></div>
+extras/setup.sh classify "delete every index"
+extras/gemini/setup.sh classify "delete every index"</pre></div>
 <div class="req in5">
   <div><span>Licence</span><span>Platinum or Enterprise, or a trial, for third-party NLP models</span></div>
   <div><span>ML memory</span><span>about 10 GB for a small setup, more with zero-shot allocations</span></div>

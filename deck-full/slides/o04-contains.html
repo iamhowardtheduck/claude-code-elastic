@@ -2,52 +2,68 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Data streams</title>
+<title>Claude Code and Gemini CLI Transcripts: Data streams</title>
 <link rel="stylesheet" href="style/eweb.css">
 <style>
-  h1{font-size:50px;max-width:540px}
-  .sub{font-size:17px;max-width:500px}
-  #pkg{left:72px;top:330px;width:560px;height:300px}
-  .side{position:absolute;left:690px;right:72px;top:96px;display:flex;flex-direction:column;gap:14px;z-index:2}
-  .card{display:flex;flex-direction:column;gap:6px;padding:16px 20px}
-  .card .k{font:500 11px var(--mono);color:var(--grey);letter-spacing:.02em}
-  .card h3{font:600 18px var(--sans);letter-spacing:-.3px}
-  .card p{font-size:13px;line-height:1.5;color:var(--char)}
-  .card .chips{display:flex;gap:6px;margin-top:2px}
-  .card.hot{border-color:var(--ink);box-shadow:8px 8px 0 var(--blue)}
-  .card.opt{border-style:dashed;border-color:var(--grey-l)}
-  .card.opt .k{color:var(--pink)}
-  code{font-family:var(--mono);font-size:.92em}
+.cols{display:grid;z-index:2;position:relative}
+.col{padding:0 22px;border-left:1px solid var(--ink);display:flex;flex-direction:column}
+.col:first-child{padding-left:0;border-left:0}
+.col:last-child{padding-right:0}
+.col .tag{margin-bottom:12px}
+
+h1{font-size:46px}
+.cols{position:absolute;left:72px;right:72px;top:236px;bottom:80px;grid-template-columns:repeat(4,1fr)}
+.big{display:flex;align-items:flex-end;gap:12px;height:90px}
+.big .stat{font-size:68px;letter-spacing:-2.5px}
+.big .post{font-size:13px;line-height:1.35;color:var(--char);padding-bottom:10px}
+.ds{font:500 10.5px var(--mono);color:var(--blue);margin-top:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+.how{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+.how p{font-size:13px;line-height:1.5;color:var(--char)}
+.how p b{color:var(--ink);font-weight:600}
+.opt{color:var(--grey);font-weight:400}
 </style>
 </head>
-<body data-foot="Overview · Data streams">
+<body data-foot="Claude Code + Gemini CLI Transcripts · Data streams">
 <div class="z">
   <div class="eyebrow in1">What it contains</div>
-  <h1 class="in2">Three data streams. <span class="b">One package.</span></h1>
-  <p class="sub in3">Transcripts, desktop and MCP logs, and the health of the ML pipeline that enriches them.</p>
+  <h1 class="in2">Four data streams. <span class="b">Two packages.</span></h1>
 </div>
-<svg id="pkg" class="iso" viewBox="0 0 560 300"></svg>
-<div class="side">
-  <div class="card hot in3"><span class="k">claude_code_transcripts.transcript</span><h3>Session transcripts</h3><p>One document per conversation line from the CLI, the VS Code and JetBrains extensions, the Desktop Code tab and Cowork. Covers prompts, responses, thinking, tool calls and results, subagents, and token usage.</p><div class="chips"><span class="chip on">200+ fields</span><span class="chip" style="text-transform:none">event.id = _id</span></div></div>
-  <div class="card in4"><span class="k">claude_code_transcripts.desktop_log</span><h3>Desktop and MCP logs</h3><p><code>main.log</code>, <code>mcp.log</code> and <code>mcp-server-*.log</code> on Windows and macOS. Parses MCP requests, responses and notifications into server, method and outcome.</p></div>
-  <div class="card opt in5"><span class="k">claude_code_transcripts.inference_stats · optional</span><h3>ML inference stats</h3><p>CEL input that polls trained-model and ingest-pipeline stats every minute, so you can tell whether inference is keeping up.</p></div>
+<div class="cols">
+  <div class="col in3">
+    <div class="tag">01 · Claude Code transcripts</div>
+    <div class="big"><span class="stat" data-n="200" data-post="+">200+</span><span class="post">fields per<br>line</span></div>
+    <div class="ds">claude_code_transcripts.<wbr>transcript</div>
+    <div class="chips"><span class="chip">CLI</span><span class="chip">VS Code</span><span class="chip">JetBrains</span><span class="chip">Desktop</span><span class="chip">Cowork</span></div>
+    <div class="how"><p><b>One document per line:</b> prompts, responses, thinking, tool calls and results, subagents and tokens.</p></div>
+  </div>
+  <div class="col in3">
+    <div class="tag">02 · Gemini CLI transcripts</div>
+    <div class="big"><span class="stat" data-n="150" data-post="+">150+</span><span class="post">fields per<br>record</span></div>
+    <div class="ds">gemini_cli.transcript</div>
+    <div class="chips"><span class="chip">Linux</span><span class="chip">macOS</span><span class="chip">Windows</span><span class="chip">Subagent chats</span></div>
+    <div class="how"><p><b>One document per message:</b> the same event types, from <span class="mono">~/.gemini/tmp/*/chats</span>.</p></div>
+  </div>
+  <div class="col in4">
+    <div class="tag">03 · Desktop &amp; MCP logs</div>
+    <div class="big"><span class="stat" data-n="4">4</span><span class="post">log families<br>parsed</span></div>
+    <div class="ds">claude_code_transcripts.<wbr>desktop_log</div>
+    <div class="chips"><span class="chip">main.log</span><span class="chip">mcp.log</span><span class="chip">mcp-server-*</span><span class="chip">chrome-native-host</span></div>
+    <div class="how"><p><b>Claude Desktop only:</b> MCP requests, responses and notifications become server, method and outcome.</p></div>
+  </div>
+  <div class="col in5">
+    <div class="tag">04 · ML inference stats <span class="opt">· optional</span></div>
+    <div class="big"><span class="stat" data-n="60">60</span><span class="post">seconds<br>between polls</span></div>
+    <div class="ds">claude_code_transcripts.<wbr>inference_stats</div>
+    <div class="chips"><span class="chip">trained models</span><span class="chip">ingest pipelines</span></div>
+    <div class="how"><p><b>Is inference keeping up?</b> A CEL input polls model and pipeline stats for the admin dashboard.</p></div>
+  </div>
 </div>
 <script src="style/eweb.js"></script>
 <script src="/js/fuckslides.js"></script>
 <script>
 (function(){
-  const sc = EW.iso(document.getElementById('pkg'), {ox: 270, oy: 92, s: .85});
-  // the package: one dashed footprint
-  sc.rect({x: 0, y: 0, w: 240, d: 200, z: 0, delay: .2});
-  sc.box({x: 20, y: 20, w: 100, d: 160, h: 90, c: 'blue', delay: .4, drop: 80});
-  // optional stream at the back: pink model in a dashed frame
-  sc.box({x: 160, y: 36, w: 40, d: 38, h: 26, c: 'pink', delay: .55, drop: 40});
-  sc.box({x: 140, y: 20, w: 80, d: 70, h: 50, c: 'glass', wire: true, dash: '3 3', stroke: '#343741', shadow: false, delay: .65, drop: 0, snap: false, order: 20});
-  sc.box({x: 140, y: 110, w: 80, d: 70, h: 50, c: 'teal', delay: .7, drop: 70});
-  sc.label({at: [20, 170, 60], side: 'l', len: 40, title: 'transcript', sub: '200+ fields', delay: 1.0});
-  sc.label({at: [220, 55, 40], side: 'r', len: 40, title: 'inference_stats', sub: 'optional', delay: 1.05});
-  sc.label({at: [220, 145, 25], side: 'r', len: 110, title: 'desktop_log', sub: 'desktop + MCP', delay: 1.1});
-  sc.run();
+document.querySelectorAll('.stat[data-n]').forEach(s => EW.count(s, +s.dataset.n, {post: s.dataset.post || '', delay: .4, dur: 1.2}));
 })();
 </script>
 </body>

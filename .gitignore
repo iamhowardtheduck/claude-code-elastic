@@ -38,3 +38,16 @@ deck-models/_site/
 deck-models/.fslides/
 deck-models/*.pdf
 deck-models/.claude/
+
+# deck build output (all three sets); PDFs are published from docs/
+deck/*.pdf
+claude/*/node_modules/
+claude/*/_site/
+claude/*/.fslides/
+claude/*/.claude/
+claude/*/*.pdf
+gemini/*/node_modules/
+gemini/*/_site/
+gemini/*/.fslides/
+gemini/*/.claude/
+gemini/*/*.pdf

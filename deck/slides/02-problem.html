@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Claude Code Transcripts: The problem</title>
+<title>Claude Code and Gemini CLI Transcripts: The problem</title>
 <link rel="stylesheet" href="style/eweb.css">
 <style>
 h1{font-size:48px;max-width:560px}
@@ -14,13 +14,13 @@ h1{font-size:48px;max-width:560px}
 #scene{left:620px;top:40px;width:660px;height:620px}
 </style>
 </head>
-<body data-foot="Claude Code Transcripts · The problem">
+<body data-foot="Claude Code + Gemini CLI Transcripts · The problem">
 <div class="z">
   <div class="eyebrow in1">The problem</div>
   <h1 class="in2">Coding agents act on real machines. <span class="b">Nobody is watching.</span></h1>
   <div class="rows">
-    <div class="row in3"><div class="tag">01 · Blind spot</div><p class="cap">Claude runs <span class="mono">rm</span>, <span class="mono">curl</span> and <span class="mono">git push</span>. EDR sees a shell, not the prompt that caused it.</p></div>
-    <div class="row in4"><div class="tag">02 · The record deletes itself</div><p class="cap">Transcripts sit as JSONL in <span class="mono">~/.claude/projects</span>, one laptop at a time, and are removed after 30 days.</p></div>
+    <div class="row in3"><div class="tag">01 · Blind spot</div><p class="cap">Claude Code and Gemini CLI run <span class="mono">rm</span>, <span class="mono">curl</span> and <span class="mono">git push</span>. EDR sees a shell, not the prompt that caused it.</p></div>
+    <div class="row in4"><div class="tag">02 · The record deletes itself</div><p class="cap">Transcripts sit as JSONL in <span class="mono">~/.claude/projects</span> and <span class="mono">~/.gemini/tmp</span>, one laptop at a time. Both delete them after 30 days.</p></div>
     <div class="row in5"><div class="tag">03 · No answers</div><p class="cap">Who uses it, on which projects, at what cost? Did a secret just get pasted into a prompt? Nobody can say.</p></div>
   </div>
 </div>

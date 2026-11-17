@@ -1,6 +1,7 @@
 {
   "name": "deck-models",
   "version": "1.0.0",
+  "description": "Models deck: Claude Code and Gemini CLI Transcripts",
   "private": true,
   "scripts": {
     "serve": "fslides serve",

@@ -21,7 +21,7 @@
 </head>
 <body data-foot="Load test · Phase 2">
 <div class="z">
-  <div class="eyebrow in1">Phase 2 · <b>adaptive allocations, one 16 GB ML node</b></div>
+  <div class="eyebrow in1">Claude Code on Elastic Cloud · <b>phase 2, adaptive, one 16 GB ML node</b></div>
   <h1 class="in2">One zero-shot allocation <span class="b">saturates at 0.5 prompts/s.</span></h1>
   <p class="sub in3">The zero-shot model runs up to five passes per prompt. On a single allocation the queue grew from the first minute, and every bulk request waited for it.</p>
   <div class="facts">
@@ -38,7 +38,7 @@
   // measured every 30 s from 10:01:11; steps 0.5 / 1 / 2 prompts/s, 5 min each, then drain
   const q = [15,25,39,52,62,73,84,96,108,118,143,168,194,220,246,275,302,327,352,378,434,494,547,601,659,712,771,823,880,935,934,928,926,919,917,911,906,904,903];
   const lat = [null,null,52.1,null,109.9,152.0,null,185.5,null,229.5,246.9,null,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2,300.2];
-  const svg = document.getElementById('chart'), L = 52, R = 520, T = 40, B = 400;
+  const svg = document.getElementById('chart'), L = 52, R = 505, T = 40, B = 400;
   const X = i => L + (R - L) * i / (q.length - 1), Y = v => B - (B - T) * v / 1000, Y2 = v => B - (B - T) * v / 330;
   const g = (t, a, p) => EW.el(t, a, p || svg);
   g('text', {x: L, y: 18, class: 'ttl'}).textContent = 'Zero-shot queue and bulk latency, measured';

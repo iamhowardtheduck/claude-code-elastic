@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Claude Code Transcripts: How it works</title>
+<title>Claude Code and Gemini CLI Transcripts: How it works</title>
 <link rel="stylesheet" href="style/eweb.css">
 <style>
 h1{font-size:46px;max-width:620px}
@@ -13,13 +13,13 @@ h1{font-size:46px;max-width:620px}
 #flow{left:0;top:0;width:1280px;height:720px}
 </style>
 </head>
-<body data-foot="Claude Code Transcripts · How it works">
+<body data-foot="Claude Code + Gemini CLI Transcripts · How it works">
 <div class="z">
   <div class="eyebrow in1">What it is</div>
-  <h1 class="in2">Tail the files Claude already writes. <span class="b">Index them properly.</span></h1>
-  <p class="sub in3">Elastic Agent reads the transcripts on each workstation, and the ingest pipeline parses, maps and redacts every line before it is indexed.</p>
+  <h1 class="in2">Two agents, one approach. <span class="b">Index what they already write.</span></h1>
+  <p class="sub in3">Elastic Agent tails Claude Code and Gemini CLI transcripts on each workstation. Two sibling integrations parse, map and redact every line the same way.</p>
 </div>
-<div class="notes in5"><div class="tag">Zero touch</div><p>Nothing changes in Claude Code itself. No proxy, no SDK, no wrapper. Install it through Fleet, assign a policy, and data shows up.</p></div>
+<div class="notes in5"><div class="tag">Zero touch</div><p>Nothing changes in either agent. No proxy, no SDK, no wrapper. Install it through Fleet, assign a policy, and data shows up.</p></div>
 <svg id="flow" class="iso" viewBox="0 0 1280 720"></svg>
 <script src="style/eweb.js"></script>
 <script src="/js/fuckslides.js"></script>
@@ -30,8 +30,11 @@ const sc = EW.iso(document.getElementById('flow'), {ox: 600, oy: 300, s: .62});
 const X = [0, 190, 380, 570, 760];
 sc.rect({x: 40, y: 106, w: 840, d: 22, z: 0, sw: 1, delay: .3});
 // source: files on disk
-sc.box({x: X[0], y: 0, w: 90, d: 90, h: 12, c: 'slate', stroke: false, delay: .3, drop: 70});
-[['teal', 10, 12], ['yellow', 40, 12], ['orange', 10, 44], ['blue', 40, 44]].forEach(([c, dx, dy], i) => sc.box({x: X[0] + dx + 8, y: dy + 8, w: 18, d: 18, h: 18, z: 12, c, sw: .8, delay: .45 + i * .05, drop: 40}));
+// two sources: Claude Code (back) and Gemini CLI (front)
+[-70, 40].forEach((y0, k) => {
+  sc.box({x: X[0], y: y0, w: 80, d: 60, h: 12, c: 'slate', stroke: false, delay: .3 + k * .1, drop: 70});
+  [['teal', 10, 8], ['yellow', 38, 8], ['orange', 10, 34], ['blue', 38, 34]].forEach(([c, dx, dy], i) => sc.box({x: X[0] + dx + 6, y: y0 + dy, w: 16, d: 16, h: 16, z: 12, c: k ? ['blue', 'teal', 'pink', 'yellow'][i] : c, sw: .8, delay: .45 + k * .1 + i * .05, drop: 40}));
+});
 // Elastic Agent
 sc.box({x: X[1] + 10, y: 10, w: 70, d: 70, h: 54, c: 'ink', delay: .6, drop: 80});
 // ingest pipeline
@@ -43,11 +46,12 @@ sc.box({x: X[3] + 20, y: 20, w: 50, d: 50, h: 50, z: 0, c: 'pink', delay: 1.0, d
 sc.box({x: X[4], y: -20, w: 130, d: 130, h: 26, c: 'blue', delay: 1.1, drop: 80, order: -500});
 [64, 48, 32].forEach((h, i) => sc.box({x: X[4] + 14 + i * 24, y: 70, w: 16, d: 30, h, z: 26, c: 'slate', stroke: false, delay: 1.3 + i * .05, drop: 50}));
 [[14, 0], [36, 0], [14, 22], [36, 22]].forEach(([dx, dy], i) => sc.box({x: X[4] + 70 + dx, y: dy, w: 16, d: 16, h: 16, z: 26, c: 'blue', sw: .8, delay: 1.4 + i * .04, drop: 40}));
-sc.label({at: [X[0], 45, 6], side: 'l', len: 50, title: '~/.claude/projects', sub: ['JSONL transcripts', 'Desktop + MCP logs'], raw: true, delay: .9});
+sc.label({at: [X[0] + 80, -70, 6], side: 'r', len: 40, title: 'Claude Code', sub: ['~/.claude/projects', '+ Desktop, MCP logs'], raw: true, delay: .9});
+sc.label({at: [X[0], 70, 6], side: 'l', len: 40, title: 'Gemini CLI', sub: ['~/.gemini/tmp', '+ subagent chats'], raw: true, delay: .94});
 sc.label({at: [X[1] + 80, 10, 54], side: 'r', len: 30, title: 'Elastic Agent', sub: 'filestream', raw: true, delay: .98});
 sc.label({at: [X[2] + 90, 0, 30], side: 'r', len: 30, title: 'Ingest pipeline', sub: 'ECS, gen_ai.*, redaction', delay: 1.06});
 sc.label({at: [X[3] + 70, 20, 50], side: 'r', len: 40, title: 'ML inference', sub: 'Optional', delay: 1.14});
-sc.label({at: [X[4] + 130, -20, 26], side: 'r', len: 30, title: 'Elastic', sub: ['3 dashboards', '10 rules'], raw: true, delay: 1.22});
+sc.label({at: [X[4] + 130, -20, 26], side: 'r', len: 30, title: 'Elastic', sub: ['5 dashboards', '18 rules'], raw: true, delay: 1.22});
 // data cubes flowing along the lane after everything has landed
 const FACES = EW.FACES, raw = ['teal', 'yellow', 'orange', 'pink'];
 const flow = Array.from({length: 7}, (_, i) => {

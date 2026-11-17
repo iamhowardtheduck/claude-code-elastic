@@ -28,12 +28,12 @@
   .win .a b{color:var(--pink)}
 </style>
 </head>
-<body data-foot="Claude Code Transcripts · Models · Jailbreak">
+<body data-foot="Claude Code and Gemini CLI Transcripts · Models · Jailbreak">
 <div class="z">
   <div class="eyebrow in1">Model 3 of 7 · <b>text classification</b></div>
   <h1 class="in2">Role-play and "no restrictions" framing. <span class="b">The strictest threshold.</span></h1>
   <p class="sub in3">A classifier trained to tell jailbreak prompts, aimed at the model's safety policy, from benign ones.</p>
-  <table class="facts in4"><tr><td>ES model ID</td><td><b>jackhhao__jailbreak-classifier</b></td></tr><tr><td>Hugging Face</td><td>jackhhao/jailbreak-classifier</td></tr><tr><td>Input length</td><td>model default</td></tr><tr><td>Labels</td><td>benign, <span class="p">jailbreak</span></td></tr><tr><td>Rule</td><td>jailbreak ≥ 0.99 <b>and</b> INJECTION ≥ 0.90 → category <code>jailbreak</code></td></tr><tr><td>Output</td><td><code>prompt_classification.scores.jailbreak</code>, always kept</td></tr><tr><td>ML memory</td><td>about 1.2 GB at 1 allocation</td></tr></table>
+  <table class="facts in4"><tr><td>ES model ID</td><td><b>jackhhao__jailbreak-classifier</b></td></tr><tr><td>Hugging Face</td><td>jackhhao/jailbreak-classifier</td></tr><tr><td>Input length</td><td>model default</td></tr><tr><td>Labels</td><td>benign, <span class="p">jailbreak</span></td></tr><tr><td>Rule</td><td>jailbreak ≥ 0.99 <b>and</b> INJECTION ≥ 0.90 → category <code>jailbreak</code></td></tr><tr><td>Output</td><td><code>prompt_classification.scores.jailbreak</code>, always kept, under both prefixes</td></tr><tr><td>ML memory</td><td>about 1.2 GB at 1 allocation</td></tr></table>
   <div class="use in5"><p><b>Paired with prompt injection.</b> Both must pass before either category is added and the prompt is flagged. Each model alone was too noisy on everyday developer prompts.</p></div>
 </div>
 <svg id="hero" class="iso" viewBox="0 0 560 380"></svg>

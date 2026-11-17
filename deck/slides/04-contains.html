@@ -2,54 +2,61 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Claude Code Transcripts: Data streams</title>
+<title>Claude Code and Gemini CLI Transcripts: Data streams</title>
 <link rel="stylesheet" href="style/eweb.css">
 <style>
 .cols{display:grid;z-index:2;position:relative}
-.col{padding:0 28px;border-left:1px solid var(--ink);display:flex;flex-direction:column}
+.col{padding:0 22px;border-left:1px solid var(--ink);display:flex;flex-direction:column}
 .col:first-child{padding-left:0;border-left:0}
 .col:last-child{padding-right:0}
 .col .tag{margin-bottom:12px}
 
 h1{font-size:46px}
-.cols{position:absolute;left:72px;right:72px;top:236px;bottom:80px;grid-template-columns:1.15fr 1fr 1fr}
+.cols{position:absolute;left:72px;right:72px;top:236px;bottom:80px;grid-template-columns:repeat(4,1fr)}
 .big{display:flex;align-items:flex-end;gap:12px;height:90px}
-.big .stat{font-size:88px}
-.big .post{font-size:14px;line-height:1.35;color:var(--char);padding-bottom:10px}
-.ds{font:500 11.5px var(--mono);color:var(--blue);margin-top:14px}
+.big .stat{font-size:68px;letter-spacing:-2.5px}
+.big .post{font-size:13px;line-height:1.35;color:var(--char);padding-bottom:10px}
+.ds{font:500 10.5px var(--mono);color:var(--blue);margin-top:14px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
 .how{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
-.how p{font-size:13.5px;line-height:1.5;color:var(--char)}
+.how p{font-size:13px;line-height:1.5;color:var(--char)}
 .how p b{color:var(--ink);font-weight:600}
 .opt{color:var(--grey);font-weight:400}
 </style>
 </head>
-<body data-foot="Claude Code Transcripts · Data streams">
+<body data-foot="Claude Code + Gemini CLI Transcripts · Data streams">
 <div class="z">
   <div class="eyebrow in1">What it contains</div>
-  <h1 class="in2">Three data streams. <span class="b">One package.</span></h1>
+  <h1 class="in2">Four data streams. <span class="b">Two packages.</span></h1>
 </div>
 <div class="cols">
   <div class="col in3">
-    <div class="tag">01 · Session transcripts</div>
-    <div class="big"><span class="stat" data-n="200" data-post="+">200+</span><span class="post">fields per<br>conversation line</span></div>
-    <div class="ds">claude_code_transcripts.transcript</div>
+    <div class="tag">01 · Claude Code transcripts</div>
+    <div class="big"><span class="stat" data-n="200" data-post="+">200+</span><span class="post">fields per<br>line</span></div>
+    <div class="ds">claude_code_transcripts.<wbr>transcript</div>
     <div class="chips"><span class="chip">CLI</span><span class="chip">VS Code</span><span class="chip">JetBrains</span><span class="chip">Desktop</span><span class="chip">Cowork</span></div>
-    <div class="how"><p><b>One document per line:</b> prompts, responses, thinking, tool calls and results, subagents and token usage. <span class="mono">event.id</span> becomes <span class="mono">_id</span>.</p></div>
+    <div class="how"><p><b>One document per line:</b> prompts, responses, thinking, tool calls and results, subagents and tokens.</p></div>
+  </div>
+  <div class="col in3">
+    <div class="tag">02 · Gemini CLI transcripts</div>
+    <div class="big"><span class="stat" data-n="150" data-post="+">150+</span><span class="post">fields per<br>record</span></div>
+    <div class="ds">gemini_cli.transcript</div>
+    <div class="chips"><span class="chip">Linux</span><span class="chip">macOS</span><span class="chip">Windows</span><span class="chip">Subagent chats</span></div>
+    <div class="how"><p><b>One document per message:</b> the same event types, from <span class="mono">~/.gemini/tmp/*/chats</span>.</p></div>
   </div>
   <div class="col in4">
-    <div class="tag">02 · Desktop &amp; MCP logs</div>
+    <div class="tag">03 · Desktop &amp; MCP logs</div>
     <div class="big"><span class="stat" data-n="4">4</span><span class="post">log families<br>parsed</span></div>
-    <div class="ds">claude_code_transcripts.desktop_log</div>
+    <div class="ds">claude_code_transcripts.<wbr>desktop_log</div>
     <div class="chips"><span class="chip">main.log</span><span class="chip">mcp.log</span><span class="chip">mcp-server-*</span><span class="chip">chrome-native-host</span></div>
-    <div class="how"><p><b>MCP traffic, structured:</b> requests, responses and notifications become server, method and outcome.</p></div>
+    <div class="how"><p><b>Claude Desktop only:</b> MCP requests, responses and notifications become server, method and outcome.</p></div>
   </div>
   <div class="col in5">
-    <div class="tag">03 · ML inference stats <span class="opt">· optional</span></div>
+    <div class="tag">04 · ML inference stats <span class="opt">· optional</span></div>
     <div class="big"><span class="stat" data-n="60">60</span><span class="post">seconds<br>between polls</span></div>
-    <div class="ds">claude_code_transcripts.inference_stats</div>
+    <div class="ds">claude_code_transcripts.<wbr>inference_stats</div>
     <div class="chips"><span class="chip">trained models</span><span class="chip">ingest pipelines</span></div>
-    <div class="how"><p><b>Is inference keeping up?</b> A CEL input polls model and pipeline stats so the admin dashboard can tell you.</p></div>
+    <div class="how"><p><b>Is inference keeping up?</b> A CEL input polls model and pipeline stats for the admin dashboard.</p></div>
   </div>
 </div>
 <script src="style/eweb.js"></script>

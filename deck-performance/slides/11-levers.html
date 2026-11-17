@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Levers</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:46px;max-width:1100px}
+  .sub{font-size:16px;max-width:900px}
+  .grid{position:absolute;left:72px;right:72px;top:268px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;z-index:2}
+  .card{display:flex;flex-direction:column;gap:6px;min-height:160px;padding:16px 20px}
+  .card .tag{color:var(--blue)}
+  .card h3{font:600 17px var(--sans);letter-spacing:-.3px}
+  .card p{font-size:13px;line-height:1.5;color:var(--char)}
+  .card .eff{margin-top:auto;font:500 11px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--teal-d);border-top:1px dashed var(--line);padding-top:8px}
+  .card.hot{border-color:var(--ink);box-shadow:8px 8px 0 var(--blue)}
+  code{font-family:var(--mono);font-size:.92em}
+</style>
+</head>
+<body data-foot="Load test · Levers">
+<div class="z">
+  <div class="eyebrow in1">Throughput levers · <b>what to change, and by how much</b></div>
+  <h1 class="in2">Six settings decide the ML bill. <span class="b">The zero-shot passes come first.</span></h1>
+  <p class="sub in3">Levers 01, 02, 03, 05 and 06 come from the Claude Code test on Elastic Cloud, 04 from <code>docs/inference-tuning.md</code>. Same models and calls, so they apply to Gemini CLI unchanged.</p>
+</div>
+<div class="grid">
+  <div class="card hot in3"><span class="tag">01 · Allocations</span><h3>Fixed allocations, provisioned ML minimum</h3><p>Adaptive allocations did not trigger ML autoscaling. Set <code>number_of_allocations</code> and raise the ML minimum to fit them.</p><div class="eff">queue 935 → ≤23</div></div>
+  <div class="card hot in3"><span class="tag">02 · Passes</span><h3>Run fewer zero-shot passes</h3><p>Cost scales with passes and labels per pass. Security and agent action alone need 2 of the 5 passes.</p><div class="eff">−60% zero-shot allocations</div></div>
+  <div class="card in4"><span class="tag">03 · Scope</span><h3>Classify by policy, embed everywhere</h3><p>Inference is a per-policy switch. Classify the teams that need it; everyone else gets embeddings and semantic threat flags.</p><div class="eff">ML cost ∝ classified share</div></div>
+  <div class="card in4"><span class="tag">04 · Threads</span><h3>One thread per allocation</h3><p>Ingest-time inference is many small requests. One thread each gave about 2× the work per core of 8-thread allocations.</p><div class="eff">≈2× per vCPU</div></div>
+  <div class="card in5"><span class="tag">05 · Agent output</span><h3>Small bulk requests</h3><p>With slow inference, 1,600-event bulks outlived the Cloud proxy timeout and the agent dropped them. <code>bulk_max_size: 200</code> keeps each request short.</p><div class="eff">1,600 → 200 events per request</div></div>
+  <div class="card in5"><span class="tag">06 · Backfill</span><h3>Backfill without classification</h3><p>A new agent reads 30 days of history at once. Turn classification off for the backfill, then back on for live prompts.</p><div class="eff">6,000 lines in minutes</div></div>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+</body>
+</html>

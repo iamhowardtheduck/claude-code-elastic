@@ -28,12 +28,12 @@
   .win .a b{color:var(--pink)}
 </style>
 </head>
-<body data-foot="Claude Code Transcripts · Models · Prompt injection">
+<body data-foot="Claude Code and Gemini CLI Transcripts · Models · Prompt injection">
 <div class="z">
   <div class="eyebrow in1">Model 2 of 7 · <b>text classification</b></div>
   <h1 class="in2">Instructions smuggled into a prompt. <span class="b">Flagged only with jailbreak.</span></h1>
   <p class="sub in3">A DeBERTa v3 classifier from ProtectAI that scores whether text tries to override the assistant's instructions.</p>
-  <table class="facts in4"><tr><td>ES model ID</td><td><b>protectai__deberta-v3-base-prompt-injection-v2</b></td></tr><tr><td>Hugging Face</td><td>protectai/deberta-v3-base-prompt-injection-v2</td></tr><tr><td>Input length</td><td>512 tokens (<code>--max-model-input-length 512</code>)</td></tr><tr><td>Labels</td><td>SAFE, <span class="p">INJECTION</span></td></tr><tr><td>Rule</td><td>INJECTION ≥ 0.90 <b>and</b> jailbreak ≥ 0.99 → category <code>prompt_injection</code></td></tr><tr><td>Output</td><td><code>prompt_classification.scores.prompt_injection</code>, always kept</td></tr><tr><td>ML memory</td><td>about 2.6 GB at 1 allocation</td></tr></table>
+  <table class="facts in4"><tr><td>ES model ID</td><td><b>protectai__deberta-v3-base-prompt-injection-v2</b></td></tr><tr><td>Hugging Face</td><td>protectai/deberta-v3-base-prompt-injection-v2</td></tr><tr><td>Input length</td><td>512 tokens (<code>--max-model-input-length 512</code>)</td></tr><tr><td>Labels</td><td>SAFE, <span class="p">INJECTION</span></td></tr><tr><td>Rule</td><td>INJECTION ≥ 0.90 <b>and</b> jailbreak ≥ 0.99 → category <code>prompt_injection</code></td></tr><tr><td>Output</td><td><code>prompt_classification.scores.prompt_injection</code>, always kept, under both prefixes</td></tr><tr><td>ML memory</td><td>about 2.6 GB at 1 allocation</td></tr></table>
   <div class="use in5"><p><b>Why paired.</b> On its own, this model fired on ordinary coding prompts. It flags only when the jailbreak model agrees, but its score is stored on every prompt for hunting.</p></div>
 </div>
 <svg id="hero" class="iso" viewBox="0 0 560 380"></svg>

@@ -1,6 +1,8 @@
-# Overview deck
+# Overview deck (Claude Code and Gemini CLI)
 
-A 12-slide [fslides](https://github.com/fslides/fslides) presentation on this integration: what it collects, why it's built the way it is, and what it solves for security, leadership and compliance teams.
+> Covers both integrations. `../claude/deck/` covers Claude Code only, and `../gemini/deck/` covers Gemini CLI only.
+
+A 13-slide [fslides](https://github.com/fslides/fslides) presentation on the Claude Code Transcripts and Gemini CLI Transcripts integrations: what they collect, why they're built the way they are, and what they solve for security, leadership and compliance teams.
 
 - **Watch it:** https://iamhowardtheduck.github.io/claude-code-elastic/
 - **PDF:** [docs/claude-code-transcripts-deck.pdf](../docs/claude-code-transcripts-deck.pdf)

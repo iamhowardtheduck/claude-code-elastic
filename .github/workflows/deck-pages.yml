@@ -1,4 +1,4 @@
-name: Deploy deck to GitHub Pages
+name: Deploy decks to GitHub Pages
 
 on:
   push:
@@ -9,11 +9,9 @@ on:
       - "deck-inference/**"
       - "deck-full/**"
       - "deck-models/**"
-      - "docs/claude-code-transcripts-deck.pdf"
-      - "docs/claude-code-transcripts-load-test.pdf"
-      - "docs/claude-code-transcripts-inference.pdf"
-      - "docs/claude-code-transcripts-full.pdf"
-      - "docs/claude-code-transcripts-models.pdf"
+      - "claude/**"
+      - "gemini/**"
+      - "docs/**/*.pdf"
       - ".github/workflows/deck-pages.yml"
   workflow_dispatch:
 
@@ -37,37 +35,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-audit --no-fund
-        working-directory: deck
+      - name: Build the 15 decks (combined, Claude Code only, Gemini CLI only)
         env:
           PUPPETEER_SKIP_DOWNLOAD: "true"
-      - run: npx fslides build ../_site
-        working-directory: deck
-      - run: npm install --no-audit --no-fund
-        working-directory: deck-performance
-        env:
-          PUPPETEER_SKIP_DOWNLOAD: "true"
-      - run: npx fslides build ../_site/load-test
-        working-directory: deck-performance
-      - run: npm install --no-audit --no-fund
-        working-directory: deck-inference
-        env:
-          PUPPETEER_SKIP_DOWNLOAD: "true"
-      - run: npx fslides build ../_site/inference
-        working-directory: deck-inference
-      - run: npm install --no-audit --no-fund
-        working-directory: deck-full
-        env:
-          PUPPETEER_SKIP_DOWNLOAD: "true"
-      - run: npx fslides build ../_site/full
-        working-directory: deck-full
-      - run: npm install --no-audit --no-fund
-        working-directory: deck-models
-        env:
-          PUPPETEER_SKIP_DOWNLOAD: "true"
-      - run: npx fslides build ../_site/models
-        working-directory: deck-models
-      - run: cp docs/claude-code-transcripts-*.pdf _site/
+        run: |
+          set -e
+          build() {   # deck dir, path under the Pages site (parents before their subfolders)
+            (cd "$1" && npm install --no-audit --no-fund && npx fslides build "$GITHUB_WORKSPACE/_site/$2")
+          }
+          for set in "" claude/ gemini/; do
+            build "${set}deck"             "${set}"
+            build "${set}deck-performance" "${set}load-test"
+            build "${set}deck-inference"   "${set}inference"
+            build "${set}deck-full"        "${set}full"
+            build "${set}deck-models"      "${set}models"
+          done
+      - name: Add the PDFs
+        run: |
+          cp docs/claude-code-transcripts-*.pdf _site/
+          cp docs/claude/*.pdf _site/claude/
+          cp docs/gemini/*.pdf _site/gemini/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

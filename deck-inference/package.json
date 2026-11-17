@@ -1,5 +1,5 @@
 {
-  "name": "deck-inference",
+  "name": "claude-code-transcripts-inference",
   "version": "1.0.0",
   "private": true,
   "scripts": {

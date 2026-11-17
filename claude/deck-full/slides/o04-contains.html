@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Data streams</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:50px;max-width:540px}
+  .sub{font-size:17px;max-width:500px}
+  #pkg{left:72px;top:330px;width:560px;height:300px}
+  .side{position:absolute;left:690px;right:72px;top:96px;display:flex;flex-direction:column;gap:14px;z-index:2}
+  .card{display:flex;flex-direction:column;gap:6px;padding:16px 20px}
+  .card .k{font:500 11px var(--mono);color:var(--grey);letter-spacing:.02em}
+  .card h3{font:600 18px var(--sans);letter-spacing:-.3px}
+  .card p{font-size:13px;line-height:1.5;color:var(--char)}
+  .card .chips{display:flex;gap:6px;margin-top:2px}
+  .card.hot{border-color:var(--ink);box-shadow:8px 8px 0 var(--blue)}
+  .card.opt{border-style:dashed;border-color:var(--grey-l)}
+  .card.opt .k{color:var(--pink)}
+  code{font-family:var(--mono);font-size:.92em}
+</style>
+</head>
+<body data-foot="Overview · Data streams">
+<div class="z">
+  <div class="eyebrow in1">What it contains</div>
+  <h1 class="in2">Three data streams. <span class="b">One package.</span></h1>
+  <p class="sub in3">Transcripts, desktop and MCP logs, and the health of the ML pipeline that enriches them.</p>
+</div>
+<svg id="pkg" class="iso" viewBox="0 0 560 300"></svg>
+<div class="side">
+  <div class="card hot in3"><span class="k">claude_code_transcripts.transcript</span><h3>Session transcripts</h3><p>One document per conversation line from the CLI, the VS Code and JetBrains extensions, the Desktop Code tab and Cowork. Covers prompts, responses, thinking, tool calls and results, subagents, and token usage.</p><div class="chips"><span class="chip on">200+ fields</span><span class="chip" style="text-transform:none">event.id = _id</span></div></div>
+  <div class="card in4"><span class="k">claude_code_transcripts.desktop_log</span><h3>Desktop and MCP logs</h3><p><code>main.log</code>, <code>mcp.log</code> and <code>mcp-server-*.log</code> on Windows and macOS. Parses MCP requests, responses and notifications into server, method and outcome.</p></div>
+  <div class="card opt in5"><span class="k">claude_code_transcripts.inference_stats · optional</span><h3>ML inference stats</h3><p>CEL input that polls trained-model and ingest-pipeline stats every minute, so you can tell whether inference is keeping up.</p></div>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+<script>
+(function(){
+  const sc = EW.iso(document.getElementById('pkg'), {ox: 270, oy: 92, s: .85});
+  // the package: one dashed footprint
+  sc.rect({x: 0, y: 0, w: 240, d: 200, z: 0, delay: .2});
+  sc.box({x: 20, y: 20, w: 100, d: 160, h: 90, c: 'blue', delay: .4, drop: 80});
+  // optional stream at the back: pink model in a dashed frame
+  sc.box({x: 160, y: 36, w: 40, d: 38, h: 26, c: 'pink', delay: .55, drop: 40});
+  sc.box({x: 140, y: 20, w: 80, d: 70, h: 50, c: 'glass', wire: true, dash: '3 3', stroke: '#343741', shadow: false, delay: .65, drop: 0, snap: false, order: 20});
+  sc.box({x: 140, y: 110, w: 80, d: 70, h: 50, c: 'teal', delay: .7, drop: 70});
+  sc.label({at: [20, 170, 60], side: 'l', len: 40, title: 'transcript', sub: '200+ fields', delay: 1.0});
+  sc.label({at: [220, 55, 40], side: 'r', len: 40, title: 'inference_stats', sub: 'optional', delay: 1.05});
+  sc.label({at: [220, 145, 25], side: 'r', len: 110, title: 'desktop_log', sub: 'desktop + MCP', delay: 1.1});
+  sc.run();
+})();
+</script>
+</body>
+</html>

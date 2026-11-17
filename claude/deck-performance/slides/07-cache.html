@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cache caveat</title>
+<link rel="stylesheet" href="style/eweb.css">
+<style>
+  h1{font-size:44px;max-width:580px}
+  .sub{font-size:16px;max-width:540px}
+  .math{margin-top:30px;display:flex;flex-direction:column;gap:0;max-width:540px;border-top:1px solid var(--ink)}
+  .row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line)}
+  .row span{font-size:14px;color:var(--char)}
+  .row b{font:500 22px var(--sans);letter-spacing:-.6px;color:var(--ink)}
+  .row.total b{color:var(--blue);font-size:28px}
+  .viz{position:absolute;left:740px;top:130px;width:400px;z-index:2}
+  .viz .tag{margin-bottom:14px}
+  .cubes{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
+  .cubes i{aspect-ratio:1;background:var(--slate-l);animation:pop .3s ease both}
+  .cubes i.hit{background:var(--slate)}
+  .cubes i.run{background:var(--blue)}
+  @keyframes pop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
+  .key{margin-top:16px;display:flex;gap:18px;font:500 11px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--char)}
+  .key .sw{margin-right:6px}
+  .warn{margin-top:22px;font-size:13px;line-height:1.55;color:var(--char);border-left:3px solid var(--orange);padding-left:12px}
+</style>
+</head>
+<body data-foot="Load test · Reading the numbers">
+<div class="z">
+  <div class="eyebrow in1">Reading phase 3 honestly · <b>inference cache</b></div>
+  <h1 class="in2">70% of model calls hit the cache. <span class="b">Size for the other 30%.</span></h1>
+  <p class="sub in3">Synthetic prompts repeat, and each deployment caches results for identical input. Real prompts repeat far less, so the sizing uses the uncached cost per call.</p>
+  <div class="math">
+    <div class="row in4"><span>Zero-shot call, uncached, measured</span><b>1.0 s</b></div>
+    <div class="row in4"><span>Zero-shot passes per prompt of 20+ characters</span><b>× 5</b></div>
+    <div class="row in5"><span>Allocation time per prompt</span><b>5 s</b></div>
+    <div class="row total in6"><span>Prompts per allocation per hour, uncached</span><b>≈720</b></div>
+  </div>
+</div>
+<div class="viz in3">
+  <div class="tag">Zero-shot calls in phase 3 · one square per 1%</div>
+  <div class="cubes" id="cubes"></div>
+  <div class="key"><span><i class="sw" style="background:var(--slate)"></i>cache hit · 70%</span><span><i class="sw" style="background:var(--blue)"></i>computed · 30%</span></div>
+  <p class="warn">The four other classifiers cost about <b>0.14 s</b> per uncached call and NER about <b>0.13 s</b>: under 0.7 s of allocation time per prompt together.</p>
+</div>
+<script src="style/eweb.js"></script>
+<script src="/js/fuckslides.js"></script>
+<script>
+(function(){
+  const c = document.getElementById('cubes');
+  for (let i = 0; i < 100; i++){ const b = document.createElement('i'); b.className = i < 70 ? 'hit' : 'run'; b.style.animationDelay = (.4 + i * .011) + 's'; c.appendChild(b); }
+})();
+</script>
+</body>
+</html>
