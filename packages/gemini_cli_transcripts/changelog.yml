@@ -1,3 +1,8 @@
+- version: 0.2.3
+  changes:
+  - description: README and description highlight that alerts from the detection rules feed Entity Analytics - every rule keeps user.name and host.name, so its alerts add to user and host risk scores. The companion repository is now iamhowardtheduck/gemini-cli-elastic.
+    type: enhancement
+    link: https://github.com/iamhowardtheduck/claude-code-elastic/pull/10
 - version: 0.2.2
   changes:
   - description: Same fixes as Claude Code Transcripts 0.2.3 - whole PEM private keys are redacted (not just the BEGIN line); redaction fails closed (text dropped, event tagged secret_redaction_failed); sensitive-file and exfil-site rules and panels match every file and URL of a turn and Windows paths; classifier input capped at 4000 characters.

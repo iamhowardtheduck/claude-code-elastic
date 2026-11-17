@@ -1,8 +1,10 @@
 # Claude Code → Elastic
 
-An Elastic Agent integration (`claude_code_transcripts`) that ships **Claude Code session transcripts** and **Claude Desktop app/MCP logs** to Elasticsearch. It maps them to ECS and the `gen_ai.*` fields, redacts secrets at ingest, and can optionally run **ML inference** on every human prompt: semantic embeddings plus NLP classification for prompt injection, jailbreaks, toxicity, intent and PII. A toggle controls the inference. It ships with business and security dashboards.
+An Elastic Agent integration (`claude_code_transcripts`) that ships **Claude Code session transcripts** and **Claude Desktop app/MCP logs** to Elasticsearch. It maps them to ECS and the `gen_ai.*` fields, redacts secrets at ingest, and can optionally run **ML inference** on every human prompt: semantic embeddings plus NLP classification for prompt injection, jailbreaks, toxicity, intent and PII. A toggle controls the inference. It ships with business and security dashboards, and its detection rules feed **Entity Analytics**: every alert carries `user.name` and `host.name`, so it adds to that developer's and workstation's risk score.
 
 > **Upstream:** this integration is proposed to Elastic in [elastic/integrations#22450](https://github.com/elastic/integrations/pull/22450). The upstream copy uses package-namespaced datasets (`claude_code_transcripts.transcript`, `claude_code_transcripts.desktop_log`). This repository keeps `claude_code.transcript` and `claude_desktop.log` so existing deployments keep working.
+
+> **Gemini CLI:** the companion integration for Gemini CLI (`gemini_cli_transcripts`) has its own repository, [iamhowardtheduck/gemini-cli-elastic](https://github.com/iamhowardtheduck/gemini-cli-elastic).
 
 > **Decks**, in three sets: Claude Code and Gemini CLI together, Claude Code only, and Gemini CLI only. Each opens in the browser (slides) or as a PDF.
 
@@ -25,7 +27,7 @@ packages/claude_code_transcripts/  the integration (elastic-package source)
 extras/                      things a package cannot install (run extras/setup.sh)
   pricing/                     claude-model-pricing lookup index (spend panels)
   inference/                   dense_vector mapping for the prompt embedding
-  detection-rules/             10 Elastic Security ES|QL rules (imported disabled)
+  detection-rules/             10 Elastic Security ES|QL rules (imported disabled); their alerts feed Entity Analytics
   inference-monitoring/        alternative stats collector (Kibana Workflow) and 9 alert rules
   models/models.json           NLP models + fixed sizing used by `extras/setup.sh models` (self-managed)
   models/profiles/adaptive.json  adaptive sizing for Elastic Cloud Hosted / ECE / ECK / Serverless
@@ -61,6 +63,18 @@ See [`packages/claude_code_transcripts/docs/README.md`](packages/claude_code_tra
 
 ---
 
+## Detection rules and Entity Analytics
+
+[`extras/detection-rules/`](extras/detection-rules/) has 10 Elastic Security ES|QL detection rules for this integration, imported disabled with `extras/setup.sh rules`. They cover actions blocked by auto mode, prompt injection and jailbreak attempts, prompts that ask to disable security, destructive, remote-shell, credential-access and persistence commands run by the agent, secrets exposed to the model, sensitive credential files, paste, webhook and tunnel sites, and prompts semantically similar to malicious intent.
+
+**The alerts these rules raise also power Entity Analytics.** Every rule keeps `user.name` and `host.name` in its alert and carries a risk score (21, 47 or 73), so once the entity risk score engine is on, each alert adds to the risk score of the developer and of the workstation it came from. AI coding agent activity then counts toward the same user and host risk scores as every other Elastic Security signal:
+
+- Users and hosts whose agents keep tripping these rules rise in the **Entity Analytics** dashboard.
+- Their alerts appear in the risk summary of the user and host flyouts, next to the rest of their activity.
+- Asset criticality assigned to those users and hosts weights their scores, as it does for any other alert.
+
+To use it, enable the rules in **Security > Rules** and turn on the engine in **Security > Manage > Entity Risk Score**.
+
 ## Deploy
 
 ### Requirements
@@ -75,7 +89,7 @@ Alternatively, download `claude_code_transcripts-<version>.zip` from the GitHub 
 ```bash
 go install github.com/elastic/elastic-package@latest
 cd packages/claude_code_transcripts
-elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.2.2.zip
+elastic-package lint && elastic-package build      # -> build/packages/claude_code_transcripts-0.2.4.zip
 ```
 
 ### 2. Upload it to Kibana
@@ -84,7 +98,7 @@ elastic-package lint && elastic-package build      # -> build/packages/claude_co
 curl -X POST "$KIBANA_URL/api/fleet/epm/packages" \
   -H "Authorization: ApiKey $ES_API_KEY" -H 'kbn-xsrf: true' \
   -H 'Content-Type: application/zip' \
-  --data-binary @build/packages/claude_code_transcripts-0.2.2.zip
+  --data-binary @build/packages/claude_code_transcripts-0.2.4.zip
 ```
 
 This installs the index templates, the three ingest pipelines (`logs-claude_code.transcript-<ver>`, `…-inference` and `…-classify`, plus `logs-claude_desktop.log-<ver>`) and the two dashboards. `elastic-package install --zip <file>` does the same against the stack configured for elastic-package.
@@ -110,13 +124,13 @@ Inference is switched per policy, so you can enable it for some machines and lea
 export ES_URL=https://elasticsearch:9200 KIBANA_URL=https://kibana:5601 ES_API_KEY=...   # or ES_USER/ES_PASSWORD
 export CA_CERT=/path/to/ca.crt     # private CA, optional
 extras/setup.sh pricing              # model price table for the spend panels (edit extras/pricing/*.ndjson to update prices)
-extras/setup.sh rules                # 10 detection rules, imported DISABLED; enable them in Security > Rules and add actions
+extras/setup.sh rules                # 10 detection rules, imported DISABLED; enable them in Security > Rules and add actions (alerts feed Entity Analytics)
 extras/setup.sh inference-mapping    # required before enabling inference
 extras/setup.sh inference-monitoring # stats collector + [ML Inference] Admin dashboard + 9 alert rules (disabled)
 extras/setup.sh all
 ```
 
-**Inference monitoring** is built into the package from 0.2.0. Enable the **ML inference statistics** input (CEL) in the integration policy, with an Elasticsearch URL and an API key that has `monitor` and `monitor_ml`; it feeds the **[Claude Code Transcripts] ML Inference Admin** dashboard. `extras/setup.sh inference-monitoring` still installs the 9 alert rules (disabled, without actions) and the older Kibana Workflow collector, which writes to `ml-inference-stats`; use one collector, not both. If you install a package version other than 0.2.2, set `PKG_VERSION` so the workflow watches the right pipeline names.
+**Inference monitoring** is built into the package from 0.2.0. Enable the **ML inference statistics** input (CEL) in the integration policy, with an Elasticsearch URL and an API key that has `monitor` and `monitor_ml`; it feeds the **[Claude Code Transcripts] ML Inference Admin** dashboard. `extras/setup.sh inference-monitoring` still installs the 9 alert rules (disabled, without actions) and the older Kibana Workflow collector, which writes to `ml-inference-stats`; use one collector, not both. If you install a package version other than 0.2.4, set `PKG_VERSION` so the workflow watches the right pipeline names.
 
 ### 5. Enabling inference (optional)
 
